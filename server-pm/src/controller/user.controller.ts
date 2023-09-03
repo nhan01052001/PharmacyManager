@@ -1,5 +1,6 @@
-import { Controller, Get, Post } from '@nestjs/common';
-import { UserService } from 'src/service/user.service';
+import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { MyJwtGuard } from '../service/guard/myjwt.guard';
+import { UserService } from '../service/user.service';
 
 @Controller('user')
 export class UserController {
@@ -7,6 +8,7 @@ export class UserController {
 
     }
 
+    @UseGuards(MyJwtGuard)
     @Get('getAll')
     getAll(): Promise<unknown> {
         return this.userService.getAll();

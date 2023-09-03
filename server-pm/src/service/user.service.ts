@@ -16,7 +16,7 @@ export class UserService {
         return await this.userRepository.find();
     }
 
-    async getUserByUsername(username: string): Promise<unknown> {
+    async getUserByUsername(username: string): Promise<User> {
         return await this.userRepository.findOne({ where: {username: ILike(username), isDeleted: false} });
     }
 

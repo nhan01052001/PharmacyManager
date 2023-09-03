@@ -34,7 +34,7 @@ export class AuthService {
         } else {
             // register on app
             if (headers?.isapp === 'true' || headers?.isapp === true) {
-                if(this.checkUsername(username)) {
+                if (this.checkUsername(username)) {
                     return this.createAccount(userRegister);
                 }
             } else {
@@ -45,7 +45,34 @@ export class AuthService {
     }
 
     async login(userLogin: UserLoginDTO): Promise<unknown> {
-        
+        const { username, password } = userLogin;
+
+        if (username && password) {
+            const data: User = await this.userService.getUserByUsername(username);
+
+            if (data) {
+                if (!bcrypt.compareSync(password, data.password)) {
+                    throw new ErrorResponse({ ... new BadRequestException('Invalid username or password! Please again.'), errorCode: "INVALID_USERNAME_PASSWORD" });
+                } else {
+                    delete data.password;
+                    return {
+                        errorCode: null,
+                        successCode: "SUCCESS",
+                        message: 'Logged in successfully!',
+                        statusCode: 200,
+                        data: data,
+                        accessToken: (await this.signWithToken(data.id, data.username))
+                            .accessToken,
+                    }
+                }
+            } else {
+                throw new ErrorResponse({ ... new BadRequestException('Invalid username or password! Please again.'), errorCode: "INVALID_USERNAME_PASSWORD" });
+            }
+        } else {
+            throw new ErrorResponse({ ... new BadRequestException('username and password is not empty!'), errorCode: "USERNAME_PASSWORD_IS_NOT_EMPTY" });
+        }
+
+        return;
     }
 
     isValidNumberPhone = (numberPhone: string): unknown => {
@@ -89,9 +116,25 @@ export class AuthService {
         try {
             const user = await this.userRepository.save(newUser);
             delete user.password;
-            return user;   
+            return user;
         } catch (error) {
             throw new ErrorResponse(...error, { errorCode: error.errorCode || "DON'T_CREATE_ACCOUNT!" });
         }
+    }
+
+    async signWithToken(userId: number, username: string): Promise<{ accessToken: string }> {
+        const payload = {
+            sub: userId,
+            username,
+        };
+
+        const jwt = await this.jwtService.signAsync(payload, {
+            expiresIn: '1m',
+            secret: this.configService.get('JWT_SECRET'),
+        });
+
+        return {
+            accessToken: jwt,
+        };
     }
 }
