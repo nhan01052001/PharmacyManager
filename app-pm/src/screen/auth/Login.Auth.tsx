@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/core';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
@@ -24,6 +24,7 @@ import { MainStackParams } from '../../navigation/Stack.Navigator';
 import StylesTheme from '../../global/theme/ Styles.Theme';
 import Function from '../../global/assets/service/Function.Service';
 import { EyeHideIcon, EyeShowIcon } from '../../global/icon/Icon';
+import TextInputComponent from '../../components/cTextInput/TextInput.component';
 
 
 export const Login: React.FC = () => {
@@ -36,7 +37,18 @@ export const Login: React.FC = () => {
     const [isRememberPassword, setIsRememberPassword] = useState<boolean>(false);
     const [isPasswordVisibility, setIsPasswordVisibility] = useState<boolean>(true);
 
-
+    const handleOnChangeText = useCallback((text: any) => {
+        if (text.length === 0) {
+            setShowErrorUserName("Số điện thoại không được bỏ trống!");
+        } else {
+            if (!Function.isValidNumberPhone(text)) {
+                setShowErrorUserName("Số điện thoại không hợp lệ!");
+            } else {
+                setShowErrorUserName("");
+            }
+        }
+        setValueUserName(text);
+    }, [valueUserName])
 
     return (
         <SafeAreaView style={[styles.container, StylesTheme.droidSafeArea]}>
@@ -58,59 +70,48 @@ export const Login: React.FC = () => {
                     <View style={{ flex: 1, marginVertical: 24 }}>
                         {/* username */}
                         <View style={{ marginVertical: 24 }}>
-                            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                                <Text style={{ fontSize: 18, fontWeight: '400', marginVertical: 12 }}>
-                                    {valueUserName.length >= 0 ? 'Số điện thoại' : ''}
-                                </Text>
+                            {/* <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                                 {
                                     showErrorUserName !== "" && (
                                         <Text style={{ color: "red" }}>{showErrorUserName}</Text>
                                     )
                                 }
-                            </View>
+                            </View> */}
 
-                            <TextInput
+                            <TextInputComponent
                                 style={[styles.textInput, {}]}
-                                placeholder="Số điện thoại"
+                                // styleCustom={[styles.textInput, {}]}
+                                placeholder="Số điện thoại hoặc email"
                                 keyboardType={'numeric'}
                                 value={valueUserName}
-                                onChangeText={(text) => {
-                                    if (text.length === 0) {
-                                        setShowErrorUserName("Số điện thoại không được bỏ trống!");
-                                    } else {
-                                        if (!Function.isValidNumberPhone(text)) {
-                                            setShowErrorUserName("Số điện thoại không hợp lệ!");
-                                        } else {
-                                            setShowErrorUserName("");
-                                        }
-                                    }
-                                    setValueUserName(text);
+                                onComplete={(text) => {
+                                    handleOnChangeText(text);
                                 }}
+                                isSubTitle={true}
+                                isClose={true}
                             />
                         </View>
 
                         {/* password */}
                         <View>
-                            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                                <Text style={{ fontSize: 18, fontWeight: '400', marginVertical: 12 }}>
-                                    {valuePassword.length >= 0 ? ' Mật khẩu' : ''}
-                                </Text>
+                            {/* <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                                 {
                                     showErrorPassword !== "" && (
                                         <Text style={{ color: "red" }}>{showErrorPassword}</Text>
                                     )
                                 }
-                            </View>
+                            </View> */}
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <TextInput
+                                <TextInputComponent
                                     style={[styles.textInput, {}]}
+                                    isSubTitle={true}
                                     placeholder="Mật khẩu"
                                     autoCapitalize="none"
                                     autoCorrect={false}
                                     secureTextEntry={isPasswordVisibility}
                                     enablesReturnKeyAutomatically
                                     value={valuePassword}
-                                    onChangeText={(text) => {
+                                    onComplete={(text) => {
                                         setValuePassword(text);
                                     }}
                                 />
@@ -315,7 +316,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 24,
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '500',
     },
 });
