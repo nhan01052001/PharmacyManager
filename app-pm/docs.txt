@@ -1,0 +1,89 @@
+import React, { FC, Reducer, useReducer } from "react";
+
+interface IState {
+    email: string;
+    password: string;
+    passwordConfirmation: string;
+    username: string;
+}
+
+interface IAction {
+    type: string;
+    value?: string;
+}
+
+const initialState: IState = {
+    email: "",
+    password: "",
+    passwordConfirmation: "",
+    username: "",
+};
+
+const reducer = (state: IState, action: IAction) => {
+    if (action.type === "reset") {
+        return initialState;
+    }
+
+    const result: IState = { ...state };
+    result[action.type] = action.value;
+    return result;
+};
+
+export const Signup: FC = props => {
+    const [state, dispatch] = useReducer<Reducer<IState, IAction>, IState>(reducer, initialState, () => initialState);
+    const { username, email, password, passwordConfirmation } = state;
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        /* fetch api */
+
+        /* clear state */
+        dispatch({ type: "reset" });
+    };
+
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        dispatch({ type: name, value });
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <div>
+                <label>
+                    Username:
+                    <input value={username} name="username" onChange={onChange} />
+                </label>
+            </div>
+            <div>
+                <label>
+                    Email:
+                    <input value={email} name="email" onChange={onChange} />
+                </label>
+            </div>
+            <div>
+                <label>
+                    Password:
+                    <input
+                        value={password}
+                        name="password"
+                        type="password"
+                        onChange={onChange}
+                    />
+                </label>
+            </div>
+            <div>
+                <label>
+                    Confirm Password:
+                    <input
+                        value={passwordConfirmation}
+                        name="passwordConfirmation"
+                        type="password"
+                        onChange={onChange}
+                    />
+                </label>
+            </div>
+            <button>Submit</button>
+        </form>
+    );
+};

@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/core';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, Reducer, useReducer } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
@@ -21,39 +21,160 @@ import {
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import { MainStackParams } from '../../navigation/Stack.Navigator';
-import StylesTheme from '../../global/theme/ Styles.Theme';
+import StylesTheme, { Colors } from '../../global/theme/Styles.Theme';
 import Function from '../../global/assets/service/Function.Service';
 import { EyeHideIcon, EyeShowIcon } from '../../global/icon/Icon';
 import TextInputComponent from '../../components/cTextInput/TextInput.component';
 
+interface IErrorUsernamePassword {
+    errorUsername: {
+        isErrorUsername: boolean,
+        messErrorUsername: string
+    },
+    errorPassword: {
+        isErrorPassword: boolean,
+        messErrorPassword: string
+    }
+}
+
+interface IState {
+    username: any;
+    password: any;
+    isError: IErrorUsernamePassword;
+    isRememberPassword: boolean;
+    isPasswordVisibility: boolean;
+}
+
+interface IAction {
+    type: string;
+    value?: any;
+}
+
+const initialState: IState = {
+    username: "",
+    password: "",
+    isError: {
+        errorUsername: {
+            isErrorUsername: false,
+            messErrorUsername: ""
+        },
+        errorPassword: {
+            isErrorPassword: false,
+            messErrorPassword: ""
+        }
+    },
+    isRememberPassword: false,
+    isPasswordVisibility: false,
+};
+
+// const reducer = (state: IState, action: IAction) => { 
+//     if (action.type === "reset") {
+//         return initialState;
+//     }
+
+//     const result: IState = { ...state };
+//     result[action.type] = action.value;
+//     return result;
+// };
 
 export const Login: React.FC = () => {
-    const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
-    const [valueUserName, setValueUserName] = useState<string>("");
-    const [valuePassword, setValuePassword] = useState<string>("");
-    const [showErrorUserName, setShowErrorUserName] = useState<string>("");
-    const [notification, setNotification] = useState<string>("");
-    const [showErrorPassword, setShowErrorPassword] = useState<string>("");
-    const [isRememberPassword, setIsRememberPassword] = useState<boolean>(false);
-    const [isPasswordVisibility, setIsPasswordVisibility] = useState<boolean>(true);
+    console.log("loading");
 
-    const handleOnChangeText = useCallback((text: any) => {
+    const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
+    const [{ username, password, isError, isRememberPassword, isPasswordVisibility }, setState] = useState<IState>({ ...initialState });
+    // const [state, dispatch] = useReducer<Reducer<IState, IAction>, IState>(reducer, initialState, () => initialState);
+    const [notification, setNotification] = useState<string>("");
+
+    const handleOnChangeTextUsername = useCallback((text: any) => {
+        debugger
+        let nextState: any = {};
         if (text.length === 0) {
-            setShowErrorUserName("Số điện thoại không được bỏ trống!");
+            nextState = {
+                errorUsername: {
+                    isErrorUsername: true,
+                    messErrorUsername: "Tài khoản không được để trống!"
+                }
+                // isError: {
+                //     ...isError,
+                //     errorUsername: {
+                //         isErrorUsername: true,
+                //         messErrorUsername: "Tài khoản không được để trống!"
+                //     }
+                // },
+            };
         } else {
-            if (!Function.isValidNumberPhone(text)) {
-                setShowErrorUserName("Số điện thoại không hợp lệ!");
-            } else {
-                setShowErrorUserName("");
+            nextState = {
+                // isError: {
+                //     ...isError,
+                //     errorUsername: {
+                //         isErrorUsername: false,
+                //         messErrorUsername: ""
+                //     }
+                // },
+                errorUsername: {
+                    isErrorUsername: false,
+                    messErrorUsername: ""
+                }
+            };
+        }
+        setState((prevState: any) => ({
+            ...prevState,
+            username: text,
+            // ...nextState
+            isError: {
+                ...prevState?.isError,
+                ...nextState
+            }
+        }));
+    }, [username]);
+
+    const handleOnChangeTextPassword = useCallback((text: any) => {
+        debugger
+        let nextState: any = {};
+        if (text.length === 0) {
+            nextState = {
+                errorPassword: {
+                    isErrorPassword: true,
+                    messErrorPassword: "Mật khẩu không được để trống!"
+                }
+                // isError: {
+                //     ...isError,
+                //     errorPassword: {
+                //         isErrorPassword: true,
+                //         messErrorPassword: "Mật khẩu không được để trống!"
+                //     }
+                // },
+            };
+        } else {
+            nextState = {
+                errorPassword: {
+                    isErrorPassword: false,
+                    messErrorPassword: ""
+                }
+                // isError: {
+                //     ...isError,
+                //     errorPassword: {
+                //         isErrorPassword: false,
+                //         messErrorPassword: ""
+                //     }
+                // },
             }
         }
-        setValueUserName(text);
-    }, [valueUserName])
+        setState((prevState: any) => ({
+            ...prevState,
+            password: text,
+            // ...nextState
+            isError: {
+                ...prevState?.isError,
+                ...nextState
+            }
+        }))
+    }, [password]);
 
     return (
         <SafeAreaView style={[styles.container, StylesTheme.droidSafeArea]}>
-            <KeyboardAwareScrollView style={{ flex: 1, width: '100%' }}>
-                <View style={{ paddingHorizontal: 24 }}>
+            <KeyboardAwareScrollView style={StylesTheme.flexW100}>
+                <View style={StylesTheme.paddingH24}>
                     {/* logo and slogan */}
                     <View
                         style={{
@@ -62,30 +183,31 @@ export const Login: React.FC = () => {
                             justifyContent: 'flex-start',
                         }}
                     >
-                        <Image source={require('../../global/assets/image/logo.png')} style={{ width: 200, height: 132 }} />
-                        <Text style={{ fontSize: 18, fontWeight: '600' }}>My slogan</Text>
+                        <Image source={require('../../global/assets/image/logo.png')} style={StylesTheme.sizeLogo} />
+                        <Text style={styles.textSlogan}>My slogan</Text>
                     </View>
 
                     {/* TextInput username, password */}
-                    <View style={{ flex: 1, marginVertical: 24 }}>
+                    <View style={styles.wrapTextInput}>
                         {/* username */}
-                        <View style={{ marginVertical: 24 }}>
-                            {/* <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                        <View style={StylesTheme.marginV12}>
+                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 4 }]}>
                                 {
-                                    showErrorUserName !== "" && (
-                                        <Text style={{ color: "red" }}>{showErrorUserName}</Text>
+                                    /* isError?.errorUsername?.isErrorUsername && 
+                                    isError?.errorUsername?.messErrorUsername !== "" ? */ (
+                                        <Text numberOfLines={2} style={{ color: "red" }}>{isError?.errorUsername?.messErrorUsername} </Text>
                                     )
                                 }
-                            </View> */}
-
+                            </View>
                             <TextInputComponent
                                 style={[styles.textInput, {}]}
                                 // styleCustom={[styles.textInput, {}]}
                                 placeholder="Số điện thoại hoặc email"
                                 keyboardType={'numeric'}
-                                value={valueUserName}
+                                value={username}
+                                isError={isError?.errorUsername?.isErrorUsername}
                                 onComplete={(text) => {
-                                    handleOnChangeText(text);
+                                    handleOnChangeTextUsername(text);
                                 }}
                                 isSubTitle={true}
                                 isClose={true}
@@ -94,31 +216,38 @@ export const Login: React.FC = () => {
 
                         {/* password */}
                         <View>
-                            {/* <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 4 }]}>
                                 {
-                                    showErrorPassword !== "" && (
-                                        <Text style={{ color: "red" }}>{showErrorPassword}</Text>
+                                    /* isError?.errorPassword?.isErrorPassword && 
+                                    isError?.errorPassword?.messErrorPassword !== "" ? */ (
+                                        <Text numberOfLines={2} style={{ color: "red" }}>{isError?.errorPassword?.messErrorPassword} </Text>
                                     )
                                 }
-                            </View> */}
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            </View>
+                            <View style={StylesTheme.onlyFlexDirectionAli_Center}>
                                 <TextInputComponent
                                     style={[styles.textInput, {}]}
                                     isSubTitle={true}
+                                    isError={isError?.errorPassword?.isErrorPassword}
                                     placeholder="Mật khẩu"
                                     autoCapitalize="none"
                                     autoCorrect={false}
                                     secureTextEntry={isPasswordVisibility}
                                     enablesReturnKeyAutomatically
-                                    value={valuePassword}
+                                    value={password}
+                                    isRefresh={isPasswordVisibility}
                                     onComplete={(text) => {
-                                        setValuePassword(text);
+                                        handleOnChangeTextPassword(text);
                                     }}
                                 />
                                 <TouchableOpacity style={{ position: 'absolute', right: 10 }}
                                     activeOpacity={0.8}
                                     onPress={() => {
-                                        setIsPasswordVisibility(!isPasswordVisibility)
+                                        setState((prevState: any) => ({
+                                            ...prevState,
+                                            isPasswordVisibility: !isPasswordVisibility
+                                        }));
+                                        // setIsPasswordVisibility(!isPasswordVisibility)
                                     }}
                                 >
                                     {
@@ -133,23 +262,23 @@ export const Login: React.FC = () => {
                         </View>
                     </View>
                     {/* remember and forget password */}
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <View style={StylesTheme.onlyFlexRow_AliCenter_JusSP}>
                         {/* remember */}
                         <View style={{}}>
                             <Pressable
-                                style={{ flexDirection: 'row', alignItems: 'center' }}
-                                onPress={() => { }}
+                                style={StylesTheme.onlyFlexDirectionAli_Center}
+                                onPress={() => {
+                                    setState((prevState: any) => ({
+                                        ...prevState,
+                                        isRememberPassword: !isRememberPassword
+                                    }));
+                                    // setIsRememberPassword(!isRememberPassword);
+                                }}
                             >
                                 <View
-                                    style={{
-                                        width: 22,
-                                        height: 22,
-                                        borderWidth: 1,
-                                        borderColor: 'red',
-                                        borderRadius: 22,
-                                        marginRight: 6,
-                                        backgroundColor: isRememberPassword ? 'green' : '#fff',
-                                    }}
+                                    style={[styles.styleCheckbox, {
+                                        backgroundColor: isRememberPassword ? Colors.primaryColor : '#fff',
+                                    }]}
                                 />
                                 <Text style={{ fontSize: 15 }}>Ghi nhớ mật khẩu</Text>
                             </Pressable>
@@ -167,18 +296,12 @@ export const Login: React.FC = () => {
                         {/* Button Login */}
                         <View style={{ flex: 1 }}>
                             <TouchableOpacity
-                                style={{
-                                    flex: 1,
-                                    backgroundColor: '#5BC57E',
-                                    paddingVertical: 14,
-                                    borderRadius: 20,
-                                    alignItems: 'center',
-                                }}
+                                style={StylesTheme.btnPrimary}
                                 onPress={() => {
                                     //this.handleLogin()
                                 }}
                             >
-                                <Text style={{ fontSize: 18, fontWeight: '600', fontStyle: 'italic' }}>
+                                <Text style={styles.textBtnLogin}>
                                     Đăng nhập
                                 </Text>
                             </TouchableOpacity>
@@ -186,8 +309,8 @@ export const Login: React.FC = () => {
 
                         {
                             notification !== "" && (
-                                <View style={{ marginTop: 12, alignItems: "center" }}>
-                                    <Text style={{ fontSize: 18, fontWeight: "600", color: "red", textAlign: "center" }}>{notification}</Text>
+                                <View style={styles.wrapErrorLogin}>
+                                    <Text style={StylesTheme.textError}>{notification}</Text>
                                 </View>
                             )
                         }
@@ -195,14 +318,9 @@ export const Login: React.FC = () => {
                         {/* OR */}
 
                         <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                marginVertical: 24,
-                            }}
+                            style={[StylesTheme.flexRowCenter, StylesTheme.marginV24]}
                         >
-                            <View style={{ width: '30%', height: 1, backgroundColor: '#ccc' }} />
+                            <View style={StylesTheme.line30} />
                             <Text
                                 style={{
                                     fontSize: 18,
@@ -214,30 +332,20 @@ export const Login: React.FC = () => {
                             >
                                 Hoặc
                             </Text>
-                            <View style={{ width: '30%', height: 1, backgroundColor: '#ccc' }} />
+                            <View style={StylesTheme.line30} />
                         </View>
 
                         <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
+                            style={StylesTheme.flexRowCenter}
                         >
                             {/* Login with facebook */}
                             <View>
                                 <TouchableOpacity
-                                    style={{
-                                        padding: 12,
-                                        marginHorizontal: 12,
-                                        borderWidth: 2,
-                                        borderColor: '#ccc',
-                                        borderRadius: 6,
-                                    }}
+                                    style={styles.btnLoginDiff}
                                 >
                                     <Image
                                         source={require('../../global/assets/image/google.png')}
-                                        style={{ width: 32, height: 32 }}
+                                        style={StylesTheme.wh32}
                                     />
                                 </TouchableOpacity>
                             </View>
@@ -245,55 +353,35 @@ export const Login: React.FC = () => {
                             {/* Login with google */}
                             <View>
                                 <TouchableOpacity
-                                    style={{
-                                        padding: 12,
-                                        marginHorizontal: 12,
-                                        borderWidth: 2,
-                                        borderColor: '#ccc',
-                                        borderRadius: 6,
-                                    }}
+                                    style={styles.btnLoginDiff}
                                 >
                                     <Image
                                         source={require('../../global/assets/image/facebook.png')}
-                                        style={{ width: 32, height: 32 }}
+                                        style={StylesTheme.wh32}
                                     />
                                 </TouchableOpacity>
                             </View>
                         </View>
 
                         <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                marginVertical: 24,
-                            }}
+                            style={styles.wrapNotHaveAccount}
                         >
                             <Text
-                                style={{
-                                    fontSize: 16,
-                                    fontWeight: '500',
-                                    fontStyle: 'italic',
-                                }}
+                                style={styles.textNotHaveAccount}
                             >
                                 Bạn chưa có tài khoản?{' '}
                             </Text>
-                            <TouchableOpacity>
+                            <Pressable
+                                onPress={() => {
+                                    navigation.navigate("Register");
+                                }}
+                            >
                                 <Text
-                                    style={{
-                                        fontSize: 16,
-                                        fontWeight: '600',
-                                        fontStyle: 'italic',
-                                        color: 'blue',
-                                    }}
-                                    onPress={() => {
-                                        // this.props.navigation.navigate('Register')
-                                    }
-                                    }
+                                    style={styles.textRegister}
                                 >
                                     Đăng ký
                                 </Text>
-                            </TouchableOpacity>
+                            </Pressable>
                         </View>
                     </View>
                 </View>
@@ -310,6 +398,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
 
+    textSlogan: {
+        fontSize: 18, fontWeight: '600'
+    },
+
+    wrapTextInput: { flex: 1, marginVertical: 24 },
+
     textInput: {
         flex: 1,
         padding: 14,
@@ -319,4 +413,47 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '500',
     },
+
+    styleCheckbox: {
+        width: 22,
+        height: 22,
+        borderWidth: 1,
+        borderColor: '#000',
+        borderRadius: 22,
+        marginRight: 6,
+    },
+
+    textBtnLogin: {
+        fontSize: 18, fontWeight: '600', fontStyle: 'italic'
+    },
+
+    wrapErrorLogin: { marginTop: 12, alignItems: "center" },
+
+    btnLoginDiff: {
+        padding: 12,
+        marginHorizontal: 12,
+        borderWidth: 2,
+        borderColor: '#ccc',
+        borderRadius: 6,
+    },
+
+    wrapNotHaveAccount: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: 24,
+    },
+
+    textNotHaveAccount: {
+        fontSize: 16,
+        fontWeight: '500',
+        fontStyle: 'italic',
+    },
+
+    textRegister: {
+        fontSize: 16,
+        fontWeight: '600',
+        fontStyle: 'italic',
+        color: 'blue',
+    }
 });

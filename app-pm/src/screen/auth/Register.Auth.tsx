@@ -1,4 +1,6 @@
-import React from 'react';
+import { useNavigation } from '@react-navigation/core';
+import { StackNavigationProp } from '@react-navigation/stack';
+import React, { useState, useCallback } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
@@ -16,13 +18,479 @@ import {
     Alert,
     Image,
 } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
-export const Register: React.FC = ({navigation, route}: any) => {
+import { MainStackParams } from '../../navigation/Stack.Navigator';
+import Function from '../../service/Function.Service';
+import StylesTheme from '../../global/theme/Styles.Theme';
+import TextInputComponent from '../../components/cTextInput/TextInput.component';
+import { EyeHideIcon, EyeShowIcon } from '../../global/icon/Icon';
+import { Account, User } from '../../type/User.Type';
+
+type ErrorAccount = {
+    errorUsername: {
+        isErrorUsername: boolean,
+        messErrorUsername: string
+    },
+    errorPassword: {
+        isErrorPassword: boolean,
+        messErrorPassword: string
+    },
+    errorConfirmPassword: {
+        isErrorConfirmPassword: boolean,
+        messErrorConfirmPassword: string,
+    }
+}
+
+type State = {
+    account: Account,
+    isError: ErrorAccount,
+    isPasswordVisibility: boolean;
+    isConfirmPasswordVisibility: boolean;
+    isRefreshConfirmPassword: boolean;
+}
+
+const initialState: State = {
+    account: {
+        username: null,
+        password: null,
+        confirmPassword: null
+    },
+    isError: {
+        errorUsername: {
+            isErrorUsername: false,
+            messErrorUsername: ''
+        },
+        errorPassword: {
+            isErrorPassword: false,
+            messErrorPassword: ''
+        },
+        errorConfirmPassword: {
+            isErrorConfirmPassword: false,
+            messErrorConfirmPassword: ''
+        }
+    },
+    isPasswordVisibility: true,
+    isConfirmPasswordVisibility: true,
+    isRefreshConfirmPassword: false,
+};
+
+export const Register: React.FC<{route: any}> = ({ route }) => {
+    const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
+    const [{ account, isError, isPasswordVisibility, isConfirmPasswordVisibility, isRefreshConfirmPassword }, setState] = useState<State>({ ...initialState });
+    // const [username, setUsername] = useState<string>("");
+    // const [password, setPassword] = useState<string>("");
+    // const [confirmPassword, setConfirmPassword] = useState<string>();
+    // const [isError, setIsError] = useState<any>({
+    //     errorUsername: {
+    //         isErrorUsername: false,
+    //         messErrorUsername: ""
+    //     },
+    //     errorPassword: {
+    //         isErrorPassword: false,
+    //         messErrorPassword: ""
+    //     },
+    //     errorConfirmPassword: {
+    //         isErrorConfirmPassword: false,
+    //         messErrorConfirmPassword: ""
+    //     }
+    // });
+    // const [isPasswordVisibility, setIsPasswordVisibility] = useState<boolean>(true);
+    // const [isConfirmPasswordVisibility, setIsConfirmPasswordVisibility] = useState<boolean>(true);
+
+    const handleOnChangeTextUsername = useCallback((text: any) => {
+        let nextState = {};
+        if (text.length === 0) {
+            nextState = {
+                errorUsername: {
+                    isErrorUsername: true,
+                    messErrorUsername: "Tài khoản không được để trống!"
+                }
+            }
+        } else {
+            nextState = {
+                errorUsername: {
+                    isErrorUsername: false,
+                    messErrorUsername: ""
+                }
+            }
+        }
+
+        setState((prevState: any) => ({
+            ...prevState,
+            account: {
+                ...prevState?.account,
+                username: text,
+            },
+            isError: {
+                ...prevState?.isError,
+                ...nextState
+            }
+        }));
+    }, [account.username]);
+
+    const handleOnChangeTextPassword = useCallback((text: any) => {
+        let nextState = {};
+        if (text.length === 0) {
+            nextState = {
+                errorPassword: {
+                    isErrorPassword: true,
+                    messErrorPassword: "Mật khẩu không được để trống!"
+                }
+            }
+        } else {
+            nextState = {
+                errorPassword: {
+                    isErrorPassword: false,
+                    messErrorPassword: ""
+                }
+            }
+        }
+
+        setState((prevState: State) => ({
+            ...prevState,
+            account: {
+                ...prevState?.account,
+                password: text,
+            },
+            isError: {
+                ...prevState?.isError,
+                ...nextState
+            },
+            isRefreshConfirmPassword: !prevState.isRefreshConfirmPassword
+        }));
+    }, [account.password]);
+
+    const handleOnChangeTextConfirmPassword = useCallback((text: any) => {
+        let nextState = {};
+        if (text.length === 0) {
+            nextState = {
+                errorConfirmPassword: {
+                    isErrorConfirmPassword: true,
+                    messErrorConfirmPassword: "Xác nhân mật khẩu không được để trống!"
+                }
+            }
+        } else {
+            if (account.password !== text) {
+                nextState = {
+
+                    errorConfirmPassword: {
+                        isErrorConfirmPassword: true,
+                        messErrorConfirmPassword: "Xác nhận mật khẩu phải khớp với mật khẩu ở trên!"
+                    }
+                }
+            } else {
+                nextState = {
+
+                    errorConfirmPassword: {
+                        isErrorConfirmPassword: false,
+                        messErrorConfirmPassword: ""
+                    }
+                }
+            }
+        }
+        setState((prevState: State) => ({
+            ...prevState,
+            account: {
+                ...prevState?.account,
+                confirmPassword: text,
+            },
+            isError: {
+                ...prevState?.isError,
+                ...nextState
+            }
+        }));
+    }, [account.confirmPassword]);
+
 
     return (
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-            <Text>Register</Text>
-        </View>
+        <SafeAreaView style={[styles.container, StylesTheme.droidSafeArea]}>
+            <KeyboardAwareScrollView style={StylesTheme.flexW100}>
+                <View style={StylesTheme.paddingH24}>
+                    {/* logo and slogan */}
+                    <View style={StylesTheme.flexCenter}>
+                        <Image source={require('../../global/assets/image/logo.png')} style={StylesTheme.sizeLogo} />
+                        <Text style={styles.textSlogan}>Shmily</Text>
+                    </View>
+                    {/* TextInput username, password, confirm password */}
+                    <View style={styles.wrapTextInput}>
+                        {/* username */}
+                        <View>
+                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 4 }]}>
+                                {/* {
+                                    errorNumberPhone !== "" ? (
+                                        <Text style={{ color: "red" }}>{errorNumberPhone}</Text>
+                                    ) : null
+                                } */}
+                                <Text numberOfLines={2} style={{ color: "red" }}>{isError?.errorUsername?.messErrorUsername} </Text>
+                            </View>
+
+                            <TextInputComponent
+                                style={[styles.textInput, {}]}
+                                // styleCustom={[styles.textInput, {}]}
+                                placeholder="Số điện thoại hoặc email"
+                                keyboardType={'numeric'}
+                                value={account.username}
+                                isError={isError?.errorUsername?.isErrorUsername}
+                                isSubTitle={true}
+                                isClose={true}
+                                onComplete={(text) => {
+                                    handleOnChangeTextUsername(text);
+                                }}
+                            />
+                        </View>
+
+                        {/* password */}
+                        <View>
+                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 4 }]}>
+                                {
+                                    /* isError?.errorPassword?.isErrorPassword && 
+                                    isError?.errorPassword?.messErrorPassword !== "" ? */ (
+                                        <Text numberOfLines={2} style={{ color: "red" }}>{isError?.errorPassword?.messErrorPassword} </Text>
+                                    )
+                                }
+                            </View>
+                            <View style={StylesTheme.onlyFlexDirectionAli_Center}>
+                                <TextInputComponent
+                                    style={[styles.textInput, {}]}
+                                    isSubTitle={true}
+                                    isError={isError?.errorPassword?.isErrorPassword}
+                                    placeholder="Mật khẩu"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    secureTextEntry={isPasswordVisibility}
+                                    enablesReturnKeyAutomatically
+                                    value={account.password}
+                                    isRefresh={isPasswordVisibility}
+                                    onComplete={(text) => {
+                                        handleOnChangeTextPassword(text);
+                                    }}
+                                />
+                                <TouchableOpacity style={{ position: 'absolute', right: 10 }}
+                                    activeOpacity={0.8}
+                                    onPress={() => {
+                                        // setIsPasswordVisibility(!isPasswordVisibility)
+                                        setState((prevState: any) => ({
+                                            ...prevState,
+                                            isPasswordVisibility: !isPasswordVisibility
+                                        }));
+                                    }}
+                                >
+                                    {
+                                        isPasswordVisibility ? (
+                                            <EyeHideIcon color={"#000"} size={32} />
+                                        ) : (
+                                            <EyeShowIcon color={"#000"} size={32} />
+                                        )
+                                    }
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        {/* confirm password */}
+                        <View>
+                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 4 }]}>
+                                <Text numberOfLines={2} style={{ color: "red" }}>{isError.errorConfirmPassword.messErrorConfirmPassword} </Text>
+                            </View>
+                            <View style={StylesTheme.onlyFlexDirectionAli_Center}>
+                                <TextInputComponent
+                                    style={[styles.textInput, account.password ? {} : { backgroundColor: "#ebebeb" }]}
+                                    isSubTitle={true}
+                                    isError={isError?.errorConfirmPassword?.isErrorConfirmPassword}
+                                    placeholder="Xác nhận mật khẩu"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    secureTextEntry={isConfirmPasswordVisibility}
+                                    editable={account.password ? true : false}
+                                    enablesReturnKeyAutomatically
+                                    value={account.confirmPassword}
+                                    isRefresh={isRefreshConfirmPassword}
+                                    onComplete={(text) => {
+                                        handleOnChangeTextConfirmPassword(text);
+                                    }}
+                                />
+                                <TouchableOpacity style={{ position: 'absolute', right: 10 }}
+                                    activeOpacity={0.8}
+                                    disabled={account.password ? false : true}
+                                    onPress={() => {
+                                        setState((prevState: any) => ({
+                                            ...prevState,
+                                            isConfirmPasswordVisibility: !isConfirmPasswordVisibility,
+                                            isRefreshConfirmPassword: !isRefreshConfirmPassword,
+                                        }));
+                                    }}
+                                >
+                                    {
+                                        isConfirmPasswordVisibility ? (
+                                            <EyeHideIcon color={"#000"} size={32} />
+                                        ) : (
+                                            <EyeShowIcon color={"#000"} size={32} />
+                                        )
+                                    }
+
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                    {/* Button Continue, Continue with Facebook or Login */}
+                    <View style={styles.wrapButtonDiff}>
+                        {/* Button Continue */}
+                        <View style={{ flex: 1 }}>
+                            <TouchableOpacity
+                                style={StylesTheme.btnPrimary}
+                                onPress={() => {
+                                    navigation.navigate("OTP", {
+                                        username: account.username,
+                                        password: account.password
+                                    });
+                                }
+                                }
+                            >
+                                <Text style={styles.textBtnLogin}>
+                                    Tiếp theo
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* OR */}
+
+                        <View
+                            style={[StylesTheme.flexRowCenter, StylesTheme.marginV24]}
+                        >
+                            <View style={StylesTheme.line30} />
+                            <Text
+                                style={{
+                                    fontSize: 18,
+                                    fontWeight: '600',
+                                    fontStyle: 'italic',
+                                    marginHorizontal: 12,
+                                    color: '#ccc',
+                                }}
+                            >
+                                Tiếp tục với
+                            </Text>
+                            <View style={StylesTheme.line30} />
+                        </View>
+
+                        <View
+                            style={StylesTheme.flexRowCenter}
+                        >
+                            {/* Continue with google */}
+                            <View>
+                                <TouchableOpacity
+                                    style={styles.btnLoginDiff}
+                                >
+                                    <Image
+                                        source={require('../../global/assets/image/google.png')}
+                                        style={StylesTheme.wh32}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Continue with facebook */}
+                            <View>
+                                <TouchableOpacity
+                                    style={styles.btnLoginDiff}
+                                >
+                                    <Image
+                                        source={require('../../global/assets/image/facebook.png')}
+                                        style={StylesTheme.wh32}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        <View
+                            style={styles.wrapNotHaveAccount}
+                        >
+                            <Text
+                                style={styles.textNotHaveAccount}
+                            >
+                                Bạn đã có tài khoản?{' '}
+                            </Text>
+                            <Pressable>
+                                <Text
+                                    style={styles.textRegister}
+                                >
+                                    Đăng nhập
+                                </Text>
+                            </Pressable>
+                        </View>
+                    </View>
+                </View>
+            </KeyboardAwareScrollView>
+        </SafeAreaView>
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+    },
+
+    textSlogan: {
+        fontSize: 18, fontWeight: '600'
+    },
+
+    wrapTextInput: { flex: 1, marginVertical: 24 },
+
+    textInput: {
+        flex: 1,
+        padding: 14,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 24,
+        fontSize: 16,
+        fontWeight: '500',
+    },
+
+    styleCheckbox: {
+        width: 22,
+        height: 22,
+        borderWidth: 1,
+        borderColor: '#000',
+        borderRadius: 22,
+        marginRight: 6,
+    },
+
+    textBtnLogin: {
+        fontSize: 18, fontWeight: '600', fontStyle: 'italic'
+    },
+
+    wrapErrorLogin: { marginTop: 12, alignItems: "center" },
+
+    wrapButtonDiff: {
+        flex: 1, justifyContent: 'center', marginTop: 12
+    },
+
+    btnLoginDiff: {
+        padding: 12,
+        marginHorizontal: 12,
+        borderWidth: 2,
+        borderColor: '#ccc',
+        borderRadius: 6,
+    },
+
+    wrapNotHaveAccount: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: 24,
+    },
+
+    textNotHaveAccount: {
+        fontSize: 16,
+        fontWeight: '500',
+        fontStyle: 'italic',
+    },
+
+    textRegister: {
+        fontSize: 16,
+        fontWeight: '600',
+        fontStyle: 'italic',
+        color: 'blue',
+    }
+});
