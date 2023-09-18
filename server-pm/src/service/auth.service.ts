@@ -109,7 +109,10 @@ export class AuthService {
     }
 
     async createAccount(userRegister: UserRegisterDTO): Promise<unknown> {
+        debugger
         const { username, password, firstName, lastName } = userRegister;
+        console.log({...userRegister},'userRegister');
+        
         let fullName = firstName + " " + lastName;
         const newUser = new User({ ...userRegister, password: bcrypt.hashSync(password, 10), fullName, isDeleted: false, isFirstLogin: false });
 
@@ -122,14 +125,14 @@ export class AuthService {
         }
     }
 
-    async signWithToken(userId: number, username: string): Promise<{ accessToken: string }> {
+    async signWithToken(userId: string, username: string): Promise<{ accessToken: string }> {
         const payload = {
             sub: userId,
             username,
         };
 
         const jwt = await this.jwtService.signAsync(payload, {
-            expiresIn: '1m',
+            expiresIn: '5m',
             secret: this.configService.get('JWT_SECRET'),
         });
 

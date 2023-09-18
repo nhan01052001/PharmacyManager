@@ -1,8 +1,13 @@
-import { PrimaryGeneratedColumn, Column } from 'typeorm';
+import { PrimaryGeneratedColumn, Column, PrimaryColumn } from 'typeorm';
 import * as moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
+
+async function generateId() {
+    return await uuidv4();
+}
 
 export interface IBaseEntity {
-    id?: number;
+    id?: string;
     createdBy?: number;
     createdAt?: number;
     updatedBy?: number;
@@ -11,8 +16,9 @@ export interface IBaseEntity {
 
 export abstract class BaseEntity {
 
-    @PrimaryGeneratedColumn()
-    id: number;
+    @Column({ nullable: false, width: 300 })
+    @PrimaryGeneratedColumn("uuid")
+    id?: string;
 
     @Column({ nullable: true, type: 'bigint' })
     createdBy?: number;
