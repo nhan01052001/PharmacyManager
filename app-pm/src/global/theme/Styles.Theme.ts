@@ -116,6 +116,10 @@ export default StyleSheet.create({
 
     flexCenter: {
         flex: 1, alignItems: 'center', justifyContent: 'center'
+    },
+
+    styleTextBtnBasic: {
+        fontSize: 18, fontWeight: '600', fontStyle: 'italic'
     }
 
 });

@@ -5,11 +5,13 @@ import { BottomTabNavigator } from './BottomTab.Navigator';
 import { Login } from '../screen/auth/Login.Auth';
 import { Register } from '../screen/auth/Register.Auth';
 import { OTP } from '../screen/auth/OTP/OTP.Auth';
+import RegisterInformationPersonal from '../screen/auth/RegisterIn4.Auth';
 
 export type MainStackParams = {
     Login: any | undefined;
     Register: any | undefined;
     OTP: any | undefined;
+    RegisterInformationPersonal: any | undefined;
     BottomTabNavigator: any | undefined;
 };
 
@@ -26,6 +28,7 @@ const MainStackNavigator: React.FC = () => (
         <MainStack.Screen name='Login' component={Login} options={{headerShown: false}} />
         <MainStack.Screen name='Register' component={Register} options={{headerShown: false}} />
         <MainStack.Screen name='OTP' component={OTP} options={{headerShown: false}} />
+        <MainStack.Screen name='RegisterInformationPersonal' component={RegisterInformationPersonal} options={{headerShown: false}} />
     </MainStack.Navigator>
 );
 

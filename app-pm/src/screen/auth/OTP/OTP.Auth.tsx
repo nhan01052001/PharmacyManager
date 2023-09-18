@@ -1,5 +1,6 @@
+import { useNavigation } from '@react-navigation/core';
+import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState, useRef, useEffect, useCallback } from "react";
-
 import {
   StyleSheet,
   View,
@@ -18,6 +19,9 @@ import { firebase as firebaseConfig } from "../../../firebase/config";
 import firebase from "firebase/compat/app";
 
 import { Account } from "../../../type/User.Type";
+import StylesTheme from "../../../global/theme/Styles.Theme";
+import { MainStackParams } from '../../../navigation/Stack.Navigator';
+import { HeaderComponent } from '../../../components/cHeadder/Header.Component';
 // import {
 //   FirebaseRecaptchaVerifierModal,
 //   FirebaseRecaptchaBanner,
@@ -25,7 +29,8 @@ import { Account } from "../../../type/User.Type";
 
 const { width } = Dimensions.get("window");
 
-export const OTP: React.FC<{navigation: any, route: any}> = ({ navigation, route }) => {
+export const OTP: React.FC<{ route: any }> = ({ route }) => {
+  const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
   const [code, setCode] = useState<any>("");
   const [verificationId, setVerificationId] = useState<any>(null);
   const [pinReady, setPinReady] = useState<any>(false);
@@ -48,40 +53,44 @@ export const OTP: React.FC<{navigation: any, route: any}> = ({ navigation, route
   const MAX_CODE_LENGTH = 6;
 
   const sendCode = async () => {
-
-    const phoneProvider = new firebase.auth.PhoneAuthProvider();
-    const verificationId = await phoneProvider.verifyPhoneNumber(
-      "+84" + username,
-      recaptchaVerifier.current
-    );
-    setVerificationId(verificationId);
+    navigation.navigate("RegisterInformationPersonal");
+    // const phoneProvider = new firebase.auth.PhoneAuthProvider();
+    // const verificationId = await phoneProvider.verifyPhoneNumber(
+    //   "+84" + username,
+    //   recaptchaVerifier.current
+    // );
+    // setVerificationId(verificationId);
   };
 
   const confirmCode = () => {
-    const credential = firebase.auth.PhoneAuthProvider.credential(
-      verificationId,
-      code
-    );
-    firebase
-      .auth()
-      .signInWithCredential(credential)
-      .then(() => {
-        setCode("");
-        // navigation.navigate("SC_Continue", {
-        //   username: username,
-        //   password: password,
-        // });
-      })
-      .catch((error) => {
-        Alert.alert(error + " Mã OTP không chính xác!");
-      });
+    navigation.navigate("RegisterInformationPersonal");
+    // const credential = firebase.auth.PhoneAuthProvider.credential(
+    //   verificationId,
+    //   code
+    // );
+    // firebase
+    //   .auth()
+    //   .signInWithCredential(credential)
+    //   .then(() => {
+    //     setCode("");
+    //     // navigation.navigate("SC_Continue", {
+    //     //   username: username,
+    //     //   password: password,
+    //     // });
+    //   })
+    //   .catch((error) => {
+    //     Alert.alert(error + " Mã OTP không chính xác!");
+    //   });
   };
-
-console.log(route.params, 'route.params');
 
 
   return (
     <View style={styles.container}>
+      <HeaderComponent
+        titleHeader={'Xác nhận OTP'}
+        isOptionHome={false}
+        goBack={() => navigation.goBack()}
+      />
       {/* <FirebaseRecaptchaVerifierModal
         ref={recaptchaVerifier}
         firebaseConfig={firebaseConfig}
@@ -92,7 +101,6 @@ console.log(route.params, 'route.params');
           flex: 1,
           justifyContent: "space-between",
           alignItems: "center",
-          //   flexGrow: 3,
         }}
       >
         <Image
@@ -116,12 +124,9 @@ console.log(route.params, 'route.params');
       </View>
 
       <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
+        style={[StylesTheme.flexCenter, {
           flexGrow: 0.5,
-        }}
+        }]}
       >
         <CodeInputField
           setPinReady={setPinReady}
@@ -157,14 +162,6 @@ console.log(route.params, 'route.params');
             </Text>
           </TouchableOpacity>
         )}
-        {/* <TouchableOpacity style={styles.btnVerify} onPress={confirmCode}>
-          <VerifyIcon color="green" size={24} />
-          <Text
-            style={{ fontSize: 18, fontWeight: "500", textAlign: "center" }}
-          >
-            Xác nhận
-          </Text>
-        </TouchableOpacity> */}
       </View>
     </View>
   );

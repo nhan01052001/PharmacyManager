@@ -5,6 +5,21 @@ export type Account = {
     confirmPassword?: any;
 };
 
+type Gender = {
+    male: {
+        isMale: boolean,
+        maleView: any
+    },
+    female: {
+        isFemale: boolean,
+        femaleView: any
+    },
+    other: {
+        isOther: boolean,
+        otherView: any
+    }
+};
+
 export type User = {
     account: Account,
     firstName: any;
@@ -12,6 +27,7 @@ export type User = {
     avatar?: any;
     phone?: any;
     email? : any;
-    gender?: any;
+    gender?: Gender;
     birthday?: any;
+    address?: any;
 };
