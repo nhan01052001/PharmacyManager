@@ -1,4 +1,4 @@
-import { PrimaryGeneratedColumn, Column, PrimaryColumn } from 'typeorm';
+import { PrimaryGeneratedColumn, Column, PrimaryColumn, Generated } from 'typeorm';
 import * as moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 

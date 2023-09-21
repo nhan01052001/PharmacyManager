@@ -1,7 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
-import { BaseEntity, IBaseEntity } from './baseEntity/base.entity';
+import { BaseEntity, IBaseEntity } from './baseEntity/base.entity'
 
-export interface IUser extends IBaseEntity {
+interface IStaff extends IBaseEntity {
     username: string;
     password: string;
     firstName: string;
@@ -15,13 +15,16 @@ export interface IUser extends IBaseEntity {
     address?: string;
     isDeleted?: boolean;
     isFirstLogin?: boolean;
-    // permission?: string[];
-    // cart?: string[];
+    idCard?: string;
+    identificationCard?: string;
+    numberStaff?: string;
+    status?: boolean;
+    role?: string;
 }
 
-@Entity('User')
-export class User extends BaseEntity {
-    constructor(props?: IUser) {
+@Entity('Staff')
+export class Staff extends BaseEntity {
+    constructor(props?: IStaff) {
         const {
             username,
             password,
@@ -34,10 +37,13 @@ export class User extends BaseEntity {
             gender,
             birthday,
             address,
-            isDeleted,
             isFirstLogin,
-            // permission,
-            // cart,
+            idCard,
+            identificationCard,
+            numberStaff,
+            isDeleted,
+            status,
+            role,
             ...superItem
         } = props || {};
 
@@ -55,10 +61,13 @@ export class User extends BaseEntity {
             gender,
             birthday,
             address,
-            isDeleted,
             isFirstLogin,
-            // permission,
-            // cart,
+            idCard,
+            identificationCard,
+            numberStaff,
+            isDeleted,
+            status,
+            role,
         });
     }
 
@@ -94,10 +103,25 @@ export class User extends BaseEntity {
 
     @Column({ nullable: true, width: 500 })
     address?: string;
-    
-    @Column({ nullable: true, default: false }) 
-    isDeleted?: boolean
 
     @Column({ nullable: true, default: false }) 
     isFirstLogin?: boolean;
+
+    @Column({ nullable: true, width: 24 })
+    idCard?: string;
+
+    @Column({ nullable: true, width: 24 })
+    identificationCard?: string;
+
+    @Column({ nullable: true, width: 24 })
+    numberStaff?: string;
+    
+    @Column({ nullable: true, default: false }) 
+    isDeleted?: boolean;
+
+    @Column({ nullable: true, default: false }) 
+    status?: boolean;
+    
+    @Column({ nullable: true })
+    role?: string;
 }

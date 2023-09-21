@@ -1,8 +1,8 @@
 import { Controller, Post, Req, Body, Get, Param, Headers } from "@nestjs/common";
 
-import { AuthService } from "src/service/auth.service";
+import { AuthService } from "../service/auth.service";
 import { UserRegisterDTO } from "../validator/dto/user-register.dto";
-import { UserLoginDTO } from "src/validator/dto/user-login.dto";
+import { UserLoginDTO } from "../validator/dto/user-login.dto";
 
 
 @Controller('auth')
@@ -17,7 +17,7 @@ export class AuthController {
     }
 
     @Post('/login')
-    login(@Body() userLogin: UserLoginDTO): Promise<unknown> {
-        return this.authService.login(userLogin);
+    login(@Body() userLogin: UserLoginDTO, @Headers() headers: any): Promise<unknown> {
+        return this.authService.login(userLogin, headers);
     }
 }

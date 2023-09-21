@@ -26,12 +26,6 @@ export class UserRegisterDTO {
     @MaxLength(300)
     lastName: string;
 
-    avatar?: string
-
-    gender?: string;
-
-    birthday?: string;
-
     email?: string;
 
     phone?: string;

@@ -3,10 +3,13 @@ import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { JwtService, JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { UserRepository } from "src/repository/user.repository";
+import { UserRepository } from "../repository/user.repository";
 import { InjectRepository } from "@nestjs/typeorm";
-import { User } from "src/entity/user.entity";
+import { User } from "../entity/user.entity";
 import { UserService } from "./user.service";
+import { StaffService } from "./staff.service";
+import { Staff } from "../entity/staff.entity";
+import { StaffRepository } from "../repository/staff.repository";
 import { UserRegisterDTO, EmailDTO, PhoneNumberDTO } from "../validator/dto/user-register.dto";
 import { UserLoginDTO } from '../validator/dto/user-login.dto';
 import { ErrorResponse } from "../error/error-response.error";
@@ -20,14 +23,25 @@ export class AuthService {
 
         private userService: UserService,
 
+        private staffService: StaffService,
+
+        @InjectRepository(Staff)
+        private staffRepository: StaffRepository,
+
         @InjectRepository(User)
         private userRepository: UserRepository,
     ) { }
 
     async register(userRegister: UserRegisterDTO, headers: any): Promise<unknown> {
         const { username, password, firstName, lastName } = userRegister;
+        let data = null;
         // check username is not exists
-        const data = await this.userService.getUserByUsername(username);
+        // before check request register from app or web
+        if(headers?.isapp === 'true' || headers?.isapp === true) {
+            data = await this.userService.getUserByUsername(username);
+        } else {
+            data = await this.staffService.getStaffByUsername(username);
+        }
 
         if (data) {
             throw new ErrorResponse({ ...new BadRequestException('username is exists!'), errorCode: "USERNAME_EXISTS" });
@@ -35,21 +49,26 @@ export class AuthService {
             // register on app
             if (headers?.isapp === 'true' || headers?.isapp === true) {
                 if (this.checkUsername(username)) {
-                    return this.createAccount(userRegister);
+                    return this.createAccount(userRegister, true);
                 }
             } else {
                 // register web main
-                return this.createAccount(userRegister);
+                return this.createAccount(userRegister, false);
             }
         }
     }
 
-    async login(userLogin: UserLoginDTO): Promise<unknown> {
+    async login(userLogin: UserLoginDTO, headers: any): Promise<unknown> {
         const { username, password } = userLogin;
+        const isApp = headers?.isapp === 'true' || headers?.isapp === true ? true : false;
 
         if (username && password) {
-            const data: User = await this.userService.getUserByUsername(username);
-
+            let data = null;
+            if(isApp) {
+                data = await this.userService.getUserByUsername(username);
+            } else {
+                data = await this.staffService.getStaffByUsername(username);
+            }
             if (data) {
                 if (!bcrypt.compareSync(password, data.password)) {
                     throw new ErrorResponse({ ... new BadRequestException('Invalid username or password! Please again.'), errorCode: "INVALID_USERNAME_PASSWORD" });
@@ -61,7 +80,7 @@ export class AuthService {
                         message: 'Logged in successfully!',
                         statusCode: 200,
                         data: data,
-                        accessToken: (await this.signWithToken(data.id, data.username))
+                        accessToken: (await this.signWithToken(data.id, data.username, isApp))
                             .accessToken,
                     }
                 }
@@ -108,16 +127,21 @@ export class AuthService {
         }
     }
 
-    async createAccount(userRegister: UserRegisterDTO): Promise<unknown> {
+    async createAccount(userRegister: UserRegisterDTO, isApp: boolean): Promise<unknown> {
         debugger
         const { username, password, firstName, lastName } = userRegister;
-        console.log({...userRegister},'userRegister');
-        
+   
         let fullName = firstName + " " + lastName;
-        const newUser = new User({ ...userRegister, password: bcrypt.hashSync(password, 10), fullName, isDeleted: false, isFirstLogin: false });
 
         try {
-            const user = await this.userRepository.save(newUser);
+            let user = null;
+            if(isApp) {
+                const newUser = new User({ ...userRegister, password: bcrypt.hashSync(password, 10), fullName, isDeleted: false, isFirstLogin: false });
+                user = await this.userRepository.save(newUser);
+            } else {
+                const newStaff = new Staff({ ...userRegister, password: bcrypt.hashSync(password, 10), fullName, isDeleted: false, isFirstLogin: false });
+                user = await this.staffRepository.save(newStaff);
+            }
             delete user.password;
             return user;
         } catch (error) {
@@ -125,10 +149,11 @@ export class AuthService {
         }
     }
 
-    async signWithToken(userId: string, username: string): Promise<{ accessToken: string }> {
+    async signWithToken(userId: string, username: string, isApp: boolean): Promise<{ accessToken: string }> {
         const payload = {
             sub: userId,
             username,
+            isApp
         };
 
         const jwt = await this.jwtService.signAsync(payload, {

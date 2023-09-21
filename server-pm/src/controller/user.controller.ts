@@ -10,7 +10,7 @@ export class UserController {
     }
 
     @UseGuards(MyJwtGuard)
-    @Get('getAll')
+    @Get('getAllUser')
     getAll(): Promise<unknown> {
         return this.userService.getAll();
     }

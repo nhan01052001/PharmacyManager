@@ -194,6 +194,8 @@ console.log('re-render');
                                             isVisibleDate: false
                                         }));
                                     }}
+                                    cancelTextIOS={"Huỷ"}
+                                    confirmTextIOS={"Xác nhận"}
                                     is24Hour={true}
                                 />
                             </View>

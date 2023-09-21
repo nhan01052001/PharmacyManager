@@ -6,6 +6,7 @@ import { AuthModule } from './module/auth.module';
 import { DatabaseModule } from './module/database.module';
 import { entities } from './entities.provider';
 import { UserModule } from './module/user.module';
+import { StaffModule } from './module/staff.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UserModule } from './module/user.module';
     DatabaseModule,
     AuthModule,
     UserModule,
+    StaffModule,
     TypeOrmModule.forFeature(entities),
   ],
   controllers: [],
