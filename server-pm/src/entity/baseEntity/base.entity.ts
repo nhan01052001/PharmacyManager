@@ -9,9 +9,9 @@ async function generateId() {
 export interface IBaseEntity {
     id?: string;
     createdBy?: number;
-    createdAt?: number;
+    createdAt?: Date;
     updatedBy?: number;
-    updatedAt?: number;
+    updatedAt?: Date;
 }
 
 export abstract class BaseEntity {
@@ -23,14 +23,14 @@ export abstract class BaseEntity {
     @Column({ nullable: true, type: 'bigint' })
     createdBy?: number;
 
-    @Column({ nullable: true, type: 'bigint', default: moment().unix() })
-    createdAt?: number;
+    @Column({ nullable: true, type: 'datetime', default: () => 'NOW()' })
+    createdAt?: Date;
 
     @Column({ nullable: true, type: 'bigint' })
     updatedBy?: number;
 
-    @Column({ nullable: true, type: 'bigint' })
-    updatedAt?: number;
+    @Column({ nullable: true, type: 'datetime' })
+    updatedAt?: Date;
 
     constructor(props?: IBaseEntity) {
         const { id, createdBy, createdAt, updatedBy, updatedAt } = props || {};

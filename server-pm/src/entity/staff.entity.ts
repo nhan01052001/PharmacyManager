@@ -1,5 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
-import { BaseEntity, IBaseEntity } from './baseEntity/base.entity'
+import { BaseEntity, IBaseEntity } from './baseEntity/base.entity';
+import { Bill } from './bill.entity';
 
 interface IStaff extends IBaseEntity {
     username: string;
@@ -20,6 +21,7 @@ interface IStaff extends IBaseEntity {
     numberStaff?: string;
     status?: boolean;
     role?: string;
+    bill?: Bill[];
 }
 
 @Entity('Staff')
@@ -44,6 +46,7 @@ export class Staff extends BaseEntity {
             isDeleted,
             status,
             role,
+            bill,
             ...superItem
         } = props || {};
 
@@ -68,6 +71,7 @@ export class Staff extends BaseEntity {
             isDeleted,
             status,
             role,
+            bill,
         });
     }
 
@@ -79,7 +83,7 @@ export class Staff extends BaseEntity {
 
     @Column({ nullable: false, width: 300 })
     firstName?: string;
-  
+
     @Column({ nullable: false, width: 300 })
     lastName?: string;
 
@@ -104,7 +108,7 @@ export class Staff extends BaseEntity {
     @Column({ nullable: true, width: 500 })
     address?: string;
 
-    @Column({ nullable: true, default: false }) 
+    @Column({ nullable: true, default: false })
     isFirstLogin?: boolean;
 
     @Column({ nullable: true, width: 24 })
@@ -115,13 +119,16 @@ export class Staff extends BaseEntity {
 
     @Column({ nullable: true, width: 24 })
     numberStaff?: string;
-    
-    @Column({ nullable: true, default: false }) 
+
+    @Column({ nullable: true, default: false })
     isDeleted?: boolean;
 
-    @Column({ nullable: true, default: false }) 
+    @Column({ nullable: true, default: false })
     status?: boolean;
-    
+
     @Column({ nullable: true })
     role?: string;
+
+    @OneToMany(() => Bill, (bill) => bill.staff)
+    bill?: Bill[];
 }

@@ -1,5 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity, IBaseEntity } from './baseEntity/base.entity';
+import { Bill } from './bill.entity';
 
 export interface IUser extends IBaseEntity {
     username: string;
@@ -15,6 +16,7 @@ export interface IUser extends IBaseEntity {
     address?: string;
     isDeleted?: boolean;
     isFirstLogin?: boolean;
+    bill?: Bill[];
     // permission?: string[];
     // cart?: string[];
 }
@@ -36,6 +38,7 @@ export class User extends BaseEntity {
             address,
             isDeleted,
             isFirstLogin,
+            bill,
             // permission,
             // cart,
             ...superItem
@@ -57,6 +60,7 @@ export class User extends BaseEntity {
             address,
             isDeleted,
             isFirstLogin,
+            bill,
             // permission,
             // cart,
         });
@@ -70,7 +74,7 @@ export class User extends BaseEntity {
 
     @Column({ nullable: false, width: 300 })
     firstName?: string;
-  
+
     @Column({ nullable: false, width: 300 })
     lastName?: string;
 
@@ -94,10 +98,13 @@ export class User extends BaseEntity {
 
     @Column({ nullable: true, width: 500 })
     address?: string;
-    
-    @Column({ nullable: true, default: false }) 
+
+    @Column({ nullable: true, default: false })
     isDeleted?: boolean
 
-    @Column({ nullable: true, default: false }) 
+    @Column({ nullable: true, default: false })
     isFirstLogin?: boolean;
+
+    @OneToMany(() => Bill, (bill) => bill.users)
+    bill?: Bill[];
 }
