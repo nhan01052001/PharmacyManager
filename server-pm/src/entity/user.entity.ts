@@ -1,6 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity, IBaseEntity } from './baseEntity/base.entity';
 import { Bill } from './bill.entity';
+import { Cart } from './cart.entity';
 
 export interface IUser extends IBaseEntity {
     username: string;
@@ -17,6 +18,7 @@ export interface IUser extends IBaseEntity {
     isDeleted?: boolean;
     isFirstLogin?: boolean;
     bill?: Bill[];
+    cart?: Cart;
     // permission?: string[];
     // cart?: string[];
 }
@@ -40,7 +42,7 @@ export class User extends BaseEntity {
             isFirstLogin,
             bill,
             // permission,
-            // cart,
+            cart,
             ...superItem
         } = props || {};
 
@@ -62,7 +64,7 @@ export class User extends BaseEntity {
             isFirstLogin,
             bill,
             // permission,
-            // cart,
+            cart,
         });
     }
 
@@ -107,4 +109,7 @@ export class User extends BaseEntity {
 
     @OneToMany(() => Bill, (bill) => bill.users)
     bill?: Bill[];
+
+    @OneToOne(() => Cart, (cart) => cart.users)
+    cart?: Cart;
 }

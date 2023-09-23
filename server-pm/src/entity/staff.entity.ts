@@ -1,6 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity, IBaseEntity } from './baseEntity/base.entity';
 import { Bill } from './bill.entity';
+import { Order } from './oder.entity';
 
 interface IStaff extends IBaseEntity {
     username: string;
@@ -22,6 +23,7 @@ interface IStaff extends IBaseEntity {
     status?: boolean;
     role?: string;
     bill?: Bill[];
+    order?: Order;
 }
 
 @Entity('Staff')
@@ -47,6 +49,7 @@ export class Staff extends BaseEntity {
             status,
             role,
             bill,
+            order,
             ...superItem
         } = props || {};
 
@@ -72,6 +75,7 @@ export class Staff extends BaseEntity {
             status,
             role,
             bill,
+            order,
         });
     }
 
@@ -131,4 +135,7 @@ export class Staff extends BaseEntity {
 
     @OneToMany(() => Bill, (bill) => bill.staff)
     bill?: Bill[];
+
+    @OneToOne(() => Order, (order) => order.staffs)
+    order?: Order;
 }

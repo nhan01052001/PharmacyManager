@@ -29,10 +29,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     async validate(payload: { sub: string; username: string, isApp: boolean }) {
         let user = null
         if(payload.isApp === true) {
-            console.log(payload.isApp, 'payload.isApp');
             user = await this.userRepository.findOne({ where: {id: ILike(payload.sub), isDeleted: false} });
         } else {
-            console.log('payload.isApp: false');
             user = await this.staffRepository.findOne({ where: {id: ILike(payload.sub), isDeleted: false} });
         }
 
