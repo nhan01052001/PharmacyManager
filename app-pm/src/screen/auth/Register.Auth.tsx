@@ -6,16 +6,8 @@ import {
     StyleSheet,
     View,
     Text,
-    TextInput,
     TouchableOpacity,
-    ScrollView,
-    Dimensions,
-    KeyboardAvoidingView,
-    ViewBase,
-    Keyboard,
-    Platform,
     Pressable,
-    Alert,
     Image,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -26,6 +18,7 @@ import StylesTheme from '../../global/theme/Styles.Theme';
 import TextInputComponent from '../../components/cTextInput/TextInput.component';
 import { EyeHideIcon, EyeShowIcon } from '../../global/icon/Icon';
 import { Account, User } from '../../type/User.Type';
+import { Colors } from '../../global/theme/Colors.Theme';
 
 type ErrorAccount = {
     errorUsername: {
@@ -75,28 +68,9 @@ const initialState: State = {
     isRefreshConfirmPassword: false,
 };
 
-export const Register: React.FC<{route: any}> = ({ route }) => {
+export const Register: React.FC<{ route: any }> = ({ route }) => {
     const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
     const [{ account, isError, isPasswordVisibility, isConfirmPasswordVisibility, isRefreshConfirmPassword }, setState] = useState<State>({ ...initialState });
-    // const [username, setUsername] = useState<string>("");
-    // const [password, setPassword] = useState<string>("");
-    // const [confirmPassword, setConfirmPassword] = useState<string>();
-    // const [isError, setIsError] = useState<any>({
-    //     errorUsername: {
-    //         isErrorUsername: false,
-    //         messErrorUsername: ""
-    //     },
-    //     errorPassword: {
-    //         isErrorPassword: false,
-    //         messErrorPassword: ""
-    //     },
-    //     errorConfirmPassword: {
-    //         isErrorConfirmPassword: false,
-    //         messErrorConfirmPassword: ""
-    //     }
-    // });
-    // const [isPasswordVisibility, setIsPasswordVisibility] = useState<boolean>(true);
-    // const [isConfirmPasswordVisibility, setIsConfirmPasswordVisibility] = useState<boolean>(true);
 
     const handleOnChangeTextUsername = useCallback((text: any) => {
         let nextState = {};
@@ -176,7 +150,7 @@ export const Register: React.FC<{route: any}> = ({ route }) => {
 
                     errorConfirmPassword: {
                         isErrorConfirmPassword: true,
-                        messErrorConfirmPassword: "Xác nhận mật khẩu phải khớp với mật khẩu ở trên!"
+                        messErrorConfirmPassword: "Xác nhận mật khẩu chưa hợp lệ!"
                     }
                 }
             } else {
@@ -216,23 +190,18 @@ export const Register: React.FC<{route: any}> = ({ route }) => {
                     <View style={styles.wrapTextInput}>
                         {/* username */}
                         <View>
-                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 4 }]}>
-                                {/* {
-                                    errorNumberPhone !== "" ? (
-                                        <Text style={{ color: "red" }}>{errorNumberPhone}</Text>
-                                    ) : null
-                                } */}
-                                <Text numberOfLines={2} style={{ color: "red" }}>{isError?.errorUsername?.messErrorUsername} </Text>
+                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 2 }]}>
+                                <Text numberOfLines={2} style={[styles.textSubTitle, isError?.errorUsername?.messErrorUsername !== "" && { color: "red" }]}>
+                                    {isError?.errorUsername?.messErrorUsername !== "" ? isError?.errorUsername?.messErrorUsername :
+                                        account.username && account.username !== "" ? "Số điện thoại hoặc email" : ""}
+                                </Text>
                             </View>
-
                             <TextInputComponent
                                 style={[styles.textInput, {}]}
-                                // styleCustom={[styles.textInput, {}]}
                                 placeholder="Số điện thoại hoặc email"
                                 keyboardType={'numeric'}
                                 value={account.username}
                                 isError={isError?.errorUsername?.isErrorUsername}
-                                isSubTitle={true}
                                 isClose={true}
                                 onComplete={(text) => {
                                     handleOnChangeTextUsername(text);
@@ -241,19 +210,16 @@ export const Register: React.FC<{route: any}> = ({ route }) => {
                         </View>
 
                         {/* password */}
-                        <View>
-                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 4 }]}>
-                                {
-                                    /* isError?.errorPassword?.isErrorPassword && 
-                                    isError?.errorPassword?.messErrorPassword !== "" ? */ (
-                                        <Text numberOfLines={2} style={{ color: "red" }}>{isError?.errorPassword?.messErrorPassword} </Text>
-                                    )
-                                }
+                        <View style={{marginVertical: 24}}>
+                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 2 }]}>
+                                <Text numberOfLines={2} style={[styles.textSubTitle, isError?.errorPassword?.messErrorPassword !== "" && { color: "red" }]}>
+                                    {isError?.errorPassword?.messErrorPassword !== "" ? isError?.errorPassword?.messErrorPassword :
+                                        account.password && account.password !== "" ? "Mật khẩu" : ""}
+                                </Text>
                             </View>
                             <View style={StylesTheme.onlyFlexDirectionAli_Center}>
                                 <TextInputComponent
                                     style={[styles.textInput, {}]}
-                                    isSubTitle={true}
                                     isError={isError?.errorPassword?.isErrorPassword}
                                     placeholder="Mật khẩu"
                                     autoCapitalize="none"
@@ -289,13 +255,15 @@ export const Register: React.FC<{route: any}> = ({ route }) => {
 
                         {/* confirm password */}
                         <View>
-                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 4 }]}>
-                                <Text numberOfLines={2} style={{ color: "red" }}>{isError.errorConfirmPassword.messErrorConfirmPassword} </Text>
+                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 2 }]}>
+                            <Text numberOfLines={2} style={[styles.textSubTitle, isError.errorConfirmPassword.messErrorConfirmPassword !== "" && { color: "red" }]}>
+                                    {isError.errorConfirmPassword.messErrorConfirmPassword !== "" ? isError.errorConfirmPassword.messErrorConfirmPassword :
+                                        account.confirmPassword && account.confirmPassword !== "" ? "Xác nhận mật khẩu" : ""}
+                                </Text>
                             </View>
                             <View style={StylesTheme.onlyFlexDirectionAli_Center}>
                                 <TextInputComponent
                                     style={[styles.textInput, account.password ? {} : { backgroundColor: "#ebebeb" }]}
-                                    isSubTitle={true}
                                     isError={isError?.errorConfirmPassword?.isErrorConfirmPassword}
                                     placeholder="Xác nhận mật khẩu"
                                     autoCapitalize="none"
@@ -439,10 +407,9 @@ const styles = StyleSheet.create({
 
     textInput: {
         flex: 1,
-        padding: 14,
-        borderWidth: 1,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
         borderColor: '#ccc',
-        borderRadius: 24,
         fontSize: 16,
         fontWeight: '500',
     },
@@ -492,5 +459,10 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         fontStyle: 'italic',
         color: 'blue',
+    },
+
+    textSubTitle: {
+        color: Colors.colorGrey,
+        fontWeight: '500',
     }
 });

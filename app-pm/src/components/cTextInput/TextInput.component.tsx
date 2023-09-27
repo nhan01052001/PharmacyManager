@@ -1,19 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import {
-    SafeAreaView,
     StyleSheet,
     View,
     Text,
     TextInput,
     TouchableOpacity,
-    ScrollView,
-    Dimensions,
-    KeyboardAvoidingView,
-    ViewBase,
-    Keyboard,
-    Platform,
-    Pressable,
-    Alert,
     Image,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -22,64 +13,45 @@ import { WarningIcon } from '../../global/icon/Icon';
 
 interface IProps extends React.ComponentProps<typeof TextInput> {
     customPropsOne?: string;
-    isSubTitle?: boolean;
-    styleCustom?: any;
     isClose?: boolean;
     isError?: boolean;
     isShowIconError?: boolean;
     isRefresh?: boolean;
+    isObligatory?: boolean,
     onComplete: (text: string) => void,
     // also contains all props of the TextInput component
 }
 
 const TextInputComponent: React.FC<IProps> = (props: IProps) => {
-    const { customPropsOne, isSubTitle, styleCustom, isClose, isError, isShowIconError, isRefresh, ...rest } = props;
-    const [isFocus, setIsFocus] = useState<boolean>(false);
-
-    const handleFocusTextInput = useCallback((value: boolean) => {
-        setIsFocus(value);
-    }, []);
+    const { customPropsOne, isClose, isError, isShowIconError, isObligatory, isRefresh, ...rest } = props;
+    const isShowOption = isObligatory || (isShowIconError && isError) || (isClose && rest.value && rest.value !== '') ? true : false;
     
     return (
 
         <View style={{ flex: 1 }}>
-            <View style={[ /* isSubTitle && isFocus && */[rest.style, { padding: 0 }],
-            StylesTheme.onlyFlexDirectionAli_Center, isError && { borderColor: 'red', }]}>
+            <View style={[{ padding: 0 },
+            StylesTheme.onlyFlexDirectionAli_Center,
+            isShowOption && rest.style,
+            isError && { borderColor: 'red'},
+            ]}>
                 <View style={{ flex: 1 }}>
-                    {
-                        isSubTitle && isFocus && (
-                            <View style={styles.subTitle}>
-                                <Text style={[styles.textSubTitle, StylesTheme.sizeTextMini]}>{rest.placeholder}</Text>
-                            </View>
-                        )
-                    }
-                    <View style={isSubTitle && isFocus && { paddingTop: 16 }}>
+                    <View>
                         <TextInput
                             {
                             ...rest
                             }
-                            style={[isSubTitle && isFocus ? [styles.noSubTitle] : rest.style, { borderWidth: 0, }, StylesTheme.sizeTextSmall]}
-                            placeholder={isSubTitle && isFocus ? '' : props.placeholder}
+                            style={[ !isShowOption && rest.style, StylesTheme.sizeTextSmall]}
+                            placeholder={props.placeholder}
                             value={rest.value}
                             onChangeText={(text) => {
                                 rest.onComplete(text)
-                            }}
-                            onFocus={() => {
-                                if (isSubTitle) {
-                                    handleFocusTextInput(true);
-                                }
-                            }}
-                            onBlur={() => {
-                                if (isSubTitle && (!rest.value || rest.value === '')) {
-                                    handleFocusTextInput(false);
-                                }
                             }}
                         />
                     </View>
                 </View>
                 {
-                    (isShowIconError && isError) || (isClose && rest.value && rest.value !== '') ? (
-                        <TouchableOpacity style={{ paddingHorizontal: 8 }} disabled={isShowIconError && isError} onPress={() => {
+                    isShowOption ? (
+                        <TouchableOpacity style={{ paddingHorizontal: 8 }} disabled={(isShowIconError && isError) || (isObligatory && rest.value === '')} onPress={() => {
                             rest.onComplete('');
                             // if (isSubTitle && (rest.value || rest.value !== '')) {
                             //     handleFocusTextInput(false);
@@ -91,6 +63,8 @@ const TextInputComponent: React.FC<IProps> = (props: IProps) => {
                                     <WarningIcon size={28} color='red' />
                                 ) : isClose && rest.value && rest.value !== '' ? (
                                     <Image source={require('../../global/assets/image/close.png')} style={StylesTheme.wh18} />
+                                ) : isObligatory && rest.value === '' ? (
+                                    <Text style={{color: 'red'}}>*</Text>
                                 ) : null
                             }
                         </TouchableOpacity>
@@ -101,10 +75,12 @@ const TextInputComponent: React.FC<IProps> = (props: IProps) => {
     )
 }
 
-export default React.memo(TextInputComponent, (prevProps, nextProps) => {
-    return prevProps.isRefresh  !== nextProps.isRefresh ? false : prevProps.value === nextProps.value ? true : false;
-    // return prevProps.value === nextProps.value ? true : false;
-});
+// export default React.memo(TextInputComponent, (prevProps, nextProps) => {
+//     return prevProps.isRefresh  !== nextProps.isRefresh ? false : prevProps.value === nextProps.value ? true : false;
+//     // return prevProps.value === nextProps.value ? true : false;
+// });
+
+export default TextInputComponent;
 
 const styles = StyleSheet.create({
     container: {
@@ -114,23 +90,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
 
-    textInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#7d7d7d',
-        borderRadius: 24,
-    },
-
     noSubTitle: {
-        borderRadius: 24,
         paddingVertical: 8,
-        paddingHorizontal: 16,
         fontWeight: "500",
+        borderWidth: 0,
     },
 
     subTitle: {
         position: 'absolute',
-        left: 16,
         top: 4,
     },
 

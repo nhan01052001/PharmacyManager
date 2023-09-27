@@ -24,6 +24,8 @@ import { MainStackParams } from '../../navigation/Stack.Navigator';
 import TextInputComponent from '../../components/cTextInput/TextInput.component';
 import { HeaderComponent } from '../../components/cHeadder/Header.Component';
 import StylesTheme from '../../global/theme/Styles.Theme';
+import { Colors } from '../../global/theme/Colors.Theme';
+import Address from '../../components/cAddress/Address.component';
 
 const { width, height } = Dimensions.get('window');
 
@@ -84,18 +86,20 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
     const [{ account, firstName, lastName, avatar, phone, email, gender, birthday, address, isVisibleDate }, setState] = useState<State>({ ...initialState });
 
     const hideDatePicker = () => {
-        // this.setState({
-        //     isVisibleDate: false
-        // })
+        setState((prevState: State) => ({
+            ...prevState,
+            isVisibleDate: false
+        }));
     };
 
     const handleConfirm = (date: any) => {
-        // if(date !== undefined && date !== null) {
-        //     this.setState({
-        //         valueDate: moment(date).format("DD/MM/YYYY").toString(),
-        //     })
-        // }
-        // this.hideDatePicker();
+        if (date) {
+            setState((prevState: State) => ({
+                ...prevState,
+                birthday: date,
+                isVisibleDate: false
+            }));
+        }
     };
 
     // handleRegister = () => {
@@ -103,7 +107,49 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
 
     //     // this.props.navigation.navigate('BottomTabNavigator')
     // }
-console.log('re-render');
+
+    const eventGender = (value: number) => {
+
+        let nextState = {};
+
+        if (value === 0) {
+            nextState = {
+                gender: {
+                    ...initialState.gender,
+                    male: {
+                        isMale: true,
+                        maleView: null
+                    },
+                }
+            };
+        } else if (value === 1) {
+            nextState = {
+                gender: {
+                    ...initialState.gender,
+                    female: {
+                        isFemale: true,
+                        femaleView: null
+                    },
+                }
+            };
+        } else {
+            nextState = {
+                gender: {
+                    ...initialState.gender,
+                    other: {
+                        isOther: true,
+                        otherView: null
+                    }
+                }
+            };
+        }
+
+        setState((prevState: State) => ({
+            ...prevState,
+            ...nextState
+        }));
+    };
+
 
     return (
         <View style={styles.container}>
@@ -121,78 +167,97 @@ console.log('re-render');
 
                     {/*  */}
                     <View style={{ flex: 1 }}>
+                        {/* First Name */}
                         <View style={styles.wrapXXX}>
-                            <View style={{flex: 1, flexDirection: 'row', alignItems: 'center',
-                            justifyContent: 'space-between'}}>
-                                <View style={{flex: 0.48}}>
-                                    <View style={StylesTheme.onlyFlexDirectionAli_Center}>
-                                        <Text style={styles.text}>Họ và tên đệm</Text>
-                                        <Text style={[styles.text, { color: 'red', marginLeft: 6 }]}>*</Text>
-                                    </View>
-                                    <TextInputComponent
-                                        style={[styles.textInput, {}]}
-                                        placeholder="Họ và tên đệm"
-                                        value={firstName}
-                                        onComplete={(text) => {
-                                            console.log(text, 'text');
-                                            
-                                            setState((prevState: State) => ({
-                                                ...prevState,
-                                                firstName: text
-                                            }));
-                                        }}
-                                    />
-                                </View>
-
-                                <View style={{flex: 0.48}}>
-                                    <View style={StylesTheme.onlyFlexDirectionAli_Center}>
-                                        <Text style={styles.text}>Tên</Text>
-                                        <Text style={[styles.text, { color: 'red', marginLeft: 6 }]}>*</Text>
-                                    </View>
-                                    <TextInputComponent
-                                        style={[styles.textInput, {}]}
-                                        placeholder="Tên"
-                                        value={lastName}
-                                        onComplete={(text) => {
-                                            setState((prevState: State) => ({
-                                                ...prevState,
-                                                lastName: text
-                                            }));
-                                        }}
-                                    />
-                                </View>
-
+                            <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
+                                <Text numberOfLines={2} style={[styles.textSubTitle]}>
+                                    {
+                                        firstName && firstName !== "" ? "Họ và tên đệm" : " "
+                                    }
+                                </Text>
+                                {
+                                    firstName && firstName !== "" && (
+                                        <Text style={styles.asteriskValid}>*</Text>
+                                    )
+                                }
                             </View>
+                            <TextInputComponent
+                                style={[styles.textInput, {}]}
+                                placeholder="Họ và tên đệm"
+                                value={firstName}
+                                isObligatory={true}
+                                isClose={true}
+                                onComplete={(text) => {
+                                    setState((prevState: State) => ({
+                                        ...prevState,
+                                        firstName: text
+                                    }));
+                                }}
+                            />
                         </View>
 
+                        {/* Last Name */}
                         <View style={styles.wrapXXX}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={styles.text}>Ngày tháng năm sinh</Text>
-                                <Text style={[styles.text, { color: 'red', marginLeft: 6 }]}>*</Text>
+                            <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
+                                <Text numberOfLines={2} style={[styles.textSubTitle]}>
+                                    {
+                                        lastName && lastName !== "" ? "Tên" : " "
+                                    }
+                                </Text>
+                                {
+                                    lastName && lastName !== "" && (
+                                        <Text style={styles.asteriskValid}>*</Text>
+                                    )
+                                }
                             </View>
+                            <TextInputComponent
+                                style={[styles.textInput, {}]}
+                                placeholder="Tên"
+                                value={lastName}
+                                isObligatory={true}
+                                onComplete={(text) => {
+                                    setState((prevState: State) => ({
+                                        ...prevState,
+                                        lastName: text
+                                    }));
+                                }}
+                            />
+                        </View>
 
+                        {/* Birthday */}
+                        <View style={styles.wrapXXX}>
+                            <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
+                                <Text numberOfLines={2} style={[styles.textSubTitle]}>
+                                    {
+                                        birthday ? "Ngày tháng năm sinh" : " "
+                                    }
+                                </Text>
+                                {
+                                    birthday && birthday !== "" && (
+                                        <Text style={styles.asteriskValid}>*</Text>
+                                    )
+                                }
+                            </View>
                             <TouchableOpacity style={[styles.textInput, {}]} onPress={() => {
                                 setState((prevState: State) => ({
                                     ...prevState,
                                     isVisibleDate: true
                                 }));
-                                //showDatePicker()
                             }}>
-                                <Text style={[{ fontSize: 18, fontWeight: '500' }, birthday === null ? { color: "#ccc" } : { color: "#000" }]}>{birthday === null ? 'Chọn ngày tháng năm sinh' : birthday}</Text>
+                                <Text style={[styles.text, { marginVertical: 0 }, birthday === null ? { color: "#ccc" } : { color: "#000" }]}>
+                                    {birthday ? moment(birthday).format('DD/MM/YYYY') : 'Chọn ngày tháng năm sinh'}
+                                </Text>
                             </TouchableOpacity>
                             {/* modal chọn ngày */}
-                            <View style={{ flex: 1, backgroundColor: "red", zIndex: 1, }}>
+                            <View style={{ flex: 1, zIndex: 1, }}>
                                 <DateTimePickerModal
-                                    date={birthday === null ? new Date() : new Date(birthday)}
+                                    date={birthday === null ? new Date() : birthday}
                                     // format="dd/MM/yyyy"
                                     isVisible={isVisibleDate}
                                     mode={'date'}
                                     onConfirm={handleConfirm}
                                     onCancel={() => {
-                                        setState((prevState: State) => ({
-                                            ...prevState,
-                                            isVisibleDate: false
-                                        }));
+                                        hideDatePicker();
                                     }}
                                     cancelTextIOS={"Huỷ"}
                                     confirmTextIOS={"Xác nhận"}
@@ -200,16 +265,18 @@ console.log('re-render');
                                 />
                             </View>
                         </View>
+
+                        {/* Gender */}
                         <View style={styles.wrapXXX}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={styles.text}>Giới tính</Text>
-                                <Text style={[styles.text, { color: 'red', marginLeft: 6 }]}>*</Text>
+                            <View style={StylesTheme.onlyFlexDirectionAli_Center}>
+                                <Text style={[styles.textSubTitle]}>Giới tính</Text>
+                                <Text style={[styles.text, styles.asteriskValid]}>*</Text>
                             </View>
                             <View style={styles.wrapCheckBoxGender}>
                                 <Pressable
-                                    style={{ flexDirection: 'row', alignItems: 'center' }}
+                                    style={StylesTheme.onlyFlexDirectionAli_Center}
                                     onPress={() => {
-                                        // eventGender(0)
+                                        eventGender(0);
                                     }}
                                 >
                                     {gender?.male.isMale === true ? (
@@ -221,9 +288,9 @@ console.log('re-render');
                                     <Text>Nam</Text>
                                 </Pressable>
                                 <Pressable
-                                    style={{ flexDirection: 'row', alignItems: 'center' }}
+                                    style={StylesTheme.onlyFlexDirectionAli_Center}
                                     onPress={() => {
-                                        // eventGender(1)
+                                        eventGender(1);
                                     }}
                                 >
                                     {gender?.female.isFemale === true ? (
@@ -234,9 +301,9 @@ console.log('re-render');
                                     <Text>Nữ</Text>
                                 </Pressable>
                                 <Pressable
-                                    style={{ flexDirection: 'row', alignItems: 'center' }}
+                                    style={StylesTheme.onlyFlexDirectionAli_Center}
                                     onPress={() => {
-                                        // eventGender(2)
+                                        eventGender(2);
                                     }}
                                 >
                                     {gender?.other.isOther === true ? (
@@ -248,29 +315,72 @@ console.log('re-render');
                                 </Pressable>
                             </View>
                         </View>
+
+                        {/* Email */}
                         <View style={styles.wrapXXX}>
-                            <Text style={styles.text}>Email</Text>
+                            <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
+                                <Text numberOfLines={2} style={[styles.textSubTitle]}>
+                                    {
+                                        email && email !== "" ? "Email" : " "
+                                    }
+                                </Text>
+                                {
+                                    email && email !== "" && (
+                                        <Text style={styles.asteriskValid}>*</Text>
+                                    )
+                                }
+                            </View>
                             <TextInputComponent
                                 style={[styles.textInput, {}]}
                                 placeholder="Nhập email của bạn"
                                 value={email}
+                                isObligatory={true}
                                 onComplete={(text) => {
-                                    // this.setState({
-                                    //     valueEmail: text,
-                                    // });
+                                    setState((prevState: State) => ({
+                                        ...prevState,
+                                        email: text
+                                    }));
                                 }}
                             />
                         </View>
 
                         {/* địa chỉ */}
+
                         <View style={styles.wrapXXX}>
                             <Text style={styles.text}>Địa chỉ</Text>
+                            <Address
+                                value={""}
+                                style={styles.componentDisplay}
+                                placeholder="Vui lòng chọn địa chỉ!"
+                                onComplete={(value) => {
+                                    console.log(value, 'value');
+                                }}
+                            />
+                        </View>
+
+                        <View style={styles.wrapXXX}>
+                            <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
+                                <Text numberOfLines={2} style={[styles.textSubTitle]}>
+                                    {
+                                        address && address !== "" ? "Địa chỉ cụ thể" : " "
+                                    }
+                                </Text>
+                                {
+                                    address && address !== "" && (
+                                        <Text style={styles.asteriskValid}>*</Text>
+                                    )
+                                }
+                            </View>
                             <TextInputComponent
                                 style={[styles.textInput, {}]}
                                 placeholder="Nhập địa chỉ của bạn"
                                 value={address}
+                                isObligatory={true}
                                 onComplete={(text) => {
-
+                                    setState((prevState: State) => ({
+                                        ...prevState,
+                                        address: text
+                                    }));
                                 }}
                             />
                         </View>
@@ -301,10 +411,9 @@ const styles = StyleSheet.create({
 
     textInput: {
         flex: 1,
-        padding: DEFAUlT_SIZE_PADDING,
-        borderWidth: 1,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
         borderColor: '#ccc',
-        borderRadius: 24,
         fontSize: 18,
         fontWeight: '500',
     },
@@ -318,9 +427,9 @@ const styles = StyleSheet.create({
     genderActive: {
         width: 20,
         height: 20,
-        backgroundColor: '#4eac6d',
+        backgroundColor: Colors.primaryColor,
         borderWidth: 2,
-        borderColor: 'red',
+        borderColor: '#ccc',
         borderRadius: 20,
         marginRight: 10,
     },
@@ -330,7 +439,7 @@ const styles = StyleSheet.create({
         height: 20,
         backgroundColor: '#fff',
         borderWidth: 2,
-        borderColor: '#4eac6d',
+        borderColor: '#000',
         borderRadius: 20,
         marginRight: 10,
     },
@@ -342,7 +451,31 @@ const styles = StyleSheet.create({
     },
 
     wrapXXX: {
-        marginVertical: 6,
+        marginVertical: 12,
+    },
+
+    flex048: {
+        flex: 0.48,
+    },
+
+    asteriskValid: {
+        color: 'red',
+        marginLeft: 6
+    },
+
+    textSubTitle: {
+        color: Colors.colorGrey,
+        fontWeight: '500',
+    },
+
+    componentDisplay: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderBottomWidth: 1,
+        borderBottomColor: "#ccc",
+        paddingVertical: 12,
     },
 });
 

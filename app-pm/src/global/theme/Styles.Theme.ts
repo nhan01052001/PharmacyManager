@@ -1,4 +1,5 @@
 import { StyleSheet, Platform, Dimensions, PixelRatio } from 'react-native';
+import { Colors } from './Colors.Theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -12,11 +13,6 @@ function normalize(size: number) {
     } else {
         return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
     }
-}
-
-const COLOR = {
-    primaryColor: "#5BC57E",
-
 }
 
 export default StyleSheet.create({
@@ -94,7 +90,7 @@ export default StyleSheet.create({
 
     btnPrimary: {
         flex: 1,
-        backgroundColor: COLOR.primaryColor,
+        backgroundColor: Colors.primaryColor,
         paddingVertical: 14,
         borderRadius: 20,
         alignItems: 'center',
@@ -123,5 +119,3 @@ export default StyleSheet.create({
     }
 
 });
-
-export { COLOR as Colors }

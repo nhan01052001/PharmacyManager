@@ -6,25 +6,18 @@ import {
     StyleSheet,
     View,
     Text,
-    TextInput,
     TouchableOpacity,
-    ScrollView,
-    Dimensions,
-    KeyboardAvoidingView,
-    ViewBase,
-    Keyboard,
-    Platform,
     Pressable,
-    Alert,
     Image,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import { MainStackParams } from '../../navigation/Stack.Navigator';
-import StylesTheme, { Colors } from '../../global/theme/Styles.Theme';
+import StylesTheme from '../../global/theme/Styles.Theme';
 import Function from '../../global/assets/service/Function.Service';
 import { EyeHideIcon, EyeShowIcon } from '../../global/icon/Icon';
 import TextInputComponent from '../../components/cTextInput/TextInput.component';
+import { Colors } from '../../global/theme/Colors.Theme';
 
 interface IErrorUsernamePassword {
     errorUsername: {
@@ -191,17 +184,14 @@ export const Login: React.FC = () => {
                     <View style={styles.wrapTextInput}>
                         {/* username */}
                         <View style={StylesTheme.marginV12}>
-                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 4 }]}>
-                                {
-                                    /* isError?.errorUsername?.isErrorUsername && 
-                                    isError?.errorUsername?.messErrorUsername !== "" ? */ (
-                                        <Text numberOfLines={2} style={{ color: "red" }}>{isError?.errorUsername?.messErrorUsername} </Text>
-                                    )
-                                }
+                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 2 }]}>
+                                <Text numberOfLines={2} style={[styles.textSubTitle, isError?.errorUsername?.messErrorUsername !== "" && { color: "red" }]}>
+                                    {isError?.errorUsername?.messErrorUsername !== "" ? isError?.errorUsername?.messErrorUsername : 
+                                        username && username !== "" ? "Số điện thoại hoặc email" : ""}
+                                </Text>
                             </View>
                             <TextInputComponent
                                 style={[styles.textInput, {}]}
-                                // styleCustom={[styles.textInput, {}]}
                                 placeholder="Số điện thoại hoặc email"
                                 keyboardType={'numeric'}
                                 value={username}
@@ -209,25 +199,22 @@ export const Login: React.FC = () => {
                                 onComplete={(text) => {
                                     handleOnChangeTextUsername(text);
                                 }}
-                                isSubTitle={true}
                                 isClose={true}
+                                isShowIconError={false}
                             />
                         </View>
 
                         {/* password */}
                         <View>
-                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 4 }]}>
-                                {
-                                    /* isError?.errorPassword?.isErrorPassword && 
-                                    isError?.errorPassword?.messErrorPassword !== "" ? */ (
-                                        <Text numberOfLines={2} style={{ color: "red" }}>{isError?.errorPassword?.messErrorPassword} </Text>
-                                    )
-                                }
+                            <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 2, marginTop: 12 }]}>
+                            <Text numberOfLines={2} style={[styles.textSubTitle, isError?.errorPassword?.messErrorPassword !== "" && { color: "red" }]}>
+                                    {isError?.errorPassword?.messErrorPassword !== "" ? isError?.errorPassword?.messErrorPassword :
+                                    password && password !== "" ? "Mật khẩu" : ""}
+                                </Text>
                             </View>
                             <View style={StylesTheme.onlyFlexDirectionAli_Center}>
                                 <TextInputComponent
                                     style={[styles.textInput, {}]}
-                                    isSubTitle={true}
                                     isError={isError?.errorPassword?.isErrorPassword}
                                     placeholder="Mật khẩu"
                                     autoCapitalize="none"
@@ -298,6 +285,7 @@ export const Login: React.FC = () => {
                             <TouchableOpacity
                                 style={StylesTheme.btnPrimary}
                                 onPress={() => {
+                                    navigation.navigate("BottomTabNavigator");
                                     //this.handleLogin()
                                 }}
                             >
@@ -406,10 +394,9 @@ const styles = StyleSheet.create({
 
     textInput: {
         flex: 1,
-        padding: 14,
-        borderWidth: 1,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
         borderColor: '#ccc',
-        borderRadius: 24,
         fontSize: 16,
         fontWeight: '500',
     },
@@ -455,5 +442,10 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         fontStyle: 'italic',
         color: 'blue',
+    },
+
+    textSubTitle: {
+        color: Colors.colorGrey,
+        fontWeight: '500',
     }
 });
