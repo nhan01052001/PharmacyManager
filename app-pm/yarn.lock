@@ -2263,6 +2263,11 @@
   "resolved" "https://registry.npmjs.org/@react-native-community/eslint-plugin/-/eslint-plugin-1.3.0.tgz"
   "version" "1.3.0"
 
+"@react-native-community/netinfo@^9.4.1":
+  "integrity" "sha512-dAbY5mfw+6Kas/GJ6QX9AZyY+K+eq9ad4Su6utoph/nxyH3whp5cMSgRNgE2VhGQVRZ/OG0qq3IaD3+wzoqJXw=="
+  "resolved" "https://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-9.4.1.tgz"
+  "version" "9.4.1"
+
 "@react-native/assets@1.0.0":
   "integrity" "sha512-KrwSpS1tKI70wuKl68DwJZYEvXktDHdZMG0k2AXD/rJVSlB23/X2CB2cutVR0HwNMJIal9HOUOBB2rVfa6UGtQ=="
   "resolved" "https://registry.npmjs.org/@react-native/assets/-/assets-1.0.0.tgz"
@@ -7027,7 +7032,7 @@
   dependencies:
     "use-latest-callback" "^0.1.5"
 
-"react-native@*", "react-native@^0.0.0-0 || 0.60 - 0.72 || 1000.0.0", "react-native@>= 0.30.0", "react-native@>=0.42.0", "react-native@>=0.48.4", "react-native@>=0.65.0", "react-native@0.71.11":
+"react-native@*", "react-native@^0.0.0-0 || 0.60 - 0.72 || 1000.0.0", "react-native@>= 0.30.0", "react-native@>=0.42.0", "react-native@>=0.48.4", "react-native@>=0.59", "react-native@>=0.65.0", "react-native@0.71.11":
   "integrity" "sha512-++8IxgUe4Ev+bTiFlLfJCdSoE5cReVP1DTpVJ8f/QtzaxA3h1008Y3Xah1Q5vsR4rZcYMO7Pn3af+wOshdQFug=="
   "resolved" "https://registry.npmjs.org/react-native/-/react-native-0.71.11.tgz"
   "version" "0.71.11"

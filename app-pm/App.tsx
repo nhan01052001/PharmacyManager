@@ -20,14 +20,19 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 
 import { RootStackNavigator } from './src/navigation/Stack.Navigator';
+import { AppProvider } from './src/context/App.provider';
+import Loading from './src/components/cLoading/Loading.component';
 
 
 const App: React.FC = () => {
 
   return (
-    <NavigationContainer>
-      <RootStackNavigator />
-    </NavigationContainer>
+    <AppProvider>
+      <NavigationContainer>
+        <Loading />
+        <RootStackNavigator />
+      </NavigationContainer>
+    </AppProvider>
   )
 }
 

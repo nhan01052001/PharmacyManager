@@ -26,6 +26,7 @@ import { HeaderComponent } from '../../components/cHeadder/Header.Component';
 import StylesTheme from '../../global/theme/Styles.Theme';
 import { Colors } from '../../global/theme/Colors.Theme';
 import Address from '../../components/cAddress/Address.component';
+import { LoadingService } from '../../components/cLoading/Loading.component';
 
 const { width, height } = Dimensions.get('window');
 
@@ -149,7 +150,6 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
             ...nextState
         }));
     };
-
 
     return (
         <View style={styles.container}>

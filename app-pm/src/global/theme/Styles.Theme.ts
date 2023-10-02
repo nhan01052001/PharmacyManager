@@ -1,3 +1,4 @@
+import { Circle } from 'react-native-svg';
 import { StyleSheet, Platform, Dimensions, PixelRatio } from 'react-native';
 import { Colors } from './Colors.Theme';
 
@@ -5,15 +6,22 @@ const { width, height } = Dimensions.get('window');
 
 // based on iphone 5s's scale
 const scale = width / 320;
+const PLATFORM_IOS = Platform.OS === 'ios' ? true : false;
 
 function normalize(size: number) {
     const newSize = size * scale;
-    if (Platform.OS === 'ios') {
+    if (PLATFORM_IOS) {
         return Math.round(PixelRatio.roundToNearestPixel(newSize));
     } else {
         return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
     }
 }
+
+const MINI = normalize(12);
+const SMALL = normalize(14);
+const MEDIUM = normalize(17);
+const LARGE = normalize(20);
+const SUPERLARGER = normalize(24);
 
 export default StyleSheet.create({
 
@@ -26,23 +34,23 @@ export default StyleSheet.create({
     },
 
     sizeTextMini: {
-        fontSize: normalize(12),
+        fontSize: MINI,
     },
 
     sizeTextSmall: {
-        fontSize: normalize(14),
+        fontSize: SMALL,
     },
 
     sizeTextMedium: {
-        fontSize: normalize(17),
+        fontSize: MEDIUM,
     },
 
     sizeTextLarge: {
-        fontSize: normalize(20),
+        fontSize: LARGE,
     },
 
     sizeTextSuperLarge: {
-        fontSize: normalize(24),
+        fontSize: SUPERLARGER,
     },
 
     droidSafeArea: {
@@ -70,6 +78,24 @@ export default StyleSheet.create({
     wh32: {
         width: 32,
         height: 32
+    },
+
+    circle18: {
+        width: 18,
+        height: 18,
+        borderRadius: 18,
+    },
+
+    circle22: {
+        width: 22,
+        height: 22,
+        borderRadius: 22,
+    },
+
+    circle32: {
+        width: 32,
+        height: 32,
+        borderRadius: 32,
     },
 
     flexW100: {
@@ -116,6 +142,14 @@ export default StyleSheet.create({
 
     styleTextBtnBasic: {
         fontSize: 18, fontWeight: '600', fontStyle: 'italic'
+    },
+
+    textBasic: {
+        fontSize: 13, fontWeight: '400', color: '#000'
+    },
+
+    text14: {
+        fontSize: MINI, fontWeight: PLATFORM_IOS ? '400' : '500', color: '#000'
     }
 
 });
