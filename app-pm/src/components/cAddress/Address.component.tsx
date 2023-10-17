@@ -72,24 +72,34 @@ const valueDefaultProvince = {
 
 type State = {
     search?: string;
-    page?: number;
-    limit?: number;
     provinces?: {
-        value?: Province | any,
-        data?: Province[] | any,
+        value?: Province,
+        data?: Province[],
         isFocus?: boolean,
+        totalPages?: number,
+        totalItems?: number,
+        page?: number;
+        limit?: number;
         isRefresh?: boolean,
     },
     districts?: {
-        value?: District | any,
-        data?: District[] | any,
+        value?: District,
+        data?: District[],
         isFocus?: boolean,
+        totalPages?: number,
+        totalItems?: number,
+        page?: number;
+        limit?: number;
         isRefresh?: boolean,
     },
     wards?: {
-        value?: Ward | any,
-        data?: Ward[] | any,
+        value?: Ward,
+        data?: Ward[],
         isFocus?: boolean,
+        totalPages?: number,
+        totalItems?: number,
+        page?: number;
+        limit?: number;
         isRefresh?: boolean,
     },
     isShowModal?: boolean,
@@ -99,24 +109,34 @@ type State = {
 
 const initialState: State = {
     search: "",
-    page: 1,
-    limit: 20,
     provinces: {
-        value: null,
-        data: null,
-        isFocus: false,
+        value: {},
+        data: [],
+        isFocus: true,
+        totalPages: 0,
+        totalItems: 0,
+        page: 1,
+        limit: 20,
         isRefresh: false,
     },
     districts: {
-        value: null,
-        data: null,
+        value: {},
+        data: [],
         isFocus: false,
+        totalPages: 0,
+        totalItems: 0,
+        page: 1,
+        limit: 20,
         isRefresh: false,
     },
     wards: {
-        value: null,
-        data: null,
+        value: {},
+        data: [],
         isFocus: false,
+        totalPages: 0,
+        totalItems: 0,
+        page: 1,
+        limit: 20,
         isRefresh: false,
     },
     isShowModal: false,
@@ -124,18 +144,24 @@ const initialState: State = {
     dataSource: null,
 };
 
+let callOnEndReached: boolean = false,
+    endLoading: boolean = false;
+
 const Address: React.FC<IProps> = (props: IProps) => {
     const { value, placeholder, style, onComplete } = props;
     const isHaveValue = value && value !== "" ? true : false;
     const cols: string = "name,name_with_type";
-    const [{ search, page, limit, provinces, districts, wards, isShowModal, isLoading, dataSource }, setState] = useState<State>({ ...initialState });
+    const [{ search, provinces, districts, wards, isShowModal, isLoading, dataSource }, setState] = useState<State>({ ...initialState });
     // let listData = new Array(26).fill([]);
     // const headerArray = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 
     const handleGetDataProvince = () => {
         try {
-            HttpService.Get(`https://vn-public-apis.fpo.vn/provinces/getAll?getAll?q=${search}&cols=${cols}&page=${page}&limit=${limit}`)
+            HttpService.Get(`https://vn-public-apis.fpo.vn/provinces/getAll?getAll?q=${search}&cols=${cols}&page=${provinces?.page ? provinces?.page : 1}&limit=${provinces?.limit ? provinces?.limit : 20}`)
                 .then((res: any) => {
+                    console.log(res, 'Province');
+
+                    callOnEndReached = false;
                     const nameData: [] = res?.data?.data;
                     // nameData.sort(function (a: any, b: any) {
                     //     return a.name.toUpperCase() < b.name.toUpperCase()
@@ -153,22 +179,26 @@ const Address: React.FC<IProps> = (props: IProps) => {
                     //         }
                     //     });
                     // });
-                    // console.log(listData, 'listData');
 
                     if (res && res?.exitcode == 1 && Array.isArray(res?.data?.data)) {
                         setState((prevState: State) => ({
                             ...prevState,
                             provinces: {
                                 ...prevState.provinces,
-                                data: res?.data?.data,
+                                isFocus: true,
+                                data: prevState.provinces?.data?.concat(res?.data?.data),
+                                totalItems: res?.data?.nItems ? res?.data?.nItems : 0,
+                                totalPages: res?.data?.nPages ? res?.data?.nPages : 0,
                                 isRefresh: !prevState.provinces?.isRefresh
                             },
                             isLoading: false,
-                            dataSource: res?.data?.data,
+                            dataSource: prevState.provinces?.data?.concat(res?.data?.data),
                         }));
                     }
                 });
         } catch (error) {
+            console.log(error, 'errorerror1213');
+            
             setState((prevState: State) => ({
                 ...prevState,
                 isLoading: false,
@@ -178,25 +208,37 @@ const Address: React.FC<IProps> = (props: IProps) => {
     };
 
     useEffect(() => {
-        if (isShowModal)
-            handleGetDataProvince();
-    }, [isShowModal]);
+        // if (isShowModal && provinces?.isFocus)
+        //     handleGetDataProvince();
+
+        setState((prevState: State) => ({
+            ...prevState,
+            isLoading: false,
+            dataSource: [],
+        }));
+    }, [isShowModal, provinces?.page]);
 
     const handleGetDataDistrictsByProvince = () => {
         try {
             if (provinces?.value?.code) {
-                HttpService.Get(`https://vn-public-apis.fpo.vn/districts/getByProvince?provinceCode=${provinces?.value?.code}&q=${search}&cols=${cols}&page=${page}&limit=${limit}`)
+                HttpService.Get(`https://vn-public-apis.fpo.vn/districts/getByProvince?provinceCode=${provinces?.value?.code}&q=${search}&cols=${cols}&page=${districts?.page}&limit=${districts?.limit}`)
                     .then((res: any) => {
+                        console.log(res, 'Districts');
+
+                        callOnEndReached = false;
                         if (res && res?.exitcode == 1 && Array.isArray(res?.data?.data)) {
                             setState((prevState: State) => ({
                                 ...prevState,
                                 districts: {
                                     ...prevState.districts,
-                                    data: res?.data?.data,
+                                    isFocus: true,
+                                    data: prevState.districts?.data?.concat(res?.data?.data),
+                                    totalItems: res?.data?.nItems ? res?.data?.nItems : 0,
+                                    totalPages: res?.data?.nPages ? res?.data?.nPages : 0,
                                     isRefresh: prevState.districts?.isRefresh
                                 },
                                 isLoading: false,
-                                dataSource: res?.data?.data
+                                dataSource: prevState.districts?.data?.concat(res?.data?.data)
                             }));
                         }
                     });
@@ -213,23 +255,29 @@ const Address: React.FC<IProps> = (props: IProps) => {
     useEffect(() => {
         if (districts?.isFocus)
             handleGetDataDistrictsByProvince();
-    }, [provinces?.value]);
+    }, [provinces?.value, districts?.page]);
 
     const handleGetDataWardByDistrict = () => {
         try {
             if (districts?.value?.code) {
-                HttpService.Get(`https://vn-public-apis.fpo.vn/wards/getByDistrict?districtCode=${districts?.value?.code}&q=${search}&cols=${cols}&page=${page}&limit=${limit}`)
+                HttpService.Get(`https://vn-public-apis.fpo.vn/wards/getByDistrict?districtCode=${districts?.value?.code}&q=${search}&cols=${cols}&page=${wards?.page}&limit=${wards?.limit}`)
                     .then((res: any) => {
+                        console.log(res, 'Ward');
+
+                        callOnEndReached = false;
                         if (res && res?.exitcode == 1 && Array.isArray(res?.data?.data)) {
                             setState((prevState: State) => ({
                                 ...prevState,
                                 wards: {
                                     ...prevState.wards,
-                                    data: res?.data?.data,
+                                    isFocus: true,
+                                    data: prevState.wards?.data?.concat(res?.data?.data),
+                                    totalItems: res?.data?.nItems ? res?.data?.nItems : 0,
+                                    totalPages: res?.data?.nPages ? res?.data?.nPages : 0,
                                     isRefresh: prevState.wards?.isRefresh
                                 },
                                 isLoading: false,
-                                dataSource: res?.data?.data
+                                dataSource: prevState.wards?.data?.concat(res?.data?.data)
                             }));
                         }
                     });
@@ -246,7 +294,7 @@ const Address: React.FC<IProps> = (props: IProps) => {
     useEffect(() => {
         if (wards?.isFocus)
             handleGetDataWardByDistrict();
-    }, [districts?.value])
+    }, [districts?.value, wards?.page])
 
     const handleChooseProvince = (value?: Province) => {
         if (provinces?.data && Array.isArray(provinces?.data)) {
@@ -269,16 +317,14 @@ const Address: React.FC<IProps> = (props: IProps) => {
             districts: {
                 ...prevState.districts,
                 isFocus: true,
-                value: null,
+                value: {},
             },
             wards: {
                 ...prevState.wards,
                 isFocus: false,
-                value: null,
+                value: {},
             },
             isLoading: true,
-            page: 1,
-            limit: 20,
             dataSource: [],
         }));
     };
@@ -308,11 +354,9 @@ const Address: React.FC<IProps> = (props: IProps) => {
             wards: {
                 ...prevState.wards,
                 isFocus: true,
-                value: null,
+                value: {},
             },
             isLoading: true,
-            page: 1,
-            limit: 20,
             dataSource: [],
         }));
     }
@@ -347,6 +391,7 @@ const Address: React.FC<IProps> = (props: IProps) => {
     }
 
     const handleOnFocusProvince = () => {
+        callOnEndReached = false;
         setState((prevState: State) => ({
             ...prevState,
             provinces: {
@@ -363,13 +408,12 @@ const Address: React.FC<IProps> = (props: IProps) => {
             },
             dataSource: prevState.provinces?.data ? prevState.provinces?.data : null,
             isLoading: prevState.provinces?.data ? false : true,
-            page: 1,
-            limit: 20,
             search: '',
         }));
     };
 
     const handleOnFocusDistrict = () => {
+        callOnEndReached = false;
         setState((prevState: State) => ({
             ...prevState,
             provinces: {
@@ -386,13 +430,12 @@ const Address: React.FC<IProps> = (props: IProps) => {
             },
             dataSource: prevState.districts?.data ? prevState.districts?.data : null,
             isLoading: prevState.districts?.data ? false : true,
-            page: 1,
-            limit: 20,
             search: '',
         }));
     };
 
     const handleOnFocusWard = () => {
+        callOnEndReached = false;
         setState((prevState: State) => ({
             ...prevState,
             provinces: {
@@ -409,11 +452,46 @@ const Address: React.FC<IProps> = (props: IProps) => {
             },
             dataSource: prevState.wards?.data ? prevState.wards?.data : null,
             isLoading: prevState.wards?.data ? false : true,
-            page: 1,
-            limit: 20,
             search: '',
         }));
     }
+
+    const setPagesForProvinces = () => {
+        debugger
+        console.log(callOnEndReached, 'callOnEndReached');
+        if (provinces?.isFocus) {
+            if (provinces?.page && provinces?.totalPages && provinces?.page < provinces?.totalPages) {
+                setState((prevState: State) => ({
+                    ...prevState,
+                    provinces: {
+                        ...prevState.provinces,
+                        page: provinces?.page ? provinces?.page + 1 : 1,
+                    },
+                }))
+            }
+        } else if (districts?.isFocus) {
+            if (districts?.page && districts?.totalPages && districts?.page < districts?.totalPages) {
+                setState((prevState: State) => ({
+                    ...prevState,
+                    districts: {
+                        ...prevState.districts,
+                        page: prevState.districts?.page ? prevState.districts?.page + 1 : 1,
+                    },
+                }))
+            }
+        } else if (wards?.isFocus) {
+            if (wards?.page && wards?.totalPages && wards?.page < wards?.totalPages) {
+                setState((prevState: State) => ({
+                    ...prevState,
+                    wards: {
+                        ...prevState.wards,
+                        page: prevState.wards?.page ? prevState.wards?.page + 1 : 1,
+                    },
+                }))
+            }
+        }
+    }
+console.log(search, 'search');
 
     return (
         <View style={{ flex: 1 }}>
@@ -452,13 +530,16 @@ const Address: React.FC<IProps> = (props: IProps) => {
                                         <BackIcon color={Colors.primaryColor} size={22} />
                                     </TouchableOpacity>
                                     <TextInputComponent
-                                        style={[styles.textInput, {}]}
+                                        style={[styles.textInput]}
                                         placeholder="Tìm kiếm"
                                         value={search}
-                                        onComplete={(text) => {
-
+                                        onComplete={(text: string) => {
+                                            setState((prevState: State) => ({
+                                                ...prevState,
+                                                search: text
+                                            }));
                                         }}
-                                        isClose={false}
+                                        isClose={true}
                                     />
                                 </View>
                                 <View style={{ flex: 1, }}>
@@ -473,7 +554,7 @@ const Address: React.FC<IProps> = (props: IProps) => {
                                     <View style={{ backgroundColor: Colors.clWhite, paddingHorizontal: 12 }}>
                                         <View style={styles.straight} />
                                         {
-                                            provinces?.value ? (
+                                            provinces?.value && Object.keys(provinces?.value).length > 0 ? (
                                                 <View>
                                                     <ItemSelectedAddressComponent value={provinces?.value} isHaveValue={true}
                                                         isFocus={provinces?.isFocus}
@@ -483,7 +564,7 @@ const Address: React.FC<IProps> = (props: IProps) => {
                                                         }}
                                                     />
                                                     {
-                                                        districts?.value ? (
+                                                        districts?.value && Object.keys(districts?.value).length > 0 ? (
                                                             <View>
                                                                 <ItemSelectedAddressComponent value={districts?.value} isHaveValue={true}
                                                                     isFocus={districts?.isFocus}
@@ -493,7 +574,7 @@ const Address: React.FC<IProps> = (props: IProps) => {
                                                                     }}
                                                                 />
                                                                 {
-                                                                    wards?.value ? (
+                                                                    wards?.value && Object.keys(wards?.value).length > 0 ? (
                                                                         <ItemSelectedAddressComponent value={wards?.value} isHaveValue={true}
                                                                             isFocus={wards?.isFocus}
                                                                             isRefresh={wards?.isRefresh}
@@ -541,9 +622,20 @@ const Address: React.FC<IProps> = (props: IProps) => {
                                                     <ActivityIndicator size={"large"} color={Colors.primaryColor} />
                                                 </View>
                                             ) : (
-                                                dataSource && Array.isArray(dataSource) && dataSource.length > 0 ? (
+                                                dataSource && Array.isArray(dataSource) && dataSource.length < 0 ? (
                                                     <FlatList
                                                         data={dataSource}
+                                                        ListFooterComponent={() => {
+                                                            return (
+                                                                <View>
+                                                                    {
+                                                                        callOnEndReached && (
+                                                                            <ActivityIndicator size={"large"} color={Colors.primaryColor} />
+                                                                        )
+                                                                    }
+                                                                </View>
+                                                            )
+                                                        }}
                                                         renderItem={({ item, index }: { item: Province, index: number }) => {
                                                             return (
                                                                 <ItemAddressComponent key={index} value={item} onChooseItem={(value?: Province | District | Ward) => {
@@ -562,6 +654,20 @@ const Address: React.FC<IProps> = (props: IProps) => {
                                                             )
                                                         }}
                                                         keyExtractor={(item: Province) => item._id}
+                                                        onMomentumScrollEnd={() => {
+                                                            // if (callOnEndReached && !endLoading) {
+                                                            //     endLoading = true;
+                                                            //     callOnEndReached = false;
+                                                            // }
+                                                        }}
+                                                        onEndReached={aa => {
+                                                            if (!callOnEndReached && search === "") {
+                                                                console.log('onEndReached');
+                                                                callOnEndReached = true;
+                                                                setPagesForProvinces();
+                                                            }
+                                                        }} // refresh khi scroll den cuoi
+                                                        onEndReachedThreshold={0}
                                                     />
                                                 ) : (
                                                     <View style={StylesTheme.flexCenter}>
@@ -591,8 +697,7 @@ const styles = StyleSheet.create({
     },
 
     textInput: {
-        flex: 1,
-        paddingVertical: 20,
+        paddingVertical: 12,
         paddingLeft: 14,
         borderWidth: 1,
         borderColor: '#ccc',

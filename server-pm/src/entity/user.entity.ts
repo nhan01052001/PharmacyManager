@@ -19,6 +19,9 @@ export interface IUser extends IBaseEntity {
     isFirstLogin?: boolean;
     bill?: Bill[];
     cart?: Cart;
+    provinces_code?: string;
+    districts_code?: string;
+    ward_code?: string;
     // permission?: string[];
     // cart?: string[];
 }
@@ -43,6 +46,9 @@ export class User extends BaseEntity {
             bill,
             // permission,
             cart,
+            provinces_code,
+            districts_code,
+            ward_code,
             ...superItem
         } = props || {};
 
@@ -65,6 +71,9 @@ export class User extends BaseEntity {
             bill,
             // permission,
             cart,
+            provinces_code,
+            districts_code,
+            ward_code,
         });
     }
 
@@ -112,4 +121,13 @@ export class User extends BaseEntity {
 
     @OneToOne(() => Cart, (cart) => cart.users)
     cart?: Cart;
+
+    @Column({ nullable: false, width: 32 | 128 })
+    provinces_code?: string;
+
+    @Column({ nullable: false, width: 32 | 128 })
+    districts_code?: string;
+
+    @Column({ nullable: false, width: 32 | 128 })
+    ward_code?: string;
 }

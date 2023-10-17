@@ -1,7 +1,23 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, FlatList } from 'react-native';
+import Function from '../../service/Function.Service';
 
-const MedicinePortfolio: React.FC<{ data: any }> = ({ data }) => {
+type Portfolio = {
+    id: string,
+    nameProductPortfolio: string,
+    img_icon: string,
+    api?: string,
+};
+
+interface IProps {
+    data: Portfolio,
+    isRefresh?: boolean,
+}
+
+const MedicinePortfolio: React.FC<IProps> = (props: IProps) => {
+    const { data, isRefresh } = props;
+
+
     return (
         <View style={styles.container}>
             <View style={styles.wrapContent}>
@@ -49,4 +65,6 @@ const styles = StyleSheet.create({
     },
 });
 
-export default MedicinePortfolio;
+export default React.memo(MedicinePortfolio, (prevProps, nextProps) => {
+    return prevProps.isRefresh === nextProps.isRefresh;
+});

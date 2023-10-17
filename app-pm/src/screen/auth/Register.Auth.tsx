@@ -221,6 +221,7 @@ export const Register: React.FC<{ route: any }> = ({ route }) => {
                                 <TextInputComponent
                                     style={[styles.textInput, {}]}
                                     isError={isError?.errorPassword?.isErrorPassword}
+                                    isObligatory={true}
                                     placeholder="Mật khẩu"
                                     autoCapitalize="none"
                                     autoCorrect={false}
@@ -265,6 +266,7 @@ export const Register: React.FC<{ route: any }> = ({ route }) => {
                                 <TextInputComponent
                                     style={[styles.textInput, account.password ? {} : { backgroundColor: "#ebebeb" }]}
                                     isError={isError?.errorConfirmPassword?.isErrorConfirmPassword}
+                                    isObligatory={true}
                                     placeholder="Xác nhận mật khẩu"
                                     autoCapitalize="none"
                                     autoCorrect={false}

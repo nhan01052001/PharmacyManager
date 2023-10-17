@@ -18,42 +18,42 @@ interface IProps extends React.ComponentProps<typeof TextInput> {
     isShowIconError?: boolean;
     isRefresh?: boolean;
     isObligatory?: boolean,
-    onComplete: (text: string) => void,
+    value: any,
+    onComplete: (text: any) => void,
     // also contains all props of the TextInput component
 }
 
 const TextInputComponent: React.FC<IProps> = (props: IProps) => {
-    const { customPropsOne, isClose, isError, isShowIconError, isObligatory, isRefresh, ...rest } = props;
-    const isShowOption = isObligatory || (isShowIconError && isError) || (isClose && rest.value && rest.value !== '') ? true : false;
-    
+    const { customPropsOne, isClose, isError, isShowIconError, isObligatory, isRefresh, value, ...rest } = props;
+    const isShowOption = isObligatory || (isShowIconError && isError) || (isClose) ? true : false;
+
     return (
 
-        <View style={{ flex: 1 }}>
+        <View style={StylesTheme.flexCenter}>
             <View style={[{ padding: 0 },
             StylesTheme.onlyFlexDirectionAli_Center,
             isShowOption && rest.style,
-            isError && { borderColor: 'red'},
+            isError && { borderColor: 'red' },
             ]}>
-                <View style={{ flex: 1 }}>
-                    <View>
-                        <TextInput
-                            {
-                            ...rest
-                            }
-                            style={[ !isShowOption && rest.style, StylesTheme.sizeTextSmall]}
-                            placeholder={props.placeholder}
-                            value={rest.value}
-                            onChangeText={(text) => {
-                                rest.onComplete(text)
-                            }}
-                        />
-                    </View>
-                </View>
+                {/* <View style={{ flex: 1 }}>
+                   
+                </View> */}
+                <TextInput
+                    {
+                    ...rest
+                    }
+                    style={[StylesTheme.sizeTextSmall, { flex: 1, }, !isShowOption && rest.style]}
+                    placeholder={props.placeholder}
+                    value={value}
+                    onChangeText={(text) => {
+                        rest.onComplete(text)
+                    }}
+                />
                 {
                     isShowOption ? (
-                        <TouchableOpacity style={{ paddingHorizontal: 8 }} disabled={(isShowIconError && isError) || (isObligatory && rest.value === '')} onPress={() => {
+                        <TouchableOpacity style={{ paddingHorizontal: 8 }} disabled={(isShowIconError && isError) || (isObligatory && value === '')} onPress={() => {
                             rest.onComplete('');
-                            // if (isSubTitle && (rest.value || rest.value !== '')) {
+                            // if (isSubTitle && (value || value !== '')) {
                             //     handleFocusTextInput(false);
                             // }
                             // Keyboard.dismiss();
@@ -61,10 +61,10 @@ const TextInputComponent: React.FC<IProps> = (props: IProps) => {
                             {
                                 isShowIconError && isError ? (
                                     <WarningIcon size={28} color='red' />
-                                ) : isClose && rest.value && rest.value !== '' ? (
+                                ) : isClose && value && value !== '' ? (
                                     <Image source={require('../../global/assets/image/close.png')} style={StylesTheme.wh18} />
-                                ) : isObligatory && rest.value === '' ? (
-                                    <Text style={{color: 'red'}}>*</Text>
+                                ) : isObligatory && value === '' ? (
+                                    <Text style={{ color: 'red' }}>*</Text>
                                 ) : null
                             }
                         </TouchableOpacity>

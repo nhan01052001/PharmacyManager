@@ -6,6 +6,7 @@ import { Login } from '../screen/auth/Login.Auth';
 import { Register } from '../screen/auth/Register.Auth';
 import { OTP } from '../screen/auth/OTP/OTP.Auth';
 import RegisterInformationPersonal from '../screen/auth/RegisterIn4.Auth';
+import DetailMedicine from '../screen/medicine/DetailMedicine.medicine';
 
 export type MainStackParams = {
     Login: any | undefined;
@@ -18,6 +19,7 @@ export type MainStackParams = {
 export type RootStackParams = {
     MainStackNavigator: undefined;
     BottomTabNavigator: undefined;
+    DetailMedicine: any;
 };
 
 const MainStack = createStackNavigator<MainStackParams>();
@@ -42,6 +44,11 @@ export const RootStackNavigator: React.FC = () => (
         <RootStack.Screen
             name='BottomTabNavigator'
             component={BottomTabNavigator}
+            options={{headerShown: false}}
+        />
+        <RootStack.Screen
+            name='DetailMedicine'
+            component={DetailMedicine}
             options={{headerShown: false}}
         />
     </RootStack.Navigator>

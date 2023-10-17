@@ -1,8 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, FlatList } from 'react-native';
 import Swiper from 'react-native-swiper';
+import Function from '../../service/Function.Service';
 
-const SwiperImgMedicine : React.FC<{ dataImg: any }> = ({dataImg}) => {
+type IMG = {
+    id: string,
+    img: string,
+};
+
+interface IProps {
+    dataImg: IMG[]
+}
+
+const SwiperImgMedicine : React.FC<IProps> = (props: IProps) => {
+    const { dataImg } = props;
+console.log('render');
+
     return (
         <View style={styles.container}>
                 <Swiper
@@ -46,7 +59,7 @@ const SwiperImgMedicine : React.FC<{ dataImg: any }> = ({dataImg}) => {
                                     source={{
                                         uri: item?.img,
                                     }}
-                                    resizeMode={'contain'}
+                                    resizeMode={'stretch'}
                                     style={styles.image}
                                 />
                             </View>
@@ -76,7 +89,8 @@ const styles = StyleSheet.create({
     },
 
     image: {
-        flex: 1,
+        width: "100%",
+        height: "100%",
     },
     slide: {
         flex: 1,
@@ -86,4 +100,7 @@ const styles = StyleSheet.create({
     },
 });
 
-export default SwiperImgMedicine;
+export default React.memo(SwiperImgMedicine, (prevProps, nextProps) => {
+    // return prevProps.dataImg  !== nextProps.dataImg ? false : prevProps.value === nextProps.value ? true : false;
+    return Function.compare(prevProps.dataImg, nextProps.dataImg);
+});

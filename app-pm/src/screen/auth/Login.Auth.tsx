@@ -216,6 +216,7 @@ export const Login: React.FC = () => {
                                 <TextInputComponent
                                     style={[styles.textInput, {}]}
                                     isError={isError?.errorPassword?.isErrorPassword}
+                                    isObligatory={true}
                                     placeholder="Mật khẩu"
                                     autoCapitalize="none"
                                     autoCorrect={false}

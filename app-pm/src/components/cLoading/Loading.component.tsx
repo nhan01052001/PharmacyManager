@@ -43,7 +43,6 @@ const Loading: React.FC = () => {
         valueStatus.hide = hide;
     }, []);
 
-    LoadingService.show
     return (
         <Modal
             animationType="slide"

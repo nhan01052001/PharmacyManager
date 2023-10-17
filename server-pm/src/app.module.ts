@@ -7,6 +7,7 @@ import { DatabaseModule } from './module/database.module';
 import { entities } from './entities.provider';
 import { UserModule } from './module/user.module';
 import { StaffModule } from './module/staff.module';
+import { ProvincesModule } from './module/provinces.module'; 
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { StaffModule } from './module/staff.module';
     AuthModule,
     UserModule,
     StaffModule,
+    ProvincesModule,
     TypeOrmModule.forFeature(entities),
   ],
   controllers: [],

@@ -9,7 +9,8 @@ import {
     SafeAreaView,
     Image,
     TouchableOpacity,
-    Platform
+    Platform,
+    Animated
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -22,69 +23,83 @@ import SwiperImgMedicine from '../../components/cSwiperImgMedicine/SwiperImgMedi
 import MedicinePortfolio from '../../components/cMedicine/MedicinePortfolio.component';
 import { RightArowIcon, BellIcon } from '../../global/icon/Icon';
 import { MainStackParams } from '../../navigation/Stack.Navigator';
+import StylesTheme, { width, height } from '../../global/theme/Styles.Theme';
+import { Product } from '../../type/Product.type';
+
+type Portfolio = {
+    id: string,
+    nameProductPortfolio: string,
+    img_icon: string,
+    api?: string,
+};
+
+type ListPortfolio = {
+    dataProductPortfolio?: Portfolio[];
+    isRefresh?: boolean;
+}
 
 const DATA_SWIPER = [
     {
-        id: 1,
-        img: 'https://cdn.nhathuoclongchau.com.vn/unsafe/fit-in/1600x400/filters:quality(100):fill(white)/https://nhathuoclongchau.com.vn/upload/slide/1680418566-Ijvp-bo-sung-dinh-duong.png',
+        id: "1",
+        img: 'https://firebasestorage.googleapis.com/v0/b/upload-image-f8fdc.appspot.com/o/Img_Swiper%2Fmain10kpc-1679457098200.png?alt=media&token=7ceffe9d-1aac-4447-8129-a323afe06270&_gl="1"*1jjuzla*_ga*OTYxOTMzMTMwLjE2OTE3NTgzNDU.*_ga_CW55HF8NVT*MTY5NjYxMDM2NC40LjEuMTY5NjYxMDUwNy41My4wLjA.',
     },
     {
-        id: 2,
-        img: 'https://cdn.nhathuoclongchau.com.vn/unsafe/fit-in/1600x400/filters:quality(100):fill(white)/https://nhathuoclongchau.com.vn/upload/slide/1679725085-Ha7S-phong-benh-sot-xuat-huyet.png',
+        id: "2",
+        img: 'https://firebasestorage.googleapis.com/v0/b/upload-image-f8fdc.appspot.com/o/Img_Swiper%2Fcovert3pc-1678260629246.png?alt=media&token=4f1efef4-2d3e-4370-8c0a-d87865ae42e1&_gl=1*103ydpr*_ga*OTYxOTMzMTMwLjE2OTE3NTgzNDU.*_ga_CW55HF8NVT*MTY5NjYxMDM2NC40LjEuMTY5NjYxMDU3Ni42MC4wLjA.',
     },
     {
-        id: 3,
-        img: 'https://cdn.nhathuoclongchau.com.vn/unsafe/fit-in/1600x400/filters:quality(100):fill(white)/https://nhathuoclongchau.com.vn/upload/slide/1679301962-G74I-san-pham-lam-dep.jpg',
+        id: "3",
+        img: 'https://firebasestorage.googleapis.com/v0/b/upload-image-f8fdc.appspot.com/o/Img_Swiper%2FArtboard%205-1678333033361.png?alt=media&token=f0bdfb7d-3571-4a2f-84c0-09ed4226b20c&_gl=1*1atg3nz*_ga*OTYxOTMzMTMwLjE2OTE3NTgzNDU.*_ga_CW55HF8NVT*MTY5NjYxMDM2NC40LjEuMTY5NjYxMDU5Ny4zOS4wLjA.',
     },
     {
-        id: 4,
-        img: 'https://cdn.nhathuoclongchau.com.vn/unsafe/fit-in/1600x400/filters:quality(100):fill(white)/https://nhathuoclongchau.com.vn/upload/slide/1678849994-9Ilx-fmcg-t3-2023.jpg',
+        id: "4",
+        img: 'https://firebasestorage.googleapis.com/v0/b/upload-image-f8fdc.appspot.com/o/Img_Swiper%2F913x280%20(4)-1678267297741.png?alt=media&token=5e7835b8-1901-4831-8715-63381a81be93&_gl=1*ngnt55*_ga*OTYxOTMzMTMwLjE2OTE3NTgzNDU.*_ga_CW55HF8NVT*MTY5NjYxMDM2NC40LjEuMTY5NjYxMDYyMS4xNS4wLjA.',
     },
     {
-        id: 5,
-        img: 'https://cdn.nhathuoclongchau.com.vn/unsafe/fit-in/1600x400/filters:quality(100):fill(white)/https://nhathuoclongchau.com.vn/upload/slide/1678700509-NBeS-kem-chong-nang-2023.png',
+        id: "5",
+        img: 'https://firebasestorage.googleapis.com/v0/b/upload-image-f8fdc.appspot.com/o/Img_Swiper%2F913x280%20(3)-1678267195605.png?alt=media&token=3a7eec5c-6d4f-4365-ab84-84ac289bde6d&_gl=1*of8dcg*_ga*OTYxOTMzMTMwLjE2OTE3NTgzNDU.*_ga_CW55HF8NVT*MTY5NjYxMDM2NC40LjEuMTY5NjYxMDYzNy42MC4wLjA.',
     },
 ];
 
 const DATA_PRODUCT_PORTFOLIO = [
     {
-        id: 1,
+        id: "1",
         nameProductPortfolio: 'Thuốc',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/3140/3140343.png',
         api: '',
     },
     {
-        id: 2,
+        id: "2",
         nameProductPortfolio: 'Vitamin, thuốc bổ',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/3159/3159960.png',
         api: '',
     },
     {
-        id: 3,
+        id: "3",
         nameProductPortfolio: 'Chăm sóc da',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/4383/4383084.png',
         api: '',
     },
     {
-        id: 4,
+        id: "4",
         nameProductPortfolio: 'Chăm sóc cơ thể',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/3023/3023711.png',
         api: '',
     },
     {
-        id: 5,
+        id: "5",
         nameProductPortfolio: 'Tăng cường trí nhớ',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/2491/2491325.png',
         api: '',
     },
     {
-        id: 6,
+        id: "6",
         nameProductPortfolio: 'Tăng cường sinh lý',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/1019/1019174.png',
         api: '',
     },
     {
-        id: 7,
+        id: "7",
         nameProductPortfolio: 'Sản phẩm',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/4076/4076123.png',
     },
@@ -92,10 +107,10 @@ const DATA_PRODUCT_PORTFOLIO = [
 
 const DATA_PRODUCT = [
     {
-        id: 1,
-        nameProduct: 'Thuốc đau đầu',
-        priceCourse: '455000',
-        pricePromotion: '550000',
+        id: "1",
+        name: 'Thuốc đau đầu',
+        priceCourse: 455000,
+        pricePromotion: 550000,
         isPromotion: true,
         unit: {
             box: true,
@@ -106,10 +121,10 @@ const DATA_PRODUCT = [
             'https://cdn.nhathuoclongchau.com.vn/unsafe/fit-in/600x600/filters:quality(90):fill(white)/nhathuoclongchau.com.vn/images/product/2019/10/00009742-hapacol-extra-5205-5d9e_large.JPG',
     },
     {
-        id: 2,
-        nameProduct: 'Thuốc đau chân',
-        priceCourse: '455000',
-        pricePromotion: '553400',
+        id: "2",
+        name: 'Thuốc đau chân',
+        priceCourse: 455000,
+        pricePromotion: 553400,
         isPromotion: true,
         unit: {
             box: true,
@@ -120,10 +135,10 @@ const DATA_PRODUCT = [
             'https://cdn.nhathuoclongchau.com.vn/unsafe/fit-in/600x600/filters:quality(90):fill(white)/nhathuoclongchau.com.vn/images/product/2022/04/00033763-actadol-500mg-medipharco-10x10-8398-624e_large.jpg',
     },
     {
-        id: 3,
-        nameProduct: 'Thuốc đau tay',
-        priceCourse: '455000',
-        pricePromotion: '585000',
+        id: "3",
+        name: 'Thuốc đau tay',
+        priceCourse: 455000,
+        pricePromotion: 585000,
         isPromotion: true,
         unit: {
             box: true,
@@ -134,10 +149,10 @@ const DATA_PRODUCT = [
             'https://cdn.nhathuoclongchau.com.vn/unsafe/fit-in/600x600/filters:quality(90):fill(white)/nhathuoclongchau.com.vn/images/product/2022/09/00501891--7317-631e_large.jpg',
     },
     {
-        id: 4,
-        nameProduct: 'Thuốc đau bụng',
-        priceCourse: '455000',
-        pricePromotion: '534000',
+        id: "4",
+        name: 'Thuốc đau bụng',
+        priceCourse: 455000,
+        pricePromotion: 534000,
         isPromotion: true,
         unit: {
             box: true,
@@ -148,10 +163,10 @@ const DATA_PRODUCT = [
             'https://cdn.nhathuoclongchau.com.vn/unsafe/fit-in/600x600/filters:quality(90):fill(white)/nhathuoclongchau.com.vn/images/product/2018/07/00002760-elthon-50mg-8703-5b43_large.JPG',
     },
     {
-        id: 5,
-        nameProduct: 'Thuốc đau răng',
-        priceCourse: '455000',
-        pricePromotion: '550330',
+        id: "5",
+        name: 'Thuốc đau răng',
+        priceCourse: 455000,
+        pricePromotion: 550330,
         isPromotion: true,
         unit: {
             box: true,
@@ -165,66 +180,117 @@ const DATA_PRODUCT = [
 
 const SIZE = 40;
 const COLOR = '#000';
-
-const { width } = Dimensions.get('window');
-
+const HEIGHT15 = (15 / 100) * height;
+const MIN_HEIGHT = 120;
+const HEIGHt85 = (85 / 100) * height;
+const SIZE_PADDING = Platform.OS === 'android' ? 32 : 48;
+const SIZE_ANIMATED = Platform.OS === 'android' ? 85 + SIZE_PADDING : 100 + SIZE_PADDING;
+ 
 interface IState {
     valueSearch?: string;
     isShowHeader?: boolean;
+    portfolios?: ListPortfolio,
+    products?: {
+        dataProduct?: Product[],
+        isRefresh?: boolean,
+    },
+    promotionalProducts?: {
+        data?: Product[],
+        isRefresh?: boolean,
+    },
+    bestSellingProducts?: {
+        data?: Product[],
+        isRefresh?: boolean,
+    },
+    recommendTodayProduct?: {
+        data?: Product[],
+        isRefresh?: boolean,
+    }
 }
 
 const initialState: IState = {
     valueSearch: '',
     isShowHeader: false,
+    portfolios: {
+        dataProductPortfolio: DATA_PRODUCT_PORTFOLIO,
+        isRefresh: false,
+    },
+    products: {
+        dataProduct: DATA_PRODUCT,
+        isRefresh: false,
+    },
+    promotionalProducts: {
+        data: DATA_PRODUCT,
+        isRefresh: false,
+    },
+    bestSellingProducts: {
+        data: DATA_PRODUCT,
+        isRefresh: false,
+    },
+    recommendTodayProduct: {
+        data: DATA_PRODUCT,
+        isRefresh: false,
+    }
 };
 
 const Home: React.FC = () => {
-
     const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
-    const [{ valueSearch, isShowHeader }, setState] = useState<IState>({ ...initialState });
+    const [{ valueSearch, isShowHeader, portfolios,
+        products, promotionalProducts, bestSellingProducts, recommendTodayProduct
+    }, setState] = useState<IState>({ ...initialState });
+    const animated = new Animated.Value(-SIZE_ANIMATED);
+    const duration = 200;
 
-    const handleScroll = useCallback((value: any) => {
-        if (value >= 130) {
-            if (isShowHeader === false) {
-                setState({
-                    isShowHeader: true,
-                });
+    const handleScroll = (value: number) => {
+        if (HEIGHT15 > MIN_HEIGHT) {
+            if (value >= HEIGHT15) {
+                Animated.timing(animated, {
+                    toValue: 0,
+                    duration: duration,
+                    useNativeDriver: true,
+                }).start();
+            } else {
+                Animated.timing(animated, {
+                    toValue: -SIZE_ANIMATED,
+                    duration: 200,
+                    useNativeDriver: true,
+                }).start();
             }
         } else {
-            if (isShowHeader === true) {
-                setState({
-                    isShowHeader: false,
-                });
+            if (value >= MIN_HEIGHT) {
+                Animated.timing(animated, {
+                    toValue: 0,
+                    duration: duration,
+                    useNativeDriver: true,
+                }).start();
+            } else {
+                Animated.timing(animated, {
+                    toValue: -SIZE_ANIMATED,
+                    duration: duration,
+                    useNativeDriver: true,
+                }).start();
             }
         }
-    }, []);
+    };
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.wrapBgRadius}>
-                <View style={styles.bgRadiusTop}></View>
-            </View>
-            {isShowHeader ? (
-                <View
-                    style={{
-                        flex: 1,
-                        position: 'absolute',
-                        width: '100%',
-                        height: Platform.OS === 'android' ? 85 : 100,
-                        zIndex: 1,
-                        elevation: 1,
-                        paddingTop: Platform.OS === 'android' ? 16 : 32,
-                        backgroundColor: '#5BC57E',
-                        paddingHorizontal: 12,
-                    }}
-                >
+            <Animated.View style={[{ transform: [{ translateY: animated }] }, { flex: 1, position: 'absolute', top: 0, right: 0, left: 0, zIndex: 99,
+                    elevation: 99, }]}>
+                <View style={{
+                    width: '100%',
+                    height: Platform.OS === 'android' ? 85 : 100,
+                    zIndex: 99,
+                    elevation: 99,
+                    paddingTop: SIZE_PADDING,
+                    backgroundColor: '#5BC57E',
+                    paddingHorizontal: 12,
+                }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <View
                             style={{
                                 position: 'absolute',
                                 left: 0,
-                                zIndex: 1,
-                                elevation: 1,
                             }}
                         >
                             <TouchableOpacity>
@@ -253,27 +319,30 @@ const Home: React.FC = () => {
                         </View>
                     </View>
                 </View>
-            ) : null}
-
+            </Animated.View>
+            <View style={styles.wrapBgRadius}>
+                <View style={[styles.bgRadiusTop]}></View>
+            </View>
             <ScrollView
-                style={styles.wrapContent}
+                style={[styles.wrapContent, {
+                    zIndex: 1,
+                    elevation: 1,
+                }]}
                 horizontal={false}
                 onScroll={(event) => {
                     handleScroll(event.nativeEvent.contentOffset.y);
                 }}
                 scrollEventThrottle={120}
             >
-                <View
-                    style={[
-                        {
-                            flex: 0.1,
-                        },
-                    ]}
-                >
-                    {!isShowHeader ? <TitleHeader /> : null}
-                </View>
-                <View style={[{ flex: 0.1, marginVertical: 12 }]}>
-                    {!isShowHeader ? (
+                <View style={{
+                    width: '100%',
+                    height: HEIGHT15,
+                    minHeight: MIN_HEIGHT,
+                }}>
+                    <View style={{ flex: 1 }}>
+                        <TitleHeader />
+                    </View>
+                    <View style={[{ flex: 1, }]}>
                         <Search
                             propsValue={valueSearch}
                             propsPlaceholder={'Bạn muốn mua thuốc gì?'}
@@ -286,7 +355,7 @@ const Home: React.FC = () => {
                             propsStyleTextInput={{}}
                             propsMargin={{}}
                         />
-                    ) : null}
+                    </View>
                 </View>
                 <View style={[styles.fl02, { marginVertical: 24 }]}>
                     <DrugStore />
@@ -297,85 +366,104 @@ const Home: React.FC = () => {
                 <View style={styles.wrapProduct}>
                     <View style={styles.contentProduct}>
                         {/* Danh mục sản phẩm */}
-                        <View style={styles.productPortfolio}>
-                            <View style={{}}>
-                                <Text style={styles.fs16fw500}>Danh mục sản phẩm </Text>
-                            </View>
-                            <View style={styles.listProductPortfolio}>
-                                {DATA_PRODUCT_PORTFOLIO.map((item) => {
-                                    return <MedicinePortfolio key={item.id} data={item} />;
-                                })}
-                            </View>
-                        </View>
+                        {
+                            portfolios?.dataProductPortfolio && (
+                                <View style={styles.productPortfolio}>
+                                    <View style={{}}>
+                                        <Text style={styles.fs16fw500}>Danh mục sản phẩm </Text>
+                                    </View>
+                                    <View style={styles.listProductPortfolio}>
+                                        {portfolios.dataProductPortfolio.map((item) => {
+                                            return <MedicinePortfolio key={item.id} data={item} isRefresh={portfolios.isRefresh} />;
+                                        })}
+                                    </View>
+                                </View>
+                            )
+                        }
 
                         {/* sản phẩm khuyến mãi */}
-                        <View style={styles.listProductRow}>
-                            <View style={styles.flexDCenter}>
-                                <Text style={styles.fs16fw500}>Sản phẩm khuyến mãi</Text>
-                                <TouchableOpacity
-                                    style={{ flexDirection: 'row', alignItems: 'center' }}
-                                    onPress={() => {
-                                        // navigation.navigate('PM_AllProduct', {
-                                        //     api: {
-                                        //         urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
-                                        //     },
-                                        // });
-                                    }
-                                    }
-                                >
-                                    <Text style={[styles.fs16fw500, { color: 'blue' }]}>Xem tất cả</Text>
-                                    <RightArowIcon color="blue" size={16} />
-                                </TouchableOpacity>
-                            </View>
-                            <View style={styles.listProduct}>
-                                <ListMedicine
-                                    data={DATA_PRODUCT}
-                                    isHorizontal={true}
-                                    api={{
-                                        urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
-                                    }}
-                                />
-                            </View>
-                        </View>
+                        {
+                            promotionalProducts?.data && (
+                                <View style={styles.listProductRow}>
+                                    <View style={styles.flexDCenter}>
+                                        <Text style={styles.fs16fw500}>Sản phẩm khuyến mãi</Text>
+                                        <TouchableOpacity
+                                            style={{ flexDirection: 'row', alignItems: 'center' }}
+                                            onPress={() => {
+                                                // navigation.navigate('PM_AllProduct', {
+                                                //     api: {
+                                                //         urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
+                                                //     },
+                                                // });
+                                            }
+                                            }
+                                        >
+                                            <Text style={[styles.fs16fw500, { color: 'blue' }]}>Xem tất cả</Text>
+                                            <RightArowIcon color="blue" size={16} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={styles.listProduct}>
+                                        <ListMedicine
+                                            data={promotionalProducts.data}
+                                            isHorizontal={true}
+                                            api={{
+                                                urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
+                                            }}
+                                            isRefresh={promotionalProducts.isRefresh}
+                                        />
+                                    </View>
+                                </View>
+                            )
+                        }
 
                         {/* sản phẩm bán chạy */}
-                        <View style={[styles.listProductRow, { marginTop: 12 }]}>
-                            <View style={styles.flexDCenter}>
-                                <Text style={styles.fs16fw500}>Sản phẩm bán chạy</Text>
-                                <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Text style={[styles.fs16fw500, { color: 'blue' }]}>Xem tất cả</Text>
-                                    <RightArowIcon color="blue" size={16} />
-                                </TouchableOpacity>
-                            </View>
-                            <View style={styles.listProduct}>
-                                <ListMedicine
-                                    data={DATA_PRODUCT}
-                                    isHorizontal={true}
-                                    api={{
-                                        urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
-                                    }}
-                                />
-                            </View>
-                        </View>
+                        {
+                            bestSellingProducts?.data && (
+                                <View style={[styles.listProductRow, { marginTop: 12 }]}>
+                                    <View style={styles.flexDCenter}>
+                                        <Text style={styles.fs16fw500}>Sản phẩm bán chạy</Text>
+                                        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <Text style={[styles.fs16fw500, { color: 'blue' }]}>Xem tất cả</Text>
+                                            <RightArowIcon color="blue" size={16} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={styles.listProduct}>
+                                        <ListMedicine
+                                            data={bestSellingProducts?.data}
+                                            isHorizontal={true}
+                                            api={{
+                                                urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
+                                            }}
+                                            isRefresh={bestSellingProducts.isRefresh}
+                                        />
+                                    </View>
+                                </View>
+                            )
+                        }
 
                         {/* Gợi ý hôm nay */}
-                        <View style={[styles.listProductRow, { marginTop: 12 }]}>
-                            <View style={styles.flexDCenter}>
-                                <Text style={styles.fs16fw500}>Gợi ý hôm nay</Text>
-                            </View>
-                            <View style={[styles.listProductPortfolio, styles.listProduct]}>
-                                <ListMedicine
-                                    data={DATA_PRODUCT}
-                                    isHorizontal={false}
-                                    isNumColumn={true}
-                                    numColumn={2}
-                                    colorBtn={'#d9c129'}
-                                    api={{
-                                        urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
-                                    }}
-                                />
-                            </View>
-                        </View>
+                        {
+                            recommendTodayProduct?.data && (
+                                <View style={[styles.listProductRow, { marginTop: 12 }]}>
+                                    <View style={styles.flexDCenter}>
+                                        <Text style={styles.fs16fw500}>Gợi ý hôm nay</Text>
+                                    </View>
+                                    <View style={[styles.listProductPortfolio, styles.listProduct]}>
+                                        <ListMedicine
+                                            data={recommendTodayProduct?.data}
+                                            isHorizontal={false}
+                                            isNumColumn={true}
+                                            numColumn={2}
+                                            colorBtn={'#d9c129'}
+                                            api={{
+                                                urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
+                                            }}
+                                            isRefresh={recommendTodayProduct.isRefresh}
+                                        />
+                                    </View>
+                                </View>
+                            )
+                        }
                     </View>
                 </View>
             </ScrollView>

@@ -3,10 +3,12 @@ import { Connection } from "typeorm";
 
 import { UserRepository } from "./repository/user.repository";
 import { StaffRepository } from "./repository/staff.repository";
+import { ProvincesRepository } from "./repository/provinces.repository";
 
 const repositories = [
     UserRepository,
-    StaffRepository
+    StaffRepository,
+    ProvincesRepository
 ];
 
 const RepositoriesProvider: Provider[] = [];

@@ -2,7 +2,7 @@ import { Circle } from 'react-native-svg';
 import { StyleSheet, Platform, Dimensions, PixelRatio } from 'react-native';
 import { Colors } from './Colors.Theme';
 
-const { width, height } = Dimensions.get('window');
+export const { width, height } = Dimensions.get('window');
 
 // based on iphone 5s's scale
 const scale = width / 320;
@@ -150,6 +150,14 @@ export default StyleSheet.create({
 
     text14: {
         fontSize: MINI, fontWeight: PLATFORM_IOS ? '400' : '500', color: '#000'
-    }
+    },
+
+    text16: {
+        fontSize: SMALL, fontWeight: PLATFORM_IOS ? '400' : '500', color: '#000'
+    },
+
+    textLabel: {
+        fontSize: MEDIUM, fontWeight: PLATFORM_IOS ? '500' : '700', color: '#000'
+    },
 
 });

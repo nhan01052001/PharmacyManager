@@ -22,6 +22,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { RootStackNavigator } from './src/navigation/Stack.Navigator';
 import { AppProvider } from './src/context/App.provider';
 import Loading from './src/components/cLoading/Loading.component';
+import Alert from './src/components/cAlert/Alert.component';
 
 
 const App: React.FC = () => {
@@ -30,6 +31,7 @@ const App: React.FC = () => {
     <AppProvider>
       <NavigationContainer>
         <Loading />
+        <Alert />
         <RootStackNavigator />
       </NavigationContainer>
     </AppProvider>

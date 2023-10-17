@@ -10,6 +10,9 @@ interface ISupplier extends IBaseEntity {
     address?: string;
     status?: boolean;
     medicineDetail?: MedicineDetail;
+    provinces_code?: string;
+    districts_code?: string;
+    ward_code?: string;
 }
 
 @Entity('Supplier')
@@ -22,6 +25,9 @@ export class Supplier extends BaseEntity {
             address,
             status,
             medicineDetail,
+            provinces_code,
+            districts_code,
+            ward_code,
             ...superItem
         } = props || {};
 
@@ -34,6 +40,9 @@ export class Supplier extends BaseEntity {
             address,
             status,
             medicineDetail,
+            provinces_code,
+            districts_code,
+            ward_code,
         });
     }
 
@@ -54,4 +63,13 @@ export class Supplier extends BaseEntity {
 
     @OneToOne(() => MedicineDetail, (medicineDetail) => medicineDetail.supplier)
     medicineDetail?: MedicineDetail;
+
+    @Column({ nullable: false, width: 32 | 128 })
+    provinces_code?: string;
+
+    @Column({ nullable: false, width: 32 | 128 })
+    districts_code?: string;
+
+    @Column({ nullable: false, width: 32 | 128 })
+    ward_code?: string;
 }

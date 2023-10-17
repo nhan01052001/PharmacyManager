@@ -24,6 +24,9 @@ interface IStaff extends IBaseEntity {
     role?: string;
     bill?: Bill[];
     order?: Order;
+    provinces_code?: string;
+    districts_code?: string;
+    ward_code?: string;
 }
 
 @Entity('Staff')
@@ -50,6 +53,9 @@ export class Staff extends BaseEntity {
             role,
             bill,
             order,
+            provinces_code,
+            districts_code,
+            ward_code,
             ...superItem
         } = props || {};
 
@@ -76,6 +82,9 @@ export class Staff extends BaseEntity {
             role,
             bill,
             order,
+            provinces_code,
+            districts_code,
+            ward_code,
         });
     }
 
@@ -138,4 +147,13 @@ export class Staff extends BaseEntity {
 
     @OneToOne(() => Order, (order) => order.staffs)
     order?: Order;
+
+    @Column({ nullable: false, width: 32 | 128 })
+    provinces_code?: string;
+
+    @Column({ nullable: false, width: 32 | 128 })
+    districts_code?: string;
+
+    @Column({ nullable: false, width: 32 | 128 })
+    ward_code?: string;
 }
