@@ -1,16 +1,22 @@
-import { Controller, Post, Req, Body, Get, Param, Headers } from "@nestjs/common";
+import { Controller, Post, Req, Body, Get, Param, Headers, Query } from "@nestjs/common";
 
 import { ProvincesService } from "../service/provinces.service";
+import { AddressParamsDTO } from "../validator/dto/Address-params.dto";
 
 @Controller('provinces')
 export class ProvincesController {
     constructor(
         private provincesService: ProvincesService
-    ){}
+    ) { }
 
-    @Get('/getAllProvinces')
-    getAllProvinces(@Headers() headers: any): Promise<unknown> {
-        return this.provincesService.getAllProvinces(headers);
+    @Get('/getProvinces/')
+    getProvinces(@Headers() headers: any, @Query("search") search?: string): Promise<unknown> {
+        return this.provincesService.getProvinces(headers, search);
+    }
+
+    @Get('/getProvincesByCode/:code')
+    getProvincesByCode(@Param('code') code: string): Promise<unknown> {
+        return this.provincesService.getProvincesByCode(code);
     }
 
 }

@@ -222,7 +222,6 @@ const DetailMedicine: React.FC = () => {
             imgProduct: item.imgProduct,
             createdAt: Date.now(),
         };
-        AlertService.show("E_SUCCESS", "Thêm thành công", 3000);
         setState((prevState: IState) => ({
             ...prevState,
             listProductInCart: listProductInCart ? [...listProductInCart, data] : [data],
@@ -230,7 +229,6 @@ const DetailMedicine: React.FC = () => {
     };
 
     const handleQuantityPurchase = useCallback((value: number) => {
-        AlertService.show("E_SUCCESS", "Bạn đã thêm sản phẩm thành công!", 5000, "Thêm thành công");
         if (value) {
             setState((prevState: IState) => ({
                 ...prevState,

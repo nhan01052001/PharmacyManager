@@ -45,7 +45,7 @@ const Loading: React.FC = () => {
 
     return (
         <Modal
-            animationType="slide"
+            animationType="none"
             transparent={true}
             visible={isVisible}
         >

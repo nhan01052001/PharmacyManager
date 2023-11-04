@@ -15,6 +15,7 @@ import {
 import StylesTheme from "../../global/theme/Styles.Theme";
 import { CloseIcon, SuccessIcon } from "../../global/icon/Icon";
 import { Colors } from "../../global/theme/Colors.Theme";
+import { ENUM } from "../../global/enum";
 
 type typeStatus = {
     show?: any;
@@ -53,7 +54,7 @@ const Alert: React.FC = () => {
         timeHide = time;
         setState({
             isVisible: true,
-            borderColor: _status === "E_SUCCESS" ? "green" : "red",
+            borderColor: _status === ENUM.E_SUCCESS ? "green" : "red",
             text: text,
             title: title,
             status: _status
@@ -121,15 +122,15 @@ const Alert: React.FC = () => {
                         >
                             <CloseIcon color="#000" size={12} />
                         </View>
-                        <View style={{ justifyContent: 'center' }}>
+                        <View style={{ justifyContent: 'center', flex: 1, }}>
                             {
                                 title && title?.length > 0 && (
-                                    <Text style={[StylesTheme.textLabel, {fontSize: 18, color: borderColor}]}>{title}</Text>
+                                    <Text style={[StylesTheme.textLabel, {fontSize: 16, color: borderColor}]}>{title}</Text>
                                 )
                             }
                             {
                                 text && text?.length > 0 && (
-                                    <Text numberOfLines={3} style={[[StylesTheme.text14, {color: Colors.colorGrey}]]}>{text}</Text>
+                                    <Text numberOfLines={3} style={[[StylesTheme.text14, {color: Colors.black}]]}>{text}</Text>
                                 )
                             }
                         </View>

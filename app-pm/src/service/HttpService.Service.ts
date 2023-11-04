@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {useNetInfo} from '@react-native-community/netinfo'
+import { useNetInfo } from '@react-native-community/netinfo'
 
 // Add a request interceptor
 axios.interceptors.request.use(
@@ -39,6 +39,11 @@ export default class HttpService {
             'Content-Type': 'application/json',
             'Application-Request': '',
             'IsApp': true,
+            'page': 1,
+            'pageSize': 20,
+            'sort': true,
+            'typeSort': 'ASC'
+
             //'Authorization': `Bearer ${token}`,
         };
         return { ...originHeader, ...headers };
@@ -59,7 +64,7 @@ export default class HttpService {
                         }
                         else {
                             console.log(error, 'error');
-                            
+
                             if (error.response) {
                                 console.log(error.response.status, url);
                             } else if (error.request) {
@@ -83,7 +88,7 @@ export default class HttpService {
                     .post(url, body, {
                         headers: this.generateHeader(header, null),
                     })
-                    .then(res => resolve(res))
+                    .then(res => resolve(res.data))
                     .catch(error => {
                         if (handleCheckInternet() === false) {
                             // Không có internet
@@ -98,6 +103,7 @@ export default class HttpService {
                                 // Something happened in setting up the request that triggered an Error
                                 console.log('Error', error.message);
                             }
+                            reject(error);
                         }
                     });
             } else {

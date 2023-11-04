@@ -148,12 +148,12 @@ export class Staff extends BaseEntity {
     @OneToOne(() => Order, (order) => order.staffs)
     order?: Order;
 
-    @Column({ nullable: false, width: 32 | 128 })
+    @Column({ nullable: true, width: 32 | 128 })
     provinces_code?: string;
 
-    @Column({ nullable: false, width: 32 | 128 })
+    @Column({ nullable: true, width: 32 | 128 })
     districts_code?: string;
 
-    @Column({ nullable: false, width: 32 | 128 })
+    @Column({ nullable: true, width: 32 | 128 })
     ward_code?: string;
 }

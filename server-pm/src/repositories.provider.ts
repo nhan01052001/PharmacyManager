@@ -3,12 +3,16 @@ import { Connection } from "typeorm";
 
 import { UserRepository } from "./repository/user.repository";
 import { StaffRepository } from "./repository/staff.repository";
+import { DistrictsRepository } from "./repository/districts.repository";
 import { ProvincesRepository } from "./repository/provinces.repository";
+import { WardsRepository } from "./repository/wards.repository";
 
 const repositories = [
     UserRepository,
     StaffRepository,
-    ProvincesRepository
+    ProvincesRepository,
+    DistrictsRepository,
+    WardsRepository
 ];
 
 const RepositoriesProvider: Provider[] = [];

@@ -13,12 +13,15 @@ import {
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import StylesTheme from '../../global/theme/Styles.Theme';
 import TextInputComponent from '../cTextInput/TextInput.component';
-import { BackIcon, RightArowIcon } from '../../global/icon/Icon';
+import { BackIcon, RightArowIcon, WarningIcon } from '../../global/icon/Icon';
 import { Colors } from '../../global/theme/Colors.Theme';
 import HttpService from '../../service/HttpService.Service';
 import { LoadingService } from '../cLoading/Loading.component';
 import ItemAddressComponent from './Item.Address.component';
 import ItemSelectedAddressComponent from './ItemSelected.Address.component';
+import { ENUM } from '../../global/enum';
+import ListItemAddressComponent from './ListItemAddress.component';
+import { env } from '../../utils/env.utils';
 
 const DATA = [
     {
@@ -36,25 +39,30 @@ const DATA = [
 ];
 
 interface IProps {
-    value?: any;
+    value?: any[];
     placeholder?: string;
     style?: any;
+    isObligatory?: boolean,
+    isShowIconError?: boolean,
+    isError?: boolean,
     onComplete: (value: any) => void,
     // also contains all props of the TextInput component
 }
 
-type Address = {
-    _id?: string;
+export type Address = {
     code?: string;
-    isDeleted?: boolean;
+    code_name?: string;
+    full_name?: string;
     name?: string;
-    name_with_type?: string;
-    slug?: string;
-    type?: string;
+    full_name_en?: string;
+    name_en?: string;
+    administrative_unit_id?: number;
     isSelect?: boolean;
 }
 
-export type Province = Address;
+export type Province = Address & {
+    administrative_region_id?: number;
+};
 
 export type District = Address;
 
@@ -79,7 +87,7 @@ type State = {
         totalPages?: number,
         totalItems?: number,
         page?: number;
-        limit?: number;
+        pageSize?: number;
         isRefresh?: boolean,
     },
     districts?: {
@@ -89,7 +97,7 @@ type State = {
         totalPages?: number,
         totalItems?: number,
         page?: number;
-        limit?: number;
+        pageSize?: number;
         isRefresh?: boolean,
     },
     wards?: {
@@ -99,12 +107,13 @@ type State = {
         totalPages?: number,
         totalItems?: number,
         page?: number;
-        limit?: number;
+        pageSize?: number;
         isRefresh?: boolean,
     },
     isShowModal?: boolean,
     isLoading?: boolean,
     dataSource?: any,
+    valueView?: any
 }
 
 const initialState: State = {
@@ -116,7 +125,7 @@ const initialState: State = {
         totalPages: 0,
         totalItems: 0,
         page: 1,
-        limit: 20,
+        pageSize: 20,
         isRefresh: false,
     },
     districts: {
@@ -126,7 +135,7 @@ const initialState: State = {
         totalPages: 0,
         totalItems: 0,
         page: 1,
-        limit: 20,
+        pageSize: 20,
         isRefresh: false,
     },
     wards: {
@@ -136,33 +145,35 @@ const initialState: State = {
         totalPages: 0,
         totalItems: 0,
         page: 1,
-        limit: 20,
+        pageSize: 20,
         isRefresh: false,
     },
     isShowModal: false,
     isLoading: false,
     dataSource: null,
+    valueView: null,
 };
 
 let callOnEndReached: boolean = false,
     endLoading: boolean = false;
 
 const Address: React.FC<IProps> = (props: IProps) => {
-    const { value, placeholder, style, onComplete } = props;
-    const isHaveValue = value && value !== "" ? true : false;
+    const { value, placeholder, style, isObligatory, isShowIconError, isError, onComplete } = props;
     const cols: string = "name,name_with_type";
-    const [{ search, provinces, districts, wards, isShowModal, isLoading, dataSource }, setState] = useState<State>({ ...initialState });
+    const [{ search, provinces, districts, wards, isShowModal, isLoading, dataSource, valueView }, setState] = useState<State>({ ...initialState });
     // let listData = new Array(26).fill([]);
     // const headerArray = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 
     const handleGetDataProvince = () => {
+        debugger
         try {
-            HttpService.Get(`https://vn-public-apis.fpo.vn/provinces/getAll?getAll?q=${search}&cols=${cols}&page=${provinces?.page ? provinces?.page : 1}&limit=${provinces?.limit ? provinces?.limit : 20}`)
+            HttpService.Get(`${env.URL}/provinces/getProvinces/?search=${search}`, {
+                'page': provinces?.page ? provinces?.page : 1,
+                'pageSize': provinces?.pageSize ? provinces?.pageSize : 20,
+            })
                 .then((res: any) => {
-                    console.log(res, 'Province');
-
                     callOnEndReached = false;
-                    const nameData: [] = res?.data?.data;
+                    const nameData: [] = res?.data;
                     // nameData.sort(function (a: any, b: any) {
                     //     return a.name.toUpperCase() < b.name.toUpperCase()
                     //         ? -1
@@ -180,25 +191,47 @@ const Address: React.FC<IProps> = (props: IProps) => {
                     //     });
                     // });
 
-                    if (res && res?.exitcode == 1 && Array.isArray(res?.data?.data)) {
+                    if (res && res?.status === 200 && res?.statusText == ENUM.E_SUCCESS && Array.isArray(res?.data)) {
+                        let nextState = {};
+                        if (provinces?.page === 1) {
+                            nextState = {
+                                ...nextState,
+                                totalItems: res?.totalItem ? res?.totalItem : 0,
+                                totalPages: res?.totalPage ? res?.totalPage : 0,
+                            }
+                        }
+
+                        if ((provinces?.page && provinces?.totalPages && provinces?.page === provinces?.totalPages) || res?.totalPage === 1) {
+                            endLoading = true;
+                        }
+
                         setState((prevState: State) => ({
                             ...prevState,
                             provinces: {
                                 ...prevState.provinces,
                                 isFocus: true,
-                                data: prevState.provinces?.data?.concat(res?.data?.data),
-                                totalItems: res?.data?.nItems ? res?.data?.nItems : 0,
-                                totalPages: res?.data?.nPages ? res?.data?.nPages : 0,
+                                data: provinces?.page ? provinces?.page === 1 ? res?.data : prevState.provinces?.data?.concat(res?.data) : [],
+                                ...nextState,
                                 isRefresh: !prevState.provinces?.isRefresh
                             },
                             isLoading: false,
-                            dataSource: prevState.provinces?.data?.concat(res?.data?.data),
+                            dataSource: provinces?.page ? provinces?.page === 1 ? res?.data : prevState.provinces?.data?.concat(res?.data) : [],
+                        }));
+                    } else {
+                        setState((prevState: State) => ({
+                            ...prevState,
+                            provinces: {
+                                ...prevState.provinces,
+                                isFocus: true,
+                                data: [],
+                                isRefresh: !prevState.provinces?.isRefresh
+                            },
+                            isLoading: false,
+                            dataSource: [],
                         }));
                     }
                 });
         } catch (error) {
-            console.log(error, 'errorerror1213');
-            
             setState((prevState: State) => ({
                 ...prevState,
                 isLoading: false,
@@ -208,37 +241,69 @@ const Address: React.FC<IProps> = (props: IProps) => {
     };
 
     useEffect(() => {
-        // if (isShowModal && provinces?.isFocus)
-        //     handleGetDataProvince();
+        if (isShowModal && provinces?.isFocus && value?.length === 0 && !dataSource)
+            handleGetDataProvince();
+        else if (isLoading && isShowModal) {
+            setState((prevState: State) => ({
+                ...prevState,
+                isLoading: false,
+            }))
+        }
+    }, [isShowModal]);
 
-        setState((prevState: State) => ({
-            ...prevState,
-            isLoading: false,
-            dataSource: [],
-        }));
-    }, [isShowModal, provinces?.page]);
+    useEffect(() => {
+        if (provinces?.page && provinces?.totalPages && provinces?.page <= provinces?.totalPages && provinces?.isFocus)
+            handleGetDataProvince();
+    }, [provinces?.page]);
 
     const handleGetDataDistrictsByProvince = () => {
         try {
             if (provinces?.value?.code) {
-                HttpService.Get(`https://vn-public-apis.fpo.vn/districts/getByProvince?provinceCode=${provinces?.value?.code}&q=${search}&cols=${cols}&page=${districts?.page}&limit=${districts?.limit}`)
+                HttpService.Get(`${env.URL}/districts/getDistricts?provinceCode=${provinces?.value?.code}&search=${search}`,
+                    {
+                        'page': districts?.page ? districts?.page : 1,
+                        'pageSize': districts?.pageSize ? districts?.pageSize : 20,
+                    }
+                )
                     .then((res: any) => {
-                        console.log(res, 'Districts');
-
                         callOnEndReached = false;
-                        if (res && res?.exitcode == 1 && Array.isArray(res?.data?.data)) {
+                        if (res && res?.status === 200 && res?.statusText == ENUM.E_SUCCESS && Array.isArray(res?.data)) {
+                            let nextState = {};
+                            if (districts?.page === 1) {
+                                nextState = {
+                                    ...nextState,
+                                    totalItems: res?.totalItem ? res?.totalItem : 0,
+                                    totalPages: res?.totalPage ? res?.totalPage : 0,
+                                }
+                            }
+
+                            if ((districts?.page && districts?.totalPages && districts?.page === districts?.totalPages) || res?.totalPage === 1) {
+                                endLoading = true;
+                            }
+
                             setState((prevState: State) => ({
                                 ...prevState,
                                 districts: {
                                     ...prevState.districts,
                                     isFocus: true,
-                                    data: prevState.districts?.data?.concat(res?.data?.data),
-                                    totalItems: res?.data?.nItems ? res?.data?.nItems : 0,
-                                    totalPages: res?.data?.nPages ? res?.data?.nPages : 0,
+                                    data: districts?.page ? districts.page === 1 ? res?.data : prevState.districts?.data?.concat(res?.data) : [],
+                                    ...nextState,
                                     isRefresh: prevState.districts?.isRefresh
                                 },
                                 isLoading: false,
-                                dataSource: prevState.districts?.data?.concat(res?.data?.data)
+                                dataSource: districts?.page ? districts.page === 1 ? res?.data : prevState.districts?.data?.concat(res?.data) : [],
+                            }));
+                        } else {
+                            setState((prevState: State) => ({
+                                ...prevState,
+                                districts: {
+                                    ...prevState.districts,
+                                    isFocus: true,
+                                    data: [],
+                                    isRefresh: prevState.districts?.isRefresh
+                                },
+                                isLoading: false,
+                                dataSource: [],
                             }));
                         }
                     });
@@ -260,24 +325,50 @@ const Address: React.FC<IProps> = (props: IProps) => {
     const handleGetDataWardByDistrict = () => {
         try {
             if (districts?.value?.code) {
-                HttpService.Get(`https://vn-public-apis.fpo.vn/wards/getByDistrict?districtCode=${districts?.value?.code}&q=${search}&cols=${cols}&page=${wards?.page}&limit=${wards?.limit}`)
+                HttpService.Get(`${env.URL}/wards/getWards?districtCode=${districts?.value?.code}&search=${search}`,
+                    {
+                        'page': wards?.page ? wards?.page : 1,
+                        'pageSize': wards?.pageSize ? wards?.pageSize : 20,
+                    }
+                )
                     .then((res: any) => {
-                        console.log(res, 'Ward');
-
                         callOnEndReached = false;
-                        if (res && res?.exitcode == 1 && Array.isArray(res?.data?.data)) {
+                        if (res && res?.status === 200 && res?.statusText == ENUM.E_SUCCESS && Array.isArray(res?.data)) {
+                            let nextState = {};
+                            if (wards?.page === 1) {
+                                nextState = {
+                                    ...nextState,
+                                    totalItems: res?.totalItem ? res?.totalItem : 0,
+                                    totalPages: res?.totalPage ? res?.totalPage : 0,
+                                }
+                            }
+
+                            if ((wards?.page && wards?.totalPages && wards?.page === wards?.totalPages) || res?.totalPage === 1) {
+                                endLoading = true;
+                            }
                             setState((prevState: State) => ({
                                 ...prevState,
                                 wards: {
                                     ...prevState.wards,
                                     isFocus: true,
-                                    data: prevState.wards?.data?.concat(res?.data?.data),
-                                    totalItems: res?.data?.nItems ? res?.data?.nItems : 0,
-                                    totalPages: res?.data?.nPages ? res?.data?.nPages : 0,
+                                    data: wards?.page ? wards.page === 1 ? res?.data : prevState.wards?.data?.concat(res?.data) : [],
+                                    ...nextState,
                                     isRefresh: prevState.wards?.isRefresh
                                 },
                                 isLoading: false,
-                                dataSource: prevState.wards?.data?.concat(res?.data?.data)
+                                dataSource: wards?.page ? wards.page === 1 ? res?.data : prevState.wards?.data?.concat(res?.data) : [],
+                            }));
+                        } else {
+                            setState((prevState: State) => ({
+                                ...prevState,
+                                wards: {
+                                    ...prevState.wards,
+                                    isFocus: true,
+                                    data: [],
+                                    isRefresh: prevState.wards?.isRefresh
+                                },
+                                isLoading: false,
+                                dataSource: [],
                             }));
                         }
                     });
@@ -296,7 +387,9 @@ const Address: React.FC<IProps> = (props: IProps) => {
             handleGetDataWardByDistrict();
     }, [districts?.value, wards?.page])
 
-    const handleChooseProvince = (value?: Province) => {
+    const handleChooseProvince = useCallback((value?: Province) => {
+
+        callOnEndReached = false;
         if (provinces?.data && Array.isArray(provinces?.data)) {
             provinces?.data.forEach((element: Province) => {
                 if (element.code === value?.code)
@@ -327,9 +420,10 @@ const Address: React.FC<IProps> = (props: IProps) => {
             isLoading: true,
             dataSource: [],
         }));
-    };
+    }, [provinces?.page, provinces?.totalPages, provinces?.isFocus]);
 
-    const handleChooseDistrict = (value?: District) => {
+    const handleChooseDistrict = useCallback((value?: District) => {
+        callOnEndReached = false;
         if (districts?.data && Array.isArray(districts?.data)) {
             districts?.data.forEach((element: District) => {
                 if (element.code === value?.code)
@@ -359,9 +453,10 @@ const Address: React.FC<IProps> = (props: IProps) => {
             isLoading: true,
             dataSource: [],
         }));
-    }
+    }, [provinces?.value]);
 
-    const handleChooseWard = (value?: Ward) => {
+    const handleChooseWard = useCallback((value?: Ward) => {
+        callOnEndReached = false;
         if (wards?.data && Array.isArray(wards?.data)) {
             wards?.data.forEach((element: Ward) => {
                 if (element.code === value?.code)
@@ -387,8 +482,17 @@ const Address: React.FC<IProps> = (props: IProps) => {
                 value: value,
                 isRefresh: !prevState.wards?.isRefresh
             },
+            isShowModal: false,
         }));
-    }
+    }, [districts?.value]);
+
+    useEffect(() => {
+        if ((wards?.value && Object.keys(wards?.value).length > 0)
+            && (provinces?.value && Object.keys(provinces?.value).length > 0)
+            && (districts?.value && Object.keys(districts?.value).length > 0)) {
+            onComplete([provinces?.value, districts?.value, wards?.value]);
+        }
+    }, [wards?.value]);
 
     const handleOnFocusProvince = () => {
         callOnEndReached = false;
@@ -456,9 +560,8 @@ const Address: React.FC<IProps> = (props: IProps) => {
         }));
     }
 
-    const setPagesForProvinces = () => {
+    const setPagesForProvinces = useCallback(() => {
         debugger
-        console.log(callOnEndReached, 'callOnEndReached');
         if (provinces?.isFocus) {
             if (provinces?.page && provinces?.totalPages && provinces?.page < provinces?.totalPages) {
                 setState((prevState: State) => ({
@@ -490,12 +593,63 @@ const Address: React.FC<IProps> = (props: IProps) => {
                 }))
             }
         }
-    }
-console.log(search, 'search');
+    }, [provinces?.page, provinces?.totalPages, districts?.page, districts?.totalPages, wards?.page, wards?.totalPages, provinces?.isFocus, districts?.isFocus, wards?.isFocus])
+
+    useEffect(() => {
+        if (value && value.length > 0) {
+            if (value.length === 3) {
+                setState((prevState: State) => ({
+                    ...prevState,
+                    valueView: `${value[2]?.full_name}, ${value[1]?.full_name}, ${value[0]?.full_name}`
+                }));
+            } else if (value.length === 2) {
+                setState((prevState: State) => ({
+                    ...prevState,
+                    valueView: `${value[1]?.full_name}, ${value[0]?.full_name}`
+                }));
+            } else if (value.length === 1) {
+                setState((prevState: State) => ({
+                    ...prevState,
+                    valueView: `${value[0]?.full_name}`
+                }));
+            }
+        }
+    }, [value]);
+
+    const handleReset = useCallback(() => {
+        endLoading = false;
+        if (provinces?.data) {
+            provinces?.data.forEach((element: Province) => {
+                element.isSelect = false;
+            })
+        }
+        setState((prevState: State) => ({
+            ...prevState,
+            ...initialState,
+            isShowModal: true,
+            provinces: {
+                ...prevState.provinces,
+                value: {}
+            },
+            dataSource: provinces?.data ? provinces?.data : [],
+            valueView: null,
+        }));
+    }, []);
+
+    // call api when search
+    useEffect(() => {
+        if (provinces?.isFocus) {
+            handleGetDataProvince();
+        } else if (districts?.isFocus) {
+            handleGetDataDistrictsByProvince();
+        } else if (wards?.isFocus) {
+            handleGetDataWardByDistrict();
+        }
+    }, [search]);
 
     return (
         <View style={{ flex: 1 }}>
-            <TouchableOpacity style={[styles.componentDisplay, { ...style }]}
+            <TouchableOpacity style={[styles.componentDisplay, { ...style, paddingHorizontal: 8 }, isError && {borderBottomColor: 'red'}]}
                 onPress={() => {
                     setState((prevState: State) => ({
                         ...prevState,
@@ -504,8 +658,14 @@ console.log(search, 'search');
                     }));
                 }}
             >
-                <Text style={[StylesTheme.text14, !isHaveValue && { color: "#ccc" }]}>{isHaveValue ? value : placeholder}</Text>
-                <RightArowIcon color={Colors.primaryColor} size={16} />
+                <Text numberOfLines={3} style={[StylesTheme.text16, !valueView && [StylesTheme.text14, { color: "#ccc" }], { maxWidth: '90%' }]}>{valueView ? valueView : placeholder}</Text>
+                {
+                    isError && isShowIconError ? (
+                        <WarningIcon size={28} color='red' />
+                    ) : (
+                        <RightArowIcon color={Colors.primaryColor} size={16} />
+                    )
+                }
             </TouchableOpacity>
             {
                 isShowModal && (
@@ -520,9 +680,18 @@ console.log(search, 'search');
                                     <TouchableOpacity
                                         style={{ marginRight: 12 }}
                                         onPress={() => {
+                                            if (wards?.value && Object.keys(wards?.value).length === 0
+                                                && provinces?.value && Object.keys(provinces?.value).length > 0
+                                                && districts?.value && Object.keys(districts?.value).length > 0) {
+                                                onComplete([provinces?.value, districts?.value]);
+                                            } else if (wards?.value && Object.keys(wards?.value).length === 0
+                                                && provinces?.value && Object.keys(provinces?.value).length > 0
+                                                && districts?.value && Object.keys(districts?.value).length === 0) {
+                                                onComplete([provinces?.value]);
+                                            }
                                             setState((prevState: State) => ({
                                                 ...prevState,
-                                                ...initialState,
+                                                // ...initialState,
                                                 isShowModal: false,
                                             }));
                                         }}
@@ -534,9 +703,11 @@ console.log(search, 'search');
                                         placeholder="Tìm kiếm"
                                         value={search}
                                         onComplete={(text: string) => {
+                                            endLoading = false;
                                             setState((prevState: State) => ({
                                                 ...prevState,
-                                                search: text
+                                                search: text,
+                                                isLoading: true,
                                             }));
                                         }}
                                         isClose={true}
@@ -546,7 +717,9 @@ console.log(search, 'search');
                                     <View style={[styles.regionSubtitle, provinces?.value && { backgroundColor: Colors.clWhite }]}>
                                         <View style={StylesTheme.onlyFlexRow_AliCenter_JusSP}>
                                             <Text style={[StylesTheme.textBasic, { color: Colors.colorGrey }]}>Khu vực đã chọn</Text>
-                                            <TouchableOpacity>
+                                            <TouchableOpacity
+                                                onPress={handleReset}
+                                            >
                                                 <Text style={[StylesTheme.textBasic, { color: 'red' }]}>Thiết lập lại</Text>
                                             </TouchableOpacity>
                                         </View>
@@ -585,7 +758,7 @@ console.log(search, 'search');
                                                                     ) : (
                                                                         <ItemSelectedAddressComponent
                                                                             value={{
-                                                                                name: "Chọn phường/xã"
+                                                                                full_name: "Chọn phường/xã"
                                                                             }}
                                                                             isHaveValue={false}
                                                                             isFocus={wards?.isFocus}
@@ -598,7 +771,7 @@ console.log(search, 'search');
                                                         ) : (
                                                             <ItemSelectedAddressComponent
                                                                 value={{
-                                                                    name: "Chọn quận/huyện"
+                                                                    full_name: "Chọn quận/huyện"
                                                                 }}
                                                                 isHaveValue={false}
                                                                 isFocus={districts?.isFocus}
@@ -610,7 +783,7 @@ console.log(search, 'search');
                                                 </View>
                                             ) : (
                                                 <ItemSelectedAddressComponent value={{
-                                                    name: "Chọn tỉnh/thành phố"
+                                                    full_name: "Chọn tỉnh/thành phố"
                                                 }} isHaveValue={false} />
                                             )
                                         }
@@ -622,59 +795,75 @@ console.log(search, 'search');
                                                     <ActivityIndicator size={"large"} color={Colors.primaryColor} />
                                                 </View>
                                             ) : (
-                                                dataSource && Array.isArray(dataSource) && dataSource.length < 0 ? (
-                                                    <FlatList
-                                                        data={dataSource}
-                                                        ListFooterComponent={() => {
-                                                            return (
-                                                                <View>
-                                                                    {
-                                                                        callOnEndReached && (
-                                                                            <ActivityIndicator size={"large"} color={Colors.primaryColor} />
-                                                                        )
-                                                                    }
-                                                                </View>
-                                                            )
-                                                        }}
-                                                        renderItem={({ item, index }: { item: Province, index: number }) => {
-                                                            return (
-                                                                <ItemAddressComponent key={index} value={item} onChooseItem={(value?: Province | District | Ward) => {
-                                                                    if (value) {
-                                                                        if (provinces?.isFocus || (!districts?.isFocus && !wards?.isFocus)) {
-                                                                            handleChooseProvince(value);
-                                                                        }
-                                                                        else if (districts?.isFocus) {
-                                                                            handleChooseDistrict(value);
-                                                                        }
-                                                                        else if (wards?.isFocus) {
-                                                                            handleChooseWard(value);
-                                                                        }
-                                                                    }
-                                                                }} />
-                                                            )
-                                                        }}
-                                                        keyExtractor={(item: Province) => item._id}
-                                                        onMomentumScrollEnd={() => {
-                                                            // if (callOnEndReached && !endLoading) {
-                                                            //     endLoading = true;
-                                                            //     callOnEndReached = false;
-                                                            // }
-                                                        }}
-                                                        onEndReached={aa => {
-                                                            if (!callOnEndReached && search === "") {
-                                                                console.log('onEndReached');
-                                                                callOnEndReached = true;
-                                                                setPagesForProvinces();
-                                                            }
-                                                        }} // refresh khi scroll den cuoi
-                                                        onEndReachedThreshold={0}
-                                                    />
-                                                ) : (
-                                                    <View style={StylesTheme.flexCenter}>
-                                                        <Image source={require("../../global/assets/image/no-data.png")} style={{ width: 70, height: 70 }} />
-                                                        <Text>Không tìm thấy dữ liệu phù hợp!</Text>
-                                                    </View>
-                                                )
+                                                // dataSource && Array.isArray(dataSource) && dataSource.length > 0 ? (
+                                                //     <FlatList
+                                                //         data={dataSource}
+                                                //         ListFooterComponent={() => {
+                                                //             return (
+                                                //                 <View style={{ paddingVertical: 20 }}>
+                                                //                     {
+                                                //                         callOnEndReached && (
+                                                //                             <ActivityIndicator size={"large"} color={Colors.primaryColor} />
+                                                //                         )
+                                                //                     }
+                                                //                 </View>
+                                                //             )
+                                                //         }}
+                                                //         renderItem={({ item, index }: { item: Address, index: number }) => {
+                                                //             return (
+                                                //                 <ItemAddressComponent key={index} value={item} onChooseItem={(value?: Province | District | Ward) => {
+                                                //                     if (value) {
+                                                //                         if (provinces?.isFocus || (!districts?.isFocus && !wards?.isFocus)) {
+                                                //                             handleChooseProvince(value);
+                                                //                         }
+                                                //                         else if (districts?.isFocus) {
+                                                //                             handleChooseDistrict(value);
+                                                //                         }
+                                                //                         else if (wards?.isFocus) {
+                                                //                             handleChooseWard(value);
+                                                //                         }
+                                                //                     }
+                                                //                 }} />
+                                                //             )
+                                                //         }}
+                                                //         keyExtractor={(item: Address) => item.code}
+                                                //         onMomentumScrollEnd={() => {
+                                                //             // if (callOnEndReached && !endLoading) {
+                                                //             //     endLoading = true;
+                                                //             //     callOnEndReached = false;
+                                                //             // }
+                                                //         }}
+                                                //         onEndReached={aa => {
+                                                //             if (!callOnEndReached && search === "") {
+                                                //                 callOnEndReached = true;
+                                                //                 setPagesForProvinces();
+                                                //             }
+                                                //         }} // refresh khi scroll den cuoi
+                                                //         onEndReachedThreshold={0}
+                                                //     />
+                                                // ) : (
+                                                //     <View style={StylesTheme.flexCenter}>
+                                                //         <Image source={require("../../global/assets/image/no-data.png")} style={{ width: 70, height: 70 }} />
+                                                //         <Text>Không tìm thấy dữ liệu phù hợp!</Text>
+                                                //     </View>
+                                                // )
+                                                <ListItemAddressComponent
+                                                    dataSource={dataSource}
+                                                    isFocusP={typeof provinces?.isFocus === 'boolean' ? provinces?.isFocus : false}
+                                                    isFocusD={typeof districts?.isFocus === 'boolean' ? districts?.isFocus : false}
+                                                    isFocusW={typeof wards?.isFocus === 'boolean' ? wards?.isFocus : false}
+                                                    isEndList={endLoading}
+                                                    onChooseProvince={(value) => {
+                                                        handleChooseProvince(value);
+                                                    }}
+                                                    onChooseDistrict={(value) => {
+                                                        handleChooseDistrict(value);
+                                                    }}
+                                                    onChooseWard={(value) => {
+                                                        handleChooseWard(value);
+                                                    }}
+                                                    onSetPagesForProvinces={setPagesForProvinces}
+                                                />
                                             )
                                         }
                                     </View>

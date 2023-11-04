@@ -37,7 +37,7 @@ export class AuthService {
         let data = null;
         // check username is not exists
         // before check request register from app or web
-        if(headers?.isapp === 'true' || headers?.isapp === true) {
+        if (headers?.isapp === 'true' || headers?.isapp === true) {
             data = await this.userService.getUserByUsername(username);
         } else {
             data = await this.staffService.getStaffByUsername(username);
@@ -64,7 +64,7 @@ export class AuthService {
 
         if (username && password) {
             let data = null;
-            if(isApp) {
+            if (isApp) {
                 data = await this.userService.getUserByUsername(username);
             } else {
                 data = await this.staffService.getStaffByUsername(username);
@@ -75,13 +75,14 @@ export class AuthService {
                 } else {
                     delete data.password;
                     return {
-                        errorCode: null,
-                        successCode: "SUCCESS",
-                        message: 'Logged in successfully!',
-                        statusCode: 200,
-                        data: data,
-                        accessToken: (await this.signWithToken(data.id, data.username, isApp))
-                            .accessToken,
+                        status: 200,
+                        statusText: 'SUCCESS',
+                        message: 'Thành công!',
+                        data: {
+                            ...data,
+                            accessToken: (await this.signWithToken(data.id, data.username, isApp))
+                                .accessToken,
+                        },
                     }
                 }
             } else {
@@ -130,12 +131,12 @@ export class AuthService {
     async createAccount(userRegister: UserRegisterDTO, isApp: boolean): Promise<unknown> {
         debugger
         const { username, password, firstName, lastName } = userRegister;
-   
+
         let fullName = firstName + " " + lastName;
 
         try {
             let user = null;
-            if(isApp) {
+            if (isApp) {
                 const newUser = new User({ ...userRegister, password: bcrypt.hashSync(password, 10), fullName, isDeleted: false, isFirstLogin: false });
                 user = await this.userRepository.save(newUser);
             } else {

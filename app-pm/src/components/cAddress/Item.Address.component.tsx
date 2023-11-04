@@ -3,13 +3,7 @@ import {
     StyleSheet,
     View,
     Text,
-    TextInput,
     TouchableOpacity,
-    Image,
-    Modal,
-    SafeAreaView,
-    FlatList,
-    ActivityIndicator
 } from 'react-native';
 import { Province } from './Address.component';
 import StylesTheme from '../../global/theme/Styles.Theme';
@@ -32,7 +26,7 @@ const ItemAddress: React.FC<IProps> = (props: IProps) => {
                     <TouchableOpacity style={[styles.item, value?.isSelect && {paddingRight: 12}]} onPress={() => {
                         onChooseItem(value)
                     }}>
-                        <Text>{value?.name}</Text>
+                        <Text>{value?.full_name}</Text>
                         {
                             value?.isSelect && (
                                 <TickIcon color={Colors.primaryColor} size={22} />

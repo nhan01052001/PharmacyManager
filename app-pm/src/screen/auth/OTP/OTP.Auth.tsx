@@ -14,18 +14,12 @@ import {
 import CodeInputField from "./CodeInputField.OTP";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { VerifyIcon } from "../../../global/icon/Icon";
-// import { firebaseConfig } from "../firebase/firebaseConfig";
-import { firebase as firebaseConfig } from "../../../firebase/config";
-import firebase from "firebase/compat/app";
+import firebase from 'react-native-firebase';
+import { HeaderComponent } from '../../../components/cHeadder/Header.Component';
 
 import { Account } from "../../../type/User.Type";
 import StylesTheme from "../../../global/theme/Styles.Theme";
 import { MainStackParams } from '../../../navigation/Stack.Navigator';
-import { HeaderComponent } from '../../../components/cHeadder/Header.Component';
-// import {
-//   FirebaseRecaptchaVerifierModal,
-//   FirebaseRecaptchaBanner,
-// } from "expo-firebase-recaptcha";
 
 const { width } = Dimensions.get("window");
 
@@ -53,7 +47,16 @@ export const OTP: React.FC<{ route: any }> = ({ route }) => {
   const MAX_CODE_LENGTH = 6;
 
   const sendCode = async () => {
-    navigation.navigate("RegisterInformationPersonal");
+    navigation.navigate("RegisterInformationPersonal", {
+      username: username,
+      password: password
+  });
+
+  firebase.auth().signInWithPhoneNumber("").then((res) => {
+
+  }).catch((error) => {
+
+  })
     // const phoneProvider = new firebase.auth.PhoneAuthProvider();
     // const verificationId = await phoneProvider.verifyPhoneNumber(
     //   "+84" + username,
@@ -63,7 +66,10 @@ export const OTP: React.FC<{ route: any }> = ({ route }) => {
   };
 
   const confirmCode = () => {
-    navigation.navigate("RegisterInformationPersonal");
+    navigation.navigate("RegisterInformationPersonal", {
+      username: username,
+      password: password
+  });
     // const credential = firebase.auth.PhoneAuthProvider.credential(
     //   verificationId,
     //   code
@@ -144,7 +150,9 @@ export const OTP: React.FC<{ route: any }> = ({ route }) => {
       </View>
       <View style={styles.wrapBtn}>
         {timerCount === 0 || status === false ? (
-          <TouchableOpacity style={styles.btnVerify} onPress={sendCode}>
+          <TouchableOpacity style={styles.btnVerify}
+            onPress={sendCode}
+          >
             <VerifyIcon color="green" size={24} />
             <Text
               style={{ fontSize: 18, fontWeight: "500", textAlign: "center" }}

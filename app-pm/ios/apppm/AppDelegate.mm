@@ -1,4 +1,5 @@
 #import "AppDelegate.h"
+#import <Firebase.h>
 
 #import <React/RCTBundleURLProvider.h>
 
@@ -16,6 +17,15 @@
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
+  
+  // Add me --- \/
+  if(FIRApp.defaultApp == nil){
+    [FIRApp configure];
+  }
+
+  // Add me --- /\
+  // ...
+  
 #if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
 #else

@@ -19,6 +19,8 @@ import TextInputComponent from '../../components/cTextInput/TextInput.component'
 import { EyeHideIcon, EyeShowIcon } from '../../global/icon/Icon';
 import { Account, User } from '../../type/User.Type';
 import { Colors } from '../../global/theme/Colors.Theme';
+import { ENUM } from '../../global/enum';
+import { AlertService } from '../../components/cAlert/Alert.component';
 
 type ErrorAccount = {
     errorUsername: {
@@ -210,7 +212,7 @@ export const Register: React.FC<{ route: any }> = ({ route }) => {
                         </View>
 
                         {/* password */}
-                        <View style={{marginVertical: 24}}>
+                        <View style={{ marginVertical: 24 }}>
                             <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 2 }]}>
                                 <Text numberOfLines={2} style={[styles.textSubTitle, isError?.errorPassword?.messErrorPassword !== "" && { color: "red" }]}>
                                     {isError?.errorPassword?.messErrorPassword !== "" ? isError?.errorPassword?.messErrorPassword :
@@ -257,7 +259,7 @@ export const Register: React.FC<{ route: any }> = ({ route }) => {
                         {/* confirm password */}
                         <View>
                             <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 2 }]}>
-                            <Text numberOfLines={2} style={[styles.textSubTitle, isError.errorConfirmPassword.messErrorConfirmPassword !== "" && { color: "red" }]}>
+                                <Text numberOfLines={2} style={[styles.textSubTitle, isError.errorConfirmPassword.messErrorConfirmPassword !== "" && { color: "red" }]}>
                                     {isError.errorConfirmPassword.messErrorConfirmPassword !== "" ? isError.errorConfirmPassword.messErrorConfirmPassword :
                                         account.confirmPassword && account.confirmPassword !== "" ? "Xác nhận mật khẩu" : ""}
                                 </Text>
@@ -307,12 +309,24 @@ export const Register: React.FC<{ route: any }> = ({ route }) => {
                         {/* Button Continue */}
                         <View style={{ flex: 1 }}>
                             <TouchableOpacity
-                                style={StylesTheme.btnPrimary}
+                                style={[StylesTheme.btnPrimary, !(account.username && account.password && account.confirmPassword) && { backgroundColor: Colors.colorGrey }]}
+                                disabled={!(account.username && account.password && account.confirmPassword) ? true : false}
                                 onPress={() => {
-                                    navigation.navigate("OTP", {
-                                        username: account.username,
-                                        password: account.password
-                                    });
+
+                                    if (account.username
+                                        && account.password
+                                        && account.confirmPassword
+                                        && !isError.errorUsername.isErrorUsername
+                                        && !isError.errorPassword.isErrorPassword
+                                        && !isError.errorConfirmPassword.isErrorConfirmPassword
+                                    ) {
+                                        navigation.navigate("OTP", {
+                                            username: account.username,
+                                            password: account.password
+                                        });
+                                    } else {
+                                        AlertService.show(ENUM.E_ERROR, 'Vui lòng nhập đầy đủ thông tin yêu cầu!', 3000, 'Thông tin đăng ký không hợp lệ!');
+                                    }
                                 }
                                 }
                             >

@@ -27,6 +27,9 @@ import StylesTheme from '../../global/theme/Styles.Theme';
 import { Colors } from '../../global/theme/Colors.Theme';
 import Address from '../../components/cAddress/Address.component';
 import { LoadingService } from '../../components/cLoading/Loading.component';
+import { AlertService } from '../../components/cAlert/Alert.component';
+import { ENUM } from '../../global/enum';
+import ImagePicker from '../../components/cImagePicker/ImagePicker.component';
 
 const { width, height } = Dimensions.get('window');
 
@@ -47,9 +50,49 @@ type ErrorAccount = {
     }
 }
 
-type State = User & {
+interface BaseState {
+    label: string,
+    value: any,
+    isObligatory?: boolean,
+    isRefresh?: boolean
+}
+
+// isObligatory 
+type State = {
     account: Account,
+    firstName: BaseState,
+    lastName: BaseState,
+    avatar: BaseState,
+    phone: BaseState,
+    email: BaseState,
+    birthday: BaseState,
+    addressDetail: BaseState,
     isVisibleDate: boolean;
+    address: {
+        label: string,
+        value: any[],
+        isObligatory?: boolean,
+        isRefresh?: boolean
+    }
+    gender: {
+        label: string,
+        value: any,
+        isObligatory?: boolean,
+        isRefresh?: boolean,
+        male: {
+            isMale: boolean,
+            maleView: any
+        },
+        female: {
+            isFemale: boolean,
+            femaleView: any
+        },
+        other: {
+            isOther: boolean,
+            otherView: any
+        },
+    },
+    isError?: boolean;
 }
 
 const initialState: State = {
@@ -58,12 +101,41 @@ const initialState: State = {
         password: null,
         confirmPassword: null
     },
-    firstName: null,
-    lastName: null,
-    avatar: null,
-    phone: null,
-    email: null,
+    firstName: {
+        label: 'Họ và tên đệm',
+        value: null,
+        isObligatory: true,
+        isRefresh: false
+    },
+    lastName: {
+        label: 'Tên',
+        value: null,
+        isObligatory: true,
+        isRefresh: false
+    },
+    avatar: {
+        label: 'Ảnh đại diện',
+        value: null,
+        isObligatory: true,
+        isRefresh: false
+    },
+    phone: {
+        label: 'Số điện thoại',
+        value: null,
+        isObligatory: true,
+        isRefresh: false
+    },
+    email: {
+        label: 'Email',
+        value: null,
+        isObligatory: true,
+        isRefresh: false
+    },
     gender: {
+        label: 'Giới tính',
+        value: null,
+        isObligatory: true,
+        isRefresh: false,
         male: {
             isMale: false,
             maleView: null
@@ -77,14 +149,32 @@ const initialState: State = {
             otherView: null
         }
     },
-    birthday: null,
-    address: null,
+    birthday: {
+        label: 'Ngày tháng năm sinh',
+        value: null,
+        isObligatory: true,
+        isRefresh: false
+    },
+    address: {
+        label: 'Địa chỉ',
+        value: [],
+        isObligatory: true,
+        isRefresh: false
+    },
+    addressDetail: {
+        label: 'Địa chỉ cụ thể',
+        value: null,
+        isObligatory: true,
+        isRefresh: false
+    },
+    isError: false,
     isVisibleDate: false,
 };
 
 export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route }) => {
     const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
-    const [{ account, firstName, lastName, avatar, phone, email, gender, birthday, address, isVisibleDate }, setState] = useState<State>({ ...initialState });
+    const [{ account, firstName, lastName, avatar, phone, email, gender, birthday, addressDetail, isError, isVisibleDate, address }, setState] = useState<State>({ ...initialState });
+    const { username, password } = route.params;
 
     const hideDatePicker = () => {
         setState((prevState: State) => ({
@@ -97,17 +187,49 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
         if (date) {
             setState((prevState: State) => ({
                 ...prevState,
-                birthday: date,
+                birthday: {
+                    ...prevState.birthday,
+                    value: date,
+                    isRefresh: !prevState.birthday.isRefresh
+                },
                 isVisibleDate: false
             }));
         }
     };
 
-    // handleRegister = () => {
-    //     const { valueName, gender, male, female, genderOther, valueEmail, valueAddress, valueDate, isVisibleDate } = this.state;
+    const handleRegister = () => {
+        if ((firstName.isObligatory && (!firstName.value || firstName.value === ''))
+            || (lastName.isObligatory && (!lastName.value || lastName.value === ''))
+            || (birthday.isObligatory && !birthday.value)
+            || (gender.isObligatory && !gender.value)
+            || (addressDetail.isObligatory && (!addressDetail.value || addressDetail.value === ''))
+            || (address.isObligatory && address.value.length < 3)
+        ) {
 
-    //     // this.props.navigation.navigate('BottomTabNavigator')
-    // }
+            setState((prevState: State) => ({
+                ...prevState,
+                isError: true,
+            }));
+            AlertService.show(ENUM.E_ERROR, '', 5000, 'Vui lòng nhập đầy đủ thông tin!');
+            return;
+        }
+
+        let params = {
+            username,
+            password,
+            firstName: firstName.value,
+            lastName: lastName.value,
+            avatar: avatar.value,
+            phone: phone.value,
+            email: email.value,
+            gender: gender.value,
+            birthday: moment(birthday.value).format("DD/MM/YYYY"),
+            address: addressDetail.value + ", " + address.value,
+        };
+
+        console.log(params, 'params');
+
+    }
 
     const eventGender = (value: number) => {
 
@@ -121,6 +243,7 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                         isMale: true,
                         maleView: null
                     },
+                    value: 'Nam'
                 }
             };
         } else if (value === 1) {
@@ -131,6 +254,7 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                         isFemale: true,
                         femaleView: null
                     },
+                    value: 'Nữ'
                 }
             };
         } else {
@@ -140,7 +264,8 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                     other: {
                         isOther: true,
                         otherView: null
-                    }
+                    },
+                    value: 'Khác'
                 }
             };
         }
@@ -150,6 +275,15 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
             ...nextState
         }));
     };
+
+    const isErrorObj = {
+        firstName: isError && firstName.isObligatory && (!firstName.value || firstName.value === '') ? true : false,
+        lastName: isError && lastName.isObligatory && (!lastName.value || lastName.value === '') ? true : false,
+        birthday: isError && birthday.isObligatory && !birthday.value ? true : false,
+        gender: isError && gender.isObligatory && !gender.value ? true : false,
+        address: isError && address.isObligatory && address.value.length < 3 ? true : false,
+        addressDetail: isError && addressDetail.isObligatory && (!addressDetail.value || addressDetail.value === '') ? true : false,
+    }
 
     return (
         <View style={styles.container}>
@@ -167,30 +301,53 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
 
                     {/*  */}
                     <View style={{ flex: 1 }}>
+
+                        {/* Avatar */}
+                        <View style={[styles.wrapXXX, { marginBottom: 0 }]}>
+                            <ImagePicker label={avatar.label} onComplete={(value: string) => {
+                                if (value.length > 0) {
+                                    setState((prevState: State) => ({
+                                        ...prevState,
+                                        avatar: {
+                                            ...prevState.avatar,
+                                            value: value,
+                                            isRefresh: !prevState.avatar?.isRefresh
+                                        }
+                                    }));
+                                }
+                            }} />
+                        </View>
+
                         {/* First Name */}
                         <View style={styles.wrapXXX}>
                             <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
                                 <Text numberOfLines={2} style={[styles.textSubTitle]}>
                                     {
-                                        firstName && firstName !== "" ? "Họ và tên đệm" : " "
+                                        firstName.value && firstName.value !== "" ? firstName.label : " "
                                     }
                                 </Text>
                                 {
-                                    firstName && firstName !== "" && (
+                                    firstName.value && firstName.value !== "" && (
                                         <Text style={styles.asteriskValid}>*</Text>
                                     )
                                 }
                             </View>
                             <TextInputComponent
                                 style={[styles.textInput, {}]}
-                                placeholder="Họ và tên đệm"
-                                value={firstName}
-                                isObligatory={true}
+                                placeholder={firstName.label}
+                                value={firstName.value}
+                                isObligatory={firstName.isObligatory}
                                 isClose={true}
+                                isShowIconError={isErrorObj.firstName}
+                                isError={isErrorObj.firstName}
                                 onComplete={(text) => {
                                     setState((prevState: State) => ({
                                         ...prevState,
-                                        firstName: text
+                                        firstName: {
+                                            ...prevState.firstName,
+                                            value: text,
+                                            isRefresh: !prevState.firstName?.isRefresh
+                                        }
                                     }));
                                 }}
                             />
@@ -201,11 +358,11 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                             <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
                                 <Text numberOfLines={2} style={[styles.textSubTitle]}>
                                     {
-                                        lastName && lastName !== "" ? "Tên" : " "
+                                        lastName.value && lastName.value !== "" ? lastName.label : " "
                                     }
                                 </Text>
                                 {
-                                    lastName && lastName !== "" && (
+                                    lastName.value && lastName.value !== "" && (
                                         <Text style={styles.asteriskValid}>*</Text>
                                     )
                                 }
@@ -213,12 +370,18 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                             <TextInputComponent
                                 style={[styles.textInput, {}]}
                                 placeholder="Tên"
-                                value={lastName}
-                                isObligatory={true}
+                                value={lastName.value}
+                                isObligatory={lastName.isObligatory}
+                                isShowIconError={isErrorObj.lastName}
+                                isError={isErrorObj.lastName}
                                 onComplete={(text) => {
                                     setState((prevState: State) => ({
                                         ...prevState,
-                                        lastName: text
+                                        lastName: {
+                                            ...prevState.lastName,
+                                            value: text,
+                                            isRefresh: !prevState.lastName.isRefresh
+                                        }
                                     }));
                                 }}
                             />
@@ -229,29 +392,38 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                             <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
                                 <Text numberOfLines={2} style={[styles.textSubTitle]}>
                                     {
-                                        birthday ? "Ngày tháng năm sinh" : " "
+                                        birthday.value ? birthday.label : " "
                                     }
                                 </Text>
                                 {
-                                    birthday && birthday !== "" && (
+                                    birthday.value && birthday.value !== "" && birthday.isObligatory && (
                                         <Text style={styles.asteriskValid}>*</Text>
                                     )
                                 }
                             </View>
-                            <TouchableOpacity style={[styles.textInput, {}]} onPress={() => {
+                            <TouchableOpacity style={[styles.textInput, isErrorObj.birthday && { borderColor: 'red' }]} onPress={() => {
                                 setState((prevState: State) => ({
                                     ...prevState,
                                     isVisibleDate: true
                                 }));
                             }}>
-                                <Text style={[styles.text, { marginVertical: 0 }, birthday === null ? { color: "#ccc" } : { color: "#000" }]}>
-                                    {birthday ? moment(birthday).format('DD/MM/YYYY') : 'Chọn ngày tháng năm sinh'}
-                                </Text>
+                                <View style={StylesTheme.onlyFlexRow_AliCenter_JusSP}>
+                                    <Text style={[styles.text, { marginVertical: 0 }, birthday.value === null ? { color: "#ccc" } : { color: "#000" }]}>
+                                        {birthday.value ? moment(birthday.value).format('DD/MM/YYYY') : 'Chọn ngày tháng năm sinh'}
+                                    </Text>
+                                    {
+                                        birthday.isObligatory && !birthday.value && (
+                                            <View style={{ paddingRight: 8 }}>
+                                                <Text style={styles.asteriskValid}>*</Text>
+                                            </View>
+                                        )
+                                    }
+                                </View>
                             </TouchableOpacity>
                             {/* modal chọn ngày */}
                             <View style={{ flex: 1, zIndex: 1, }}>
                                 <DateTimePickerModal
-                                    date={birthday === null ? new Date() : birthday}
+                                    date={birthday.value === null ? new Date() : birthday.value}
                                     // format="dd/MM/yyyy"
                                     isVisible={isVisibleDate}
                                     mode={'date'}
@@ -269,7 +441,7 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                         {/* Gender */}
                         <View style={styles.wrapXXX}>
                             <View style={StylesTheme.onlyFlexDirectionAli_Center}>
-                                <Text style={[styles.textSubTitle]}>Giới tính</Text>
+                                <Text style={[styles.textSubTitle]}>{gender.label}</Text>
                                 <Text style={[styles.text, styles.asteriskValid]}>*</Text>
                             </View>
                             <View style={styles.wrapCheckBoxGender}>
@@ -321,11 +493,11 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                             <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
                                 <Text numberOfLines={2} style={[styles.textSubTitle]}>
                                     {
-                                        email && email !== "" ? "Email" : " "
+                                        email.value && email.value !== "" ? email.label : " "
                                     }
                                 </Text>
                                 {
-                                    email && email !== "" && (
+                                    email.value && email.value !== "" && email.isObligatory && (
                                         <Text style={styles.asteriskValid}>*</Text>
                                     )
                                 }
@@ -333,12 +505,16 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                             <TextInputComponent
                                 style={[styles.textInput, {}]}
                                 placeholder="Nhập email của bạn"
-                                value={email}
+                                value={email.value}
                                 isObligatory={true}
                                 onComplete={(text) => {
                                     setState((prevState: State) => ({
                                         ...prevState,
-                                        email: text
+                                        email: {
+                                            ...prevState.email,
+                                            value: text,
+                                            isRefresh: !prevState.email.isRefresh
+                                        }
                                     }));
                                 }}
                             />
@@ -347,13 +523,32 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                         {/* địa chỉ */}
 
                         <View style={styles.wrapXXX}>
-                            <Text style={styles.text}>Địa chỉ</Text>
+                            <Text style={styles.text}>{address.label}
+                                {
+                                    address.isObligatory && (
+                                        <Text style={styles.asteriskValid}>  *</Text>
+                                    )
+                                }
+                            </Text>
                             <Address
-                                value={""}
+                                value={Array.isArray(address.value) ? address.value : []}
                                 style={styles.componentDisplay}
                                 placeholder="Vui lòng chọn địa chỉ!"
+                                isObligatory={address.isObligatory}
+                                isShowIconError={isErrorObj.address}
+                                isError={isErrorObj.address}
                                 onComplete={(value) => {
                                     console.log(value, 'value');
+                                    if (Array.isArray(value)) {
+                                        setState((prevState: State) => ({
+                                            ...prevState,
+                                            address: {
+                                                ...prevState.address,
+                                                value: value,
+                                                isRefresh: !prevState.address.isRefresh
+                                            }
+                                        }));
+                                    }
                                 }}
                             />
                         </View>
@@ -362,11 +557,11 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                             <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
                                 <Text numberOfLines={2} style={[styles.textSubTitle]}>
                                     {
-                                        address && address !== "" ? "Địa chỉ cụ thể" : " "
+                                        addressDetail.value && addressDetail.value !== "" ? addressDetail.label : " "
                                     }
                                 </Text>
                                 {
-                                    address && address !== "" && (
+                                    addressDetail.value && addressDetail.value !== "" && (
                                         <Text style={styles.asteriskValid}>*</Text>
                                     )
                                 }
@@ -374,12 +569,18 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                             <TextInputComponent
                                 style={[styles.textInput, {}]}
                                 placeholder="Nhập địa chỉ của bạn"
-                                value={address}
-                                isObligatory={true}
+                                value={addressDetail.value}
+                                isObligatory={addressDetail.isObligatory}
+                                isShowIconError={isErrorObj.addressDetail}
+                                isError={isErrorObj.addressDetail}
                                 onComplete={(text) => {
                                     setState((prevState: State) => ({
                                         ...prevState,
-                                        address: text
+                                        addressDetail: {
+                                            ...prevState.addressDetail,
+                                            value: text,
+                                            isRefresh: !prevState.addressDetail.isRefresh
+                                        }
                                     }));
                                 }}
                             />
@@ -389,9 +590,7 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                         {/* Button Continue */}
                         <TouchableOpacity
                             style={StylesTheme.btnPrimary}
-                            onPress={() => {
-                                // handleRegister()
-                            }}
+                            onPress={handleRegister}
                         >
                             <Text style={StylesTheme.styleTextBtnBasic}>
                                 Tiếp theo

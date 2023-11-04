@@ -1,4 +1,5 @@
-import moment from "moment"
+import moment from "moment";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class Function {
     // copy from HieuTran Leader Team App VnResource
@@ -96,5 +97,23 @@ export default class Function {
           /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,20}$/
         );
     };
+
+    static getAppData = async (storageKey: string): Promise<unknown> => {
+        try {
+            const data = await AsyncStorage.getItem(storageKey);
+            if (data) {
+                return JSON.parse(data);
+            }
+            return null;
+        } catch {
+            return null;
+        }
+    };
+    
+    static setAppData = async (storageKey: string, data: any) => {
+        try {
+          await AsyncStorage.setItem(storageKey, JSON.stringify(data));
+        } catch {}
+      };
  
 }

@@ -63,7 +63,7 @@ const TextInputComponent: React.FC<IProps> = (props: IProps) => {
                                     <WarningIcon size={28} color='red' />
                                 ) : isClose && value && value !== '' ? (
                                     <Image source={require('../../global/assets/image/close.png')} style={StylesTheme.wh18} />
-                                ) : isObligatory && value === '' ? (
+                                ) : isObligatory &&( value === '' || !value) ? (
                                     <Text style={{ color: 'red' }}>*</Text>
                                 ) : null
                             }
@@ -75,12 +75,12 @@ const TextInputComponent: React.FC<IProps> = (props: IProps) => {
     )
 }
 
-// export default React.memo(TextInputComponent, (prevProps, nextProps) => {
-//     return prevProps.isRefresh  !== nextProps.isRefresh ? false : prevProps.value === nextProps.value ? true : false;
-//     // return prevProps.value === nextProps.value ? true : false;
-// });
+export default React.memo(TextInputComponent, (prevProps, nextProps) => {
+    return prevProps.isRefresh  !== nextProps.isRefresh ? false : prevProps.isError !== nextProps.isError ? false : prevProps.value !== nextProps.value ? false : true;
+    // return prevProps.value === nextProps.value ? true : false;
+});
 
-export default TextInputComponent;
+// export default TextInputComponent;
 
 const styles = StyleSheet.create({
     container: {

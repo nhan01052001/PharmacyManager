@@ -38,7 +38,7 @@ const ItemSelected: React.FC<IProps> = (props: IProps) => {
                 }
             }}
             >
-                <Text style={[styles.textItem, isFocus && {color: Colors.primaryColor}]}>{value?.name}</Text>
+                <Text style={[styles.textItem, isFocus && {color: Colors.primaryColor}]}>{value?.full_name}</Text>
             </TouchableOpacity>
         </View>
     )

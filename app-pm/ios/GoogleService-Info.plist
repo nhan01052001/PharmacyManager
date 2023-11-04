@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CLIENT_ID</key>
+    <string>430715989692-r5ckgsr7qvucvapen6rlg9p92d7uv801.apps.googleusercontent.com</string>
+    <key>REVERSED_CLIENT_ID</key>
+    <string>com.googleusercontent.apps.430715989692-r5ckgsr7qvucvapen6rlg9p92d7uv801</string>
+  <key>API_KEY</key>
+  <string>AIzaSyB0NwIlH8YfA7e994PwU0wRCUNKazvaesA</string>
+  <key>GCM_SENDER_ID</key>
+  <string>493934264080</string>
+  <key>PLIST_VERSION</key>
+  <string>1</string>
+  <key>BUNDLE_ID</key>
+  <string>org.reactjs.native.example.apppm</string>
+  <key>PROJECT_ID</key>
+  <string>pharmacy-manager-401ca</string>
+  <key>STORAGE_BUCKET</key>
+  <string>pharmacy-manager-401ca.appspot.com</string>
+  <key>IS_ADS_ENABLED</key>
+  <false/>
+  <key>IS_ANALYTICS_ENABLED</key>
+  <false/>
+  <key>IS_APPINVITE_ENABLED</key>
+  <true/>
+  <key>IS_GCM_ENABLED</key>
+  <true/>
+  <key>IS_SIGNIN_ENABLED</key>
+  <true/>
+  <key>GOOGLE_APP_ID</key>
+  <string>1:493934264080:ios:f7b4030d562f662a7cef95</string>
+</dict>
+</plist>

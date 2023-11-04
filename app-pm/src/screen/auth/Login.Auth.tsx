@@ -18,6 +18,11 @@ import Function from '../../global/assets/service/Function.Service';
 import { EyeHideIcon, EyeShowIcon } from '../../global/icon/Icon';
 import TextInputComponent from '../../components/cTextInput/TextInput.component';
 import { Colors } from '../../global/theme/Colors.Theme';
+import { env } from '../../utils/env.utils';
+import HttpService from '../../service/HttpService.Service';
+import { LoadingService } from '../../components/cLoading/Loading.component';
+import { AlertService } from '../../components/cAlert/Alert.component';
+import { ENUM } from '../../global/enum';
 
 interface IErrorUsernamePassword {
     errorUsername: {
@@ -164,6 +169,48 @@ export const Login: React.FC = () => {
         }))
     }, [password]);
 
+    const handleLogin = () => {
+        try {
+            if (typeof username === 'string' && typeof password === 'string' && username.length > 0 && password.length > 0) {
+                LoadingService.show();
+                HttpService.Post(`${env.URL}/auth/login`, {
+                    username,
+                    password
+                }).then((res: any) => {
+                    LoadingService.hide();
+                    if(res?.status === 200 && res?.statusText === ENUM.E_SUCCESS && res?.data) {
+                        Function.setAppData(ENUM.KEY_IN4USER, res?.data);
+                        navigation.navigate("BottomTabNavigator", {
+                            data: res?.data
+                        });
+                    }
+                }).catch((error) => {
+                    const textError = error?.response?.data?.message;
+                    AlertService.show(ENUM.E_ERROR, '', 5000, textError ? textError :'Sai cú pháp')
+                    LoadingService.hide();
+                })
+            } else {
+                AlertService.show(ENUM.E_ERROR, '', 5000, 'Vui lòng nhập đầy đủ thông tin!')
+                setState((prevState: any) => ({
+                    ...prevState,
+                    isError: {
+                        errorUsername: {
+                            isErrorUsername: true,
+                            messErrorUsername: "Tài khoản không được để trống!"
+                        },
+                        errorPassword: {
+                            isErrorPassword: true,
+                            messErrorPassword: "Mật khẩu không được để trống!"
+                        }
+                    }
+                }));
+            }
+        } catch (error) {
+            AlertService.show(ENUM.E_ERROR, '', 5000, 'Sai cú pháp')
+            LoadingService.hide();
+        }
+    }
+
     return (
         <SafeAreaView style={[styles.container, StylesTheme.droidSafeArea]}>
             <KeyboardAwareScrollView style={StylesTheme.flexW100}>
@@ -186,7 +233,7 @@ export const Login: React.FC = () => {
                         <View style={StylesTheme.marginV12}>
                             <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 2 }]}>
                                 <Text numberOfLines={2} style={[styles.textSubTitle, isError?.errorUsername?.messErrorUsername !== "" && { color: "red" }]}>
-                                    {isError?.errorUsername?.messErrorUsername !== "" ? isError?.errorUsername?.messErrorUsername : 
+                                    {isError?.errorUsername?.messErrorUsername !== "" ? isError?.errorUsername?.messErrorUsername :
                                         username && username !== "" ? "Số điện thoại hoặc email" : ""}
                                 </Text>
                             </View>
@@ -200,16 +247,16 @@ export const Login: React.FC = () => {
                                     handleOnChangeTextUsername(text);
                                 }}
                                 isClose={true}
-                                isShowIconError={false}
+                                isShowIconError={isError?.errorUsername?.isErrorUsername}
                             />
                         </View>
 
                         {/* password */}
                         <View>
                             <View style={[StylesTheme.onlyFlexRow_AliCenter_JusSP, { marginVertical: 2, marginTop: 12 }]}>
-                            <Text numberOfLines={2} style={[styles.textSubTitle, isError?.errorPassword?.messErrorPassword !== "" && { color: "red" }]}>
+                                <Text numberOfLines={2} style={[styles.textSubTitle, isError?.errorPassword?.messErrorPassword !== "" && { color: "red" }]}>
                                     {isError?.errorPassword?.messErrorPassword !== "" ? isError?.errorPassword?.messErrorPassword :
-                                    password && password !== "" ? "Mật khẩu" : ""}
+                                        password && password !== "" ? "Mật khẩu" : ""}
                                 </Text>
                             </View>
                             <View style={StylesTheme.onlyFlexDirectionAli_Center}>
@@ -285,10 +332,7 @@ export const Login: React.FC = () => {
                         <View style={{ flex: 1 }}>
                             <TouchableOpacity
                                 style={StylesTheme.btnPrimary}
-                                onPress={() => {
-                                    navigation.navigate("BottomTabNavigator");
-                                    //this.handleLogin()
-                                }}
+                                onPress={handleLogin}
                             >
                                 <Text style={styles.textBtnLogin}>
                                     Đăng nhập

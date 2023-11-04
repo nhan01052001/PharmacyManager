@@ -23,18 +23,22 @@ import { RootStackNavigator } from './src/navigation/Stack.Navigator';
 import { AppProvider } from './src/context/App.provider';
 import Loading from './src/components/cLoading/Loading.component';
 import Alert from './src/components/cAlert/Alert.component';
+import { Provider } from 'react-redux';
+import store from './src/redux/store.redux';
 
 
 const App: React.FC = () => {
 
   return (
-    <AppProvider>
-      <NavigationContainer>
-        <Loading />
-        <Alert />
-        <RootStackNavigator />
-      </NavigationContainer>
-    </AppProvider>
+    <Provider store={store}>
+      <AppProvider>
+        <NavigationContainer>
+          <Loading />
+          <Alert />
+          <RootStackNavigator />
+        </NavigationContainer>
+      </AppProvider>
+    </Provider>
   )
 }
 
