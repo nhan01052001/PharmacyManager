@@ -5,6 +5,7 @@ import { BillDetail } from "./entity/bill-detail.entity";
 import { provinces } from "./entity/provinces.entity";
 import { districts } from "./entity/districts.entity";
 import { wards } from "./entity/wards.entity";
+import { Medicine } from "./entity/medicine.entity";
 
 export const entities = [
     User,
@@ -13,5 +14,6 @@ export const entities = [
     BillDetail,
     provinces,
     districts,
-    wards
+    wards,
+    Medicine
 ];

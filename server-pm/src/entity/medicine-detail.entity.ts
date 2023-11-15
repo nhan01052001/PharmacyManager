@@ -17,6 +17,7 @@ interface IMedicineDetail extends IBaseEntity {
     price?: number;
     quantity?: number;
     unit?: string;
+    lsImage?: string;
     supplier?: Supplier;
     medicine?: Medicine;
 }
@@ -37,6 +38,7 @@ export class MedicineDetail extends BaseEntity {
             price,
             quantity,
             unit,
+            lsImage,
             supplier,
             medicine,
             ...superItem
@@ -57,6 +59,7 @@ export class MedicineDetail extends BaseEntity {
             price,
             quantity,
             unit,
+            lsImage,
             supplier,
             medicine,
         });
@@ -74,7 +77,7 @@ export class MedicineDetail extends BaseEntity {
     @Column({ nullable: true, width: 300 })
     conversionUnit?: string;
 
-    @Column({ nullable: true, width: 1024 })
+    @Column({ nullable: true, type: 'mediumtext' })
     describe?: string;
 
     @Column({ nullable: true, width: 1024 })
@@ -97,6 +100,9 @@ export class MedicineDetail extends BaseEntity {
 
     @Column({ nullable: true })
     unit?: string;
+
+    @Column({ nullable: true, type: 'mediumtext' })
+    lsImage?: string;
 
     @OneToOne(() => Supplier, (supplier) => supplier.medicineDetail, { cascade: true, nullable: true })
     @JoinColumn()

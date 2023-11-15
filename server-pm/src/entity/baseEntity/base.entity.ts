@@ -12,6 +12,7 @@ export interface IBaseEntity {
     createdAt?: Date;
     updatedBy?: number;
     updatedAt?: Date;
+    isDelete?: boolean;
 }
 
 export abstract class BaseEntity {
@@ -32,8 +33,11 @@ export abstract class BaseEntity {
     @Column({ nullable: true, type: 'datetime' })
     updatedAt?: Date;
 
+    @Column({ nullable: true, default: () => false})
+    isDelete?: boolean;
+
     constructor(props?: IBaseEntity) {
-        const { id, createdBy, createdAt, updatedBy, updatedAt } = props || {};
+        const { id, createdBy, createdAt, updatedBy, updatedAt, isDelete } = props || {};
 
         if (id) {
             this.id = id;
@@ -53,6 +57,10 @@ export abstract class BaseEntity {
 
         if (updatedAt) {
             this.updatedAt = updatedAt;
+        }
+
+        if (isDelete) {
+            this.isDelete = isDelete;
         }
     }
 }

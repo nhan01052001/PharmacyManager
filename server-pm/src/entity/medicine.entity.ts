@@ -6,6 +6,7 @@ import { Cart } from "./cart.entity";
 import { Order } from "./oder.entity";
 
 interface IMedicine extends IBaseEntity {
+    code?: string;
     name?: string;
     fullName?: string;
     active?: boolean;
@@ -20,6 +21,7 @@ interface IMedicine extends IBaseEntity {
 export class Medicine extends BaseEntity {
     constructor(props?: IMedicine) {
         const {
+            code,
             name,
             fullName,
             active,
@@ -34,6 +36,7 @@ export class Medicine extends BaseEntity {
         super(superItem);
 
         Object.assign(this, {
+            code,
             name,
             fullName,
             active,
@@ -44,6 +47,9 @@ export class Medicine extends BaseEntity {
             order,
         });
     }
+
+    @Column({ nullable: false, width: 300 })
+    code?: string;
 
     @Column({ nullable: true, width: 300 })
     name?: string;

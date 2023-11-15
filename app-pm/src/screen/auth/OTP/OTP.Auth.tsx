@@ -14,7 +14,7 @@ import {
 import CodeInputField from "./CodeInputField.OTP";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { VerifyIcon } from "../../../global/icon/Icon";
-import firebase from 'react-native-firebase';
+import * as firebase from 'react-native-firebase';
 import { HeaderComponent } from '../../../components/cHeadder/Header.Component';
 
 import { Account } from "../../../type/User.Type";

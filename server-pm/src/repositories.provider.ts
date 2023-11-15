@@ -6,13 +6,15 @@ import { StaffRepository } from "./repository/staff.repository";
 import { DistrictsRepository } from "./repository/districts.repository";
 import { ProvincesRepository } from "./repository/provinces.repository";
 import { WardsRepository } from "./repository/wards.repository";
+import { MedicineRepository } from "./repository/medicines.repository";
 
 const repositories = [
     UserRepository,
     StaffRepository,
     ProvincesRepository,
     DistrictsRepository,
-    WardsRepository
+    WardsRepository,
+    MedicineRepository
 ];
 
 const RepositoriesProvider: Provider[] = [];
