@@ -9,7 +9,7 @@ const ormConfig: TypeOrmModuleOptions = {
     database: 'pharmacymanager_product',
     entities: [__dirname + '/entity/*.entity.{js,ts}'], //['./**/entities/*.entity'],
     // autoLoadEntities: true,
-    synchronize: true,
+    synchronize: false,
     migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
     //   cli: {
     //     migrationsDir: 'src/database/migrations',

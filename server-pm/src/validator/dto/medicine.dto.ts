@@ -5,6 +5,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class MedicineDTO {
 
+    id?: string;
+
     @IsNotEmpty()
     @IsString()
     code: string;

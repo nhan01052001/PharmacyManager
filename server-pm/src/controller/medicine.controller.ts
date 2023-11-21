@@ -19,4 +19,29 @@ export class MedicinesController {
     getMedicineByCode(@Param() param: any): Promise<unknown> {
         return this.medicinesService.getMedicineByCode(param?.code);
     }
+
+    @Post('/updateOneMedicine')
+    updateOneMedicine(@Headers() headers: any, @Body() body?: MedicinesDTO, value?: any): Promise<unknown> {
+        return this.medicinesService.updateOneMedicine(headers, body, value);
+    }
+
+    @Post('/deleteMedicine')
+    deleteMedicine(@Body() body?: any): Promise<unknown> {
+        return this.medicinesService.deleteMedicine(body);
+    }
+
+    @Post('/revertDeleteMedicine')
+    revertDeleteMedicine(@Body() body?: any): Promise<unknown> {
+        return this.medicinesService.revertDeleteMedicine(body);
+    }
+
+    @Get('/getMedicineById/:id')
+    getMedicineById(@Param() param: any): Promise<unknown> {
+        return this.medicinesService.getMedicineById(param?.id);
+    }
+
+    @Get('/findMedicine/')
+    findMedicine(@Headers() headers: any, @Query("typeFind") typeFind: string, @Query("search") search?: string): Promise<unknown> {
+        return this.medicinesService.findMedicine(headers, search, typeFind );
+    }
 }

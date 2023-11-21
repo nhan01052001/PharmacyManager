@@ -4,7 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { WardsRepository } from "../repository/wards.repository";
 import { wards } from "../entity/wards.entity";
 import { ErrorResponse } from "../error/error-response.error";
-import { AddressParamsDTO } from "../validator/dto/Address-params.dto";
+import { FilterParamsDTO } from "../validator/dto/Address-params.dto";
 import { ProvincesService } from "./provinces.service";
 
 @Injectable({})
@@ -19,7 +19,7 @@ export class WardsService {
     ) { }
 
     async getWards(headers: any, districtCode: string, search?: string): Promise<unknown> {
-        const { page, pagesize, sort, typesort }: AddressParamsDTO = headers;
+        const { page, pagesize, sort, typesort }: FilterParamsDTO = headers;
         try {
             let take = 1 * 20;
             let skip = take - 20;
@@ -35,7 +35,7 @@ export class WardsService {
             }
 
             if (page && pagesize) {
-                const temp = this.provincesService.handlePaging({ page, pagesize }, totalItem, data);
+                const temp = await this.provincesService.handlePaging({ page, pagesize }, totalItem, data);
                 totalPage = temp.totalPage;
                 if (temp.status === 'SUCCESS') {
                     data = temp.data;

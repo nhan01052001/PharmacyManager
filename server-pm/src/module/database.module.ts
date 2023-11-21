@@ -1,6 +1,6 @@
 import { Module, Global, Provider } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import ormConfig from 'orm.config';
+import ormConfig from '../orm.config';
 import { createConnection } from 'typeorm';
 import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
 

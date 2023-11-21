@@ -1,7 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsEmail, IsEmpty, IsNotEmpty, IsNumber, IsPhoneNumber, IsString, MaxLength, MinLength } from 'class-validator';
 
-export class AddressParamsDTO {
+export class FilterParamsDTO {
 
     page?: number | string;
 

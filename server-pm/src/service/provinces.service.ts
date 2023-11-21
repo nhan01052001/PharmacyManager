@@ -4,7 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ProvincesRepository } from "../repository/provinces.repository";
 import { provinces } from "../entity/provinces.entity";
 import { ErrorResponse } from "../error/error-response.error";
-import { AddressParamsDTO } from "../validator/dto/Address-params.dto";
+import { FilterParamsDTO } from "../validator/dto/Address-params.dto";
 import { SelectQueryBuilder } from "typeorm";
 import { entities } from "../entities.provider";
 
@@ -18,7 +18,7 @@ export class ProvincesService {
     ) { }
 
     async getProvinces(headers: any, search?: string): Promise<unknown> {
-        let { page, pagesize, sort, typesort }: AddressParamsDTO = headers;
+        let { page, pagesize, sort, typesort }: FilterParamsDTO = headers;
         try {
             let take = 1 * 20;
             let skip = take - 20;
@@ -32,7 +32,7 @@ export class ProvincesService {
             }
 
             if ((page && pagesize) || ((sort as boolean) && typesort)) {
-                const temp = this.handlePaging({ page, pagesize, sort, typesort }, totalItem, data, 'provinces', 'name');
+                const temp = await this.handlePaging({ page, pagesize, sort, typesort }, totalItem, data, 'provinces', 'name');
                 totalPage = temp.totalPage;
                 if (temp.status === 'SUCCESS') {
                     data = temp.data;
@@ -92,16 +92,14 @@ export class ProvincesService {
         }
     }
 
-    handlePaging = ({ page, pagesize, sort, typesort }: AddressParamsDTO, totalItem: number, data: SelectQueryBuilder<any>, tableName?: string, fieldSort?: string): {
-        status: string,
-        data: SelectQueryBuilder<any>,
-        totalPage: number
-    } => {
+    handlePaging = async ({ page, pagesize, sort, typesort }: FilterParamsDTO, totalItem: number, data: SelectQueryBuilder<any>, tableName?: string, fieldSort?: string): Promise<{ status: string; data: SelectQueryBuilder<any>; totalPage: number; }> => {
 
         // sort
         if ((tableName && tableName.length > 0) && (sort as boolean) && (typesort && typesort.length > 0) && (fieldSort && fieldSort.length > 0)) {
             data.orderBy(`${tableName}.${fieldSort}`, `${typesort}`)
         }
+
+        let resultNumberItem: number = await data.getCount();
 
         // default take 20 and skip 0;
         let take = 20;
@@ -112,8 +110,8 @@ export class ProvincesService {
             let pageReattached = Number(page),
                 pageSizeReattached = Number(pagesize);
             if (pageReattached >= 1 && pageSizeReattached >= 1) {
-                if (totalItem) {
-                    totalPage = Math.ceil(totalItem / pageSizeReattached);
+                if (resultNumberItem) {
+                    totalPage = Math.ceil(resultNumberItem / pageSizeReattached);
                     if (totalPage < pageReattached) {
                         return {
                             status: 'ERROR',

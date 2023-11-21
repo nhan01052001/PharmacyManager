@@ -46,4 +46,6 @@ export class MedicineDetailDTO {
 
     @IsString()
     lsImage?: string;
+
+    medicineId?: string;
 }
