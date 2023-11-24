@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/core';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useCallback, useState, Reducer, useReducer } from 'react';
+import React, { useCallback, useState, Reducer, useReducer, useEffect } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
@@ -9,8 +9,11 @@ import {
     TouchableOpacity,
     Pressable,
     Image,
+    ActivityIndicator
 } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth';
 
 import { MainStackParams } from '../../navigation/Stack.Navigator';
 import StylesTheme from '../../global/theme/Styles.Theme';
@@ -23,6 +26,7 @@ import HttpService from '../../service/HttpService.Service';
 import { LoadingService } from '../../components/cLoading/Loading.component';
 import { AlertService } from '../../components/cAlert/Alert.component';
 import { ENUM } from '../../global/enum';
+import { User } from '../../type/User.Type';
 
 interface IErrorUsernamePassword {
     errorUsername: {
@@ -176,7 +180,7 @@ export const Login: React.FC = () => {
                     password
                 }).then((res: any) => {
                     LoadingService.hide();
-                    if(res?.status === 200 && res?.statusText === ENUM.E_SUCCESS && res?.data) {
+                    if (res?.status === 200 && res?.statusText === ENUM.E_SUCCESS && res?.data) {
                         Function.setAppData(ENUM.KEY_IN4USER, res?.data);
                         navigation.navigate("BottomTabNavigator", {
                             data: res?.data
@@ -184,7 +188,7 @@ export const Login: React.FC = () => {
                     }
                 }).catch((error) => {
                     const textError = error?.response?.data?.message;
-                    AlertService.show(ENUM.E_ERROR, '', 5000, textError ? textError :'Sai cú pháp')
+                    AlertService.show(ENUM.E_ERROR, '', 5000, textError ? textError : 'Sai cú pháp')
                     LoadingService.hide();
                 })
             } else {
@@ -208,6 +212,85 @@ export const Login: React.FC = () => {
             LoadingService.hide();
         }
     }
+
+    const signInWithGoogle = async () => {
+        // It will prompt google Signin Widget
+        try {
+            await GoogleSignin.hasPlayServices({
+                // Check if device has Google Play Services installed
+                // Always resolves to true on iOS
+                showPlayServicesUpdateDialog: true,
+            });
+            LoadingService.show();
+            const userInfo = await GoogleSignin.signIn(); console.log(userInfo, 'userInfo');
+
+            const credential = auth.GoogleAuthProvider.credential(userInfo.idToken);
+            await auth().signInWithCredential(credential);
+        } catch (error) {
+            console.log(JSON.stringify(error), 'Message');
+        }
+    }
+
+    useEffect(() => {
+        LoadingService.show();
+        // Initial configuration
+        GoogleSignin.configure({
+            // Mandatory method to call before calling signIn()
+            // scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+            // Repleace with your webClientId
+            // Generated from Firebase console
+            webClientId: '493934264080-edtlckbg0dlfqomsa7j1291oql9bhgks.apps.googleusercontent.com',
+        });
+        // Check if user is already signed in
+        _isSignedIn();
+    }, []);
+
+    const _isSignedIn = async () => {
+        const isSignedIn = await GoogleSignin.isSignedIn();
+        if (isSignedIn) {
+            LoadingService.hide();
+            let info = await GoogleSignin.signInSilently();
+            const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+            return subscriber; // unsubscribe on unmount
+        } else {
+            console.log('Please Login');
+        }
+    };
+
+    const onAuthStateChanged = (user: any) => {
+        LoadingService.hide();
+        const dataUser = {
+            "username": user?._user?.email ? user?._user?.email : '',
+            "firstName": "",
+            "lastName": "",
+            "fullName": user?._user?.displayName ? user?._user?.displayName : '',
+            "avatar": user?._user?.photoURL ? user?._user?.photoURL : '',
+            "phone": user?._user?.phoneNumber ? user?._user?.phoneNumber : '',
+            "email": user?._user?.email ? user?._user?.email : '',
+            "gender": '',
+            "birthday": '',
+            "address": '',
+            "id": Array.isArray(user?._user?.providerData) ? user?._user?.providerData[0]?.uid : user?._user?.uid ? user?._user?.uid : '',
+        };
+        console.log(dataUser, user, 'user');
+        Function.setAppData(ENUM.KEY_IN4USER, dataUser);
+        navigation.navigate("BottomTabNavigator", {
+            data: dataUser
+        });
+    }
+
+    const _signOut = async () => {
+        // Remove user session from the device.
+        try {
+            await GoogleSignin.revokeAccess();
+            await GoogleSignin.signOut();
+            auth()
+                .signOut()
+                .then(() => console.warn('Your are signed out!'));
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     return (
         <SafeAreaView style={[styles.container, StylesTheme.droidSafeArea]}>
@@ -369,9 +452,11 @@ export const Login: React.FC = () => {
                         <View
                             style={StylesTheme.flexRowCenter}
                         >
-                            {/* Login with facebook */}
+
+                            {/* Login with google */}
                             <View>
                                 <TouchableOpacity
+                                    onPress={signInWithGoogle}
                                     style={styles.btnLoginDiff}
                                 >
                                     <Image
@@ -381,9 +466,11 @@ export const Login: React.FC = () => {
                                 </TouchableOpacity>
                             </View>
 
-                            {/* Login with google */}
+                            {/* Login with facebook */}
                             <View>
                                 <TouchableOpacity
+                                    onPress={_signOut}
+
                                     style={styles.btnLoginDiff}
                                 >
                                     <Image
@@ -419,6 +506,57 @@ export const Login: React.FC = () => {
             </KeyboardAwareScrollView>
         </SafeAreaView>
     )
+    // if (gettingLoginStatus) {
+    //     return (
+    //       <View style={styles.container}>
+    //         <ActivityIndicator size="large" color="#0000ff" />
+    //       </View>
+    //     );
+    //   } else {
+    //     return (
+    //       <SafeAreaView style={{flex: 1}}>
+    //         <View style={styles.container}>
+    //           <Text style={styles.titleText}>
+    //             Example of Google Sign In in React Native
+    //           </Text>
+    //           <View style={styles.container}>
+    //             {userInfo !== null ? (
+    //               <>
+    //                 <Image
+    //                   source={{uri: userInfo.user.photo}}
+    //                   style={styles.imageStyle}
+    //                 />
+    //                 <Text>
+    //                   Name: {userInfo.user.name}
+    //                 </Text>
+    //                 <Text>
+    //                   Email: {userInfo.user.email}
+    //                 </Text>
+    //                 <TouchableOpacity
+    //                   style={styles.buttonStyle}
+    //                   onPress={_signOut}>
+    //                   <Text>Logout</Text>
+    //                 </TouchableOpacity>
+    //               </>
+    //             ) : (
+    //               <GoogleSigninButton
+    //                 style={{width: 312, height: 48}}
+    //                 size={GoogleSigninButton.Size.Wide}
+    //                 color={GoogleSigninButton.Color.Light}
+    //                 onPress={signInWithGoogle}
+    //               />
+    //             )}
+    //           </View>
+    //           <Text style={styles.footerHeading}>
+    //             Google SignIn in React Native
+    //           </Text>
+    //           <Text style={styles.footerText}>
+    //             www.aboutreact.com
+    //           </Text>
+    //         </View>
+    //       </SafeAreaView>
+    //     );
+    //   }
 }
 
 const styles = StyleSheet.create({

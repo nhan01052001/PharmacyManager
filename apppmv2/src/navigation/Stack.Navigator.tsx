@@ -46,10 +46,10 @@ const RootStack = createStackNavigator<RootStackParams>();
 
 const MainStackNavigator: React.FC = () => (
     <MainStack.Navigator>
-        <MainStack.Screen name='Login' component={Login} options={{ headerShown: false }} />
-        <MainStack.Screen name='Register' component={Register} options={{ headerShown: false }} />
-        <MainStack.Screen name='OTP' component={OTP} options={{ headerShown: false }} />
-        <MainStack.Screen name='RegisterInformationPersonal' component={RegisterInformationPersonal} options={{ headerShown: false }} />
+        <MainStack.Screen name='Login' component={Login} options={{ headerShown: false, gestureEnabled: false, }} />
+        <MainStack.Screen name='Register' component={Register} options={{ headerShown: false, gestureEnabled: false, }} />
+        <MainStack.Screen name='OTP' component={OTP} options={{ headerShown: false, gestureEnabled: false, }} />
+        <MainStack.Screen name='RegisterInformationPersonal' component={RegisterInformationPersonal} options={{ headerShown: false, gestureEnabled: false, }} />
     </MainStack.Navigator>
 );
 
@@ -58,17 +58,17 @@ export const RootStackNavigator: React.FC = () => (
         <RootStack.Screen
             name='MainStackNavigator'
             component={MainStackNavigator}
-            options={{ headerShown: false }}
+            options={{ headerShown: false, gestureEnabled: false, }}
         />
         <RootStack.Screen
             name='BottomTabNavigator'
             component={BottomTabNavigator}
-            options={{ headerShown: false }}
+            options={{ headerShown: false, gestureEnabled: false, }}
         />
         <RootStack.Screen
             name='DetailMedicine'
             component={DetailMedicine}
-            options={{ headerShown: false }}
+            options={{ headerShown: false, gestureEnabled: false, }}
         />
     </RootStack.Navigator>
 );

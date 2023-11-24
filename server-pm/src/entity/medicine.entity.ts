@@ -15,6 +15,7 @@ interface IMedicine extends IBaseEntity {
     medicineDetail?: MedicineDetail;
     cart?: Cart;
     order?: Order;
+    typeView?: string;
 }
 
 @Entity('Medicine')
@@ -30,6 +31,7 @@ export class Medicine extends BaseEntity {
             medicineDetail,
             cart,
             order,
+            typeView,
             ...superItem
         } = props || {};
 
@@ -45,6 +47,7 @@ export class Medicine extends BaseEntity {
             medicineDetail,
             cart,
             order,
+            typeView
         });
     }
 
@@ -65,6 +68,9 @@ export class Medicine extends BaseEntity {
 
     @Column({ nullable: true })
     status?: boolean;
+
+    @Column({ nullable: true, width: 300 })
+    typeView?: string;
 
     @OneToOne(() => MedicineDetail, (medicineDetail) => medicineDetail.medicine, {cascade: true, nullable: true})
     medicineDetail?: MedicineDetail;

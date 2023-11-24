@@ -1,7 +1,7 @@
 
 export type Account = {
-    username: any;
-    password: any;
+    username?: any;
+    password?: any;
     confirmPassword?: any;
 };
 
@@ -22,12 +22,13 @@ type Gender = {
 
 export type User = {
     account: Account,
-    firstName: any;
-    lastName: any;
-    avatar?: any;
-    phone?: any;
-    email? : any;
+    firstName?: string;
+    lastName?: string;
+    fullName?: string;
+    avatar?: string;
+    phone?: string;
+    email? : string;
     gender?: Gender;
     birthday?: any;
-    address?: any;
+    address?: string;
 };

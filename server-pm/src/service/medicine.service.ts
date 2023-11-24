@@ -9,6 +9,9 @@ import { Medicine } from "../entity/medicine.entity";
 import { MedicineDTO, MedicinesDTO } from "../validator/dto/medicine.dto";
 import { FilterParamsDTO } from "../validator/dto/Address-params.dto";
 import { ProvincesService } from "./provinces.service";
+import { FindDTO } from "../validator/dto/find.dto";
+import moment from "moment";
+import { ENUM } from "../util/enum.util";
 
 @Injectable()
 export class MedicinesService {
@@ -154,43 +157,49 @@ export class MedicinesService {
         return null;
     }
 
-    async updateOneMedicine(headers?: any, model?: MedicinesDTO, tableName?: string, value?: any): Promise<unknown> {
+    async updateOneMedicine(headers?: any, model?: any, tableName?: string, value?: any): Promise<unknown> {
         try {
-            if (model.medicines && model.medicines.length > 0) {
+            if (Array.isArray(model.medicines) && model.medicines.length > 0) {
                 let resultNoSuccess = [];
                 let resultSuccess = [];
 
                 await Promise.all(
-                    model.medicines.map(async (item) => {
-                        const { medicineDetail } = item;
+                    model.medicines.map(async (item: any) => {
+                        const { id, medicineDetail } = item;
                         delete item.medicineDetail;
 
-                        if (item.id) {
+                        if (id) {
+                            delete item?.id;
+
                             const resultUpdateMedicine = await this.medicineRepository.createQueryBuilder()
                                 .update('Medicine')
                                 .set({ ...item })
-                                .where("id = :id", { id: item.id }).andWhere("isDelete = false")
+                                .where("id = :id", { id: id }).andWhere("isDelete = false")
                                 .execute();
 
                             if (!resultUpdateMedicine || resultUpdateMedicine.affected <= 0) {
-                                resultNoSuccess.push(item.id);
+                                resultNoSuccess.push(id);
                             } else {
-                                resultSuccess.push(item.id);
+                                resultSuccess.push(id);
                             }
                         }
 
-                        if (medicineDetail.medicineId) {
+                        if (medicineDetail?.medicineId && id) {
+                            delete medicineDetail?.medicineId;
+
                             const resultUpdateMedicineDetail = await this.medicineRepository.createQueryBuilder()
                                 .update('MedicineDetail')
-                                .set({ ...medicineDetail })
-                                .where("medicineId = :id", { id: item.id }).andWhere("isDelete = false")
+                                .set({
+                                    ...medicineDetail
+                                })
+                                .where("medicineId = :id", { id: id }).andWhere("MedicineDetail.isDelete = false")
                                 .execute();
                             if (!resultUpdateMedicineDetail || resultUpdateMedicineDetail.affected <= 0) {
-                                if (!resultNoSuccess.includes(item.id))
-                                    resultNoSuccess.push(item.id);
+                                if (!resultNoSuccess.includes(id))
+                                    resultNoSuccess.push(id);
                             } else {
-                                if (!resultSuccess.includes(item.id))
-                                    resultSuccess.push(item.id);
+                                if (!resultSuccess.includes(id))
+                                    resultSuccess.push(id);
                             }
                         }
                     })
@@ -335,12 +344,14 @@ export class MedicinesService {
         }
     }
 
-
-    async findMedicine(headers: any, search?: string, typeFind?: string): Promise<unknown> {
+    async findMedicine(headers: any, search?: string, typeFind?: string, body?: FindDTO): Promise<unknown> {
         let { page, pagesize, sort, typesort }: FilterParamsDTO = headers;
+        const { findByPrice, findByDateEnd, type, quantity } = body;
+
         try {
             let take = 1 * 20;
             let skip = take - 20;
+            let message= '';
 
             let data = await this.medicineRepository
                 .createQueryBuilder('Medicine')
@@ -350,7 +361,29 @@ export class MedicinesService {
                 totalPage: number = 0;
 
             if (search && search.length > 0) {
-                data.andWhere(`Medicine.${typeFind} LIKE :search`, { search: `%${search}%` });
+                data.andWhere(`Medicine.${typeFind && typeFind.length > 0 && typeFind !== 'type' ? typeFind : 'name' } LIKE :search`, { search: `%${search}%` });
+            }
+
+            if(type) {
+                data.andWhere(`Medicine.type = ${type.value ? type.value : ''}`);
+            }
+
+            if(quantity) {
+                data.andWhere(`d.quantity <= ${quantity.value ? quantity.value : 0} OR d.quantity = NULL`);
+            }
+
+            if(findByPrice) {
+                data.andWhere(`d.price >= ${findByPrice.fromPrice ? findByPrice.fromPrice : 0} and d.price <= ${findByPrice.toPrice ? findByPrice.toPrice : 0}`);
+                if(findByPrice.fromPrice > findByPrice.toPrice) {
+                    message = message + ' | Đến giá không thể nhỏ hơn từ giá';
+                }
+            }
+
+            if(findByDateEnd) {
+                data.andWhere(`d.dateEnd >= ${findByDateEnd.fromDate ? findByDateEnd.fromDate : moment(new Date()).format('YYYY-MM-DD HH:mm:ss')} and d.dateEnd <= ${findByDateEnd.toDate ? findByDateEnd.toDate : moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}`);
+                if(findByDateEnd.fromDate > findByDateEnd.toDate) {
+                    message = message + ' | Đến giá không thể nhỏ hơn từ giá';
+                }
             }
 
             if ((page && pagesize) || ((sort as boolean) && typesort)) {
@@ -363,10 +396,13 @@ export class MedicinesService {
 
             const result = await data.getMany();
             if (result) {
+                result.forEach((element) => {
+                    element.typeView = ENUM[`${element.type}`];
+                })
                 return {
                     status: 200,
                     statusText: 'SUCCESS',
-                    message: 'Thành công!',
+                    message: message.length === 0 ? 'Thành công!' : message,
                     data: result,
                     totalItem,
                     totalPage
@@ -384,6 +420,11 @@ export class MedicinesService {
         } catch (error) {
             throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
         }
+    }
+
+    async saleMedicine(headers: any): Promise<unknown> {
+
+        return;
     }
 
 }

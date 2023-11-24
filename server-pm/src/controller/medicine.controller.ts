@@ -2,6 +2,7 @@ import { Controller, Post, Req, Body, Get, Param, Headers, Query } from "@nestjs
 
 import { MedicinesService } from "../service/medicine.service";
 import { MedicineDTO, MedicinesDTO } from "../validator/dto/medicine.dto";
+import { FindDTO } from "../validator/dto/find.dto";
 
 @Controller('medicine')
 export class MedicinesController {
@@ -21,7 +22,7 @@ export class MedicinesController {
     }
 
     @Post('/updateOneMedicine')
-    updateOneMedicine(@Headers() headers: any, @Body() body?: MedicinesDTO, value?: any): Promise<unknown> {
+    updateOneMedicine(@Headers() headers: any, @Body() body?: any, value?: any): Promise<unknown> {
         return this.medicinesService.updateOneMedicine(headers, body, value);
     }
 
@@ -41,7 +42,12 @@ export class MedicinesController {
     }
 
     @Get('/findMedicine/')
-    findMedicine(@Headers() headers: any, @Query("typeFind") typeFind: string, @Query("search") search?: string): Promise<unknown> {
-        return this.medicinesService.findMedicine(headers, search, typeFind );
+    findMedicine(
+        @Headers() headers: any, 
+        @Query("typeFind") typeFind: string,
+        @Query("search") search?: string, 
+        @Body() body?: FindDTO
+        ): Promise<unknown> {
+        return this.medicinesService.findMedicine(headers, search, typeFind, body);
     }
 }

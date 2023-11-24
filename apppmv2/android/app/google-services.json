@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "493934264080",
+    "project_id": "pharmacy-manager-401ca",
+    "storage_bucket": "pharmacy-manager-401ca.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:493934264080:android:35d1cd62036b15347cef95",
+        "android_client_info": {
+          "package_name": "com.apppmv2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "493934264080-iqke4hnvtje4ta2u7rhnbih06mt314gm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.apppmv2",
+            "certificate_hash": "83ee8b423f189f32a8dcd4b96a1c51ecef1a4e08"
+          }
+        },
+        {
+          "client_id": "493934264080-de9osdfi038em8bu140a756tis8f0e3i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAL4LoZlAYhKv6uGKw-51fIa6R2kC4zpwg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "493934264080-de9osdfi038em8bu140a756tis8f0e3i.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "493934264080-4crlqsck176jkp3kgti2kbuoaqrtp41c.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.app.apppmv2"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -150,6 +150,9 @@ android {
 
 dependencies {
 
+    // nhan add
+    implementation project(path: ":@react-native-firebase_auth")
+
     implementation project(':react-native-community-geolocation')
 
     // The version of react-native is set by the React Native Gradle Plugin
