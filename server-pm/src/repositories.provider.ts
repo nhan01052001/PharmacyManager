@@ -7,6 +7,7 @@ import { DistrictsRepository } from "./repository/districts.repository";
 import { ProvincesRepository } from "./repository/provinces.repository";
 import { WardsRepository } from "./repository/wards.repository";
 import { MedicineRepository } from "./repository/medicines.repository";
+import { CartRepository } from "./repository/cart.repository";
 
 const repositories = [
     UserRepository,
@@ -14,7 +15,8 @@ const repositories = [
     ProvincesRepository,
     DistrictsRepository,
     WardsRepository,
-    MedicineRepository
+    MedicineRepository,
+    CartRepository
 ];
 
 const RepositoriesProvider: Provider[] = [];

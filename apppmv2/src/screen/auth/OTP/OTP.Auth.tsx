@@ -58,25 +58,25 @@ export const OTP: React.FC<{ route: any }> = ({ route }) => {
   const MAX_CODE_LENGTH = 6;
 
   const sendCode = async () => {
-    // navigation.navigate("RegisterInformationPersonal", {
-    //   username: username,
-    //   password: password
-    // });
-    LoadingService.show();
-    await auth().signInWithPhoneNumber(`+84${username.substring(1)}`, true).then((res) => {
-      console.log(res, 'res');
-      LoadingService.hide();
-      if(res) {
-        setConfirm(res);
-      setTimerCount(90);
-      setIsTimeCount(true);
-      countDown();
-      } else {
-        AlertService.show("", "Có lỗi trong quá trình xử lý!", 4000, "Lỗi xử lý");
-      }
-    }).catch((error) => {
-      console.log(error, 'error');
+    navigation.navigate("RegisterInformationPersonal", {
+      username: username,
+      password: password
     });
+    // LoadingService.show();
+    // await auth().signInWithPhoneNumber(`+84${username.substring(1)}`, true).then((res) => {
+    //   console.log(res, 'res');
+    //   LoadingService.hide();
+    //   if (res) {
+    //     setConfirm(res);
+    //     setTimerCount(90);
+    //     setIsTimeCount(true);
+    //     countDown();
+    //   } else {
+    //     AlertService.show("", "Có lỗi trong quá trình xử lý!", 4000, "Lỗi xử lý");
+    //   }
+    // }).catch((error) => {
+    //   console.log(error, 'error');
+    // });
   };
 
   const confirmCode = () => {
@@ -87,7 +87,7 @@ export const OTP: React.FC<{ route: any }> = ({ route }) => {
           .then((res: any) => {
             LoadingService.hide();
             console.log(res, 'res');
-            if(res?.user?._user?.uid) {
+            if (res?.user?._user?.uid) {
               navigation.navigate("RegisterInformationPersonal", {
                 username: username,
                 password: password
@@ -109,81 +109,83 @@ export const OTP: React.FC<{ route: any }> = ({ route }) => {
 
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
       <HeaderComponent
         titleHeader={'Xác nhận OTP'}
         isOptionHome={false}
         goBack={() => navigation.goBack()}
       />
-      <View
-        style={{
-          marginTop: 70,
-          flex: 1,
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Image
-          style={styles.image}
-          source={require("../../../global/assets/image/otp.png")}
-          resizeMode="contain"
-        />
+      <View style={[styles.container, StylesTheme.droidSafeArea]}>
         <View
           style={{
+            marginTop: 70,
+            flex: 1,
             justifyContent: "space-between",
             alignItems: "center",
           }}
         >
-          <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 5 }}>
-            Xác thực OTP
-          </Text>
-          <Text style={{ fontSize: 16 }}>
-            {isTimeCount && `OTP được gửi qua số điện thoại của bạn`}
-          </Text>
-        </View>
-      </View>
-
-      <View
-        style={[StylesTheme.flexCenter, {
-          flexGrow: 0.5,
-        }]}
-      >
-        <CodeInputField
-          setPinReady={setPinReady}
-          code={code}
-          setCode={setCode}
-          maxLength={MAX_CODE_LENGTH}
-        />
-        {isTimeCount === true ? (
-          <Text style={{ fontSize: 16 }}>
-            OTP tồn tại trong: {timerCount} giây
-          </Text>
-        ) : (
-          <Text style={{ fontSize: 16 }}></Text>
-        )}
-      </View>
-      <View style={styles.wrapBtn}>
-        {timerCount === 0 || isTimeCount === false ? (
-          <TouchableOpacity style={styles.btnVerify}
-            onPress={sendCode}
+          <Image
+            style={styles.image}
+            source={require("../../../global/assets/image/otp.png")}
+            resizeMode="contain"
+          />
+          <View
+            style={{
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
           >
-            <VerifyIcon color="green" size={24} />
-            <Text
-              style={{ fontSize: 18, fontWeight: "500", textAlign: "center" }}
-            >
-              Gửi OTP
+            <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 5 }}>
+              Xác thực OTP
             </Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.btnVerify} onPress={confirmCode}>
-            <VerifyIcon color="green" size={24} />
-            <Text
-              style={{ fontSize: 18, fontWeight: "500", textAlign: "center" }}
-            >
-              Xác nhận
+            <Text style={{ fontSize: 16 }}>
+              {isTimeCount && `OTP được gửi qua số điện thoại của bạn`}
             </Text>
-          </TouchableOpacity>
-        )}
+          </View>
+        </View>
+
+        <View
+          style={[StylesTheme.flexCenter, {
+            flexGrow: 0.5,
+          }]}
+        >
+          <CodeInputField
+            setPinReady={setPinReady}
+            code={code}
+            setCode={setCode}
+            maxLength={MAX_CODE_LENGTH}
+          />
+          {isTimeCount === true ? (
+            <Text style={{ fontSize: 16 }}>
+              OTP tồn tại trong: {timerCount} giây
+            </Text>
+          ) : (
+            <Text style={{ fontSize: 16 }}></Text>
+          )}
+        </View>
+        <View style={styles.wrapBtn}>
+          {timerCount === 0 || isTimeCount === false ? (
+            <TouchableOpacity style={styles.btnVerify}
+              onPress={sendCode}
+            >
+              <VerifyIcon color="green" size={24} />
+              <Text
+                style={{ fontSize: 18, fontWeight: "500", textAlign: "center" }}
+              >
+                Gửi OTP
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.btnVerify} onPress={confirmCode}>
+              <VerifyIcon color="green" size={24} />
+              <Text
+                style={{ fontSize: 18, fontWeight: "500", textAlign: "center" }}
+              >
+                Xác nhận
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );

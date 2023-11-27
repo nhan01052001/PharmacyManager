@@ -6,6 +6,7 @@ import { provinces } from "./entity/provinces.entity";
 import { districts } from "./entity/districts.entity";
 import { wards } from "./entity/wards.entity";
 import { Medicine } from "./entity/medicine.entity";
+import { Cart } from "./entity/cart.entity";
 
 export const entities = [
     User,
@@ -15,5 +16,6 @@ export const entities = [
     provinces,
     districts,
     wards,
-    Medicine
+    Medicine,
+    Cart
 ];

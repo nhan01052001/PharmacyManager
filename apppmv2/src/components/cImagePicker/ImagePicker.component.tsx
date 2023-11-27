@@ -35,12 +35,15 @@ const initialState: IState = {
 
 interface IProps {
     label?: string,
+    width?: number,
+    height?: number,
+    borderRadius?: number,
     onComplete: (value: string) => void,
 }
 
 
 const ImagePicker: React.FC<IProps> = (props: IProps) => {
-    const { label, onComplete } = props;
+    const { label, width, height, borderRadius, onComplete } = props;
     const [{ filePath, isShowModal }, setState] = useState<IState>({ ...initialState });
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -156,13 +159,13 @@ const ImagePicker: React.FC<IProps> = (props: IProps) => {
     };
 
     useEffect(() => {
-        if(filePath) {
+        if (filePath) {
             onComplete(filePath?.uri ? filePath?.uri : "");
         }
     }, [filePath]);
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -207,7 +210,13 @@ const ImagePicker: React.FC<IProps> = (props: IProps) => {
                 </View>
             </Modal>
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <TouchableOpacity style={{ width: 100, height: 100, borderRadius: 100, padding: 2, backgroundColor: Colors.black }}
+                <TouchableOpacity style={{
+                    width: width && width > 0 ? width : 100,
+                    height: height && height > 0 ? height : 100,
+                    borderRadius: borderRadius && borderRadius > 0 ? borderRadius : 100,
+                    padding: 2,
+                    backgroundColor: Colors.black
+                }}
                     onPress={() => {
                         setState((prevState: IState) => ({
                             ...prevState,
@@ -215,18 +224,30 @@ const ImagePicker: React.FC<IProps> = (props: IProps) => {
                         }));
                     }}
                 >
-                    <View style={{ flex: 1, borderRadius: 100, justifyContent: 'center', alignItems: 'center' }}>
+                    <View style={{ flex: 1, borderRadius: borderRadius && borderRadius > 0 ? borderRadius : 100, justifyContent: 'center', alignItems: 'center' }}>
                         {
                             filePath && filePath?.uri ? (
-                                <Image source={{ uri: filePath.uri }} style={{ width: 98, height: 98, borderRadius: 98 }} resizeMode={"stretch"} />
+                                <Image source={{ uri: filePath.uri }} style={{
+                                    width: width && width > 0 ? width : 98,
+                                    height: height && height > 0 ? height : 98,
+                                    borderRadius: borderRadius && borderRadius > 0 ? borderRadius : 98
+                                }} resizeMode={"stretch"} />
                             ) : (
-                                <Image source={require("../../global/assets/image/man.png")} style={{ width: 98, height: 98, borderRadius: 98 }} />
+                                <Image source={require("../../global/assets/image/man.png")} style={{
+                                    width: width && width > 0 ? width : 98,
+                                    height: height && height > 0 ? height : 98,
+                                    borderRadius: borderRadius && borderRadius > 0 ? borderRadius : 98
+                                }} />
                             )
                         }
                     </View>
                     {
                         isLoading && (
-                            <View style={{ position: 'absolute', width: 100, height: 100, borderRadius: 100, justifyContent: 'center', alignItems: 'center' }}>
+                            <View style={{
+                                position: 'absolute', width: width && width > 0 ? width : 100,
+                                height: height && height > 0 ? height : 100,
+                                borderRadius: borderRadius && borderRadius > 0 ? borderRadius : 100, justifyContent: 'center', alignItems: 'center'
+                            }}>
                                 <Progress.Circle size={110} indeterminate={true} />
                             </View>
                         )
@@ -234,7 +255,7 @@ const ImagePicker: React.FC<IProps> = (props: IProps) => {
                 </TouchableOpacity>
                 <Text style={[StylesTheme.textLabel, { marginTop: 6 }]}>{label}</Text>
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 

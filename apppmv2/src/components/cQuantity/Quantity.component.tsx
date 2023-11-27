@@ -15,8 +15,8 @@ const Quantity: React.FC<IProps> = (props: IProps) => {
     const { value, onComplete } = props;
 
 
-    const handleIncrease = () => {      
-        if (value) {            
+    const handleIncrease = () => {
+        if (value) {
             onComplete(Number(value) + 1);
         }
     };
@@ -26,13 +26,13 @@ const Quantity: React.FC<IProps> = (props: IProps) => {
             onComplete(Number(value) - 1);
         }
     };
-    
+
     return (
-        <View style={[StylesTheme.onlyFlexDirectionAli_Center, {marginLeft: 12}]}>
-            <TouchableOpacity onPress={() => handleIncrease()}>
-                <Image source={require('../../global/assets/image/plus.png')} style={StylesTheme.wh18} />
+        <View style={[StylesTheme.onlyFlexDirectionAli_Center, {  marginLeft: 12, }]}>
+            <TouchableOpacity onPress={() => handleReduce()}>
+                <Image source={require('../../global/assets/image/minus-sign.png')} style={StylesTheme.wh18} />
             </TouchableOpacity>
-            <View style={{paddingHorizontal: 12}}>
+            <View style={{ paddingHorizontal: 12 }}>
                 <TextInput
                     style={{
                         paddingVertical: 4,
@@ -47,8 +47,8 @@ const Quantity: React.FC<IProps> = (props: IProps) => {
                     }}
                 />
             </View>
-            <TouchableOpacity onPress={() => handleReduce()}>
-                <Image source={require('../../global/assets/image/minus-sign.png')} style={StylesTheme.wh18} />
+            <TouchableOpacity onPress={() => handleIncrease()}>
+                <Image source={require('../../global/assets/image/plus.png')} style={StylesTheme.wh18} />
             </TouchableOpacity>
         </View>
     )

@@ -1,13 +1,13 @@
 import "reflect-metadata";
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity, IBaseEntity } from './baseEntity/base.entity';
 import { User } from './user.entity';
 import { Medicine } from "./medicine.entity";
 
 interface ICart extends IBaseEntity {
-    user?: User,
+    user?: string,
     status?: boolean;
-    medicine?: Medicine[];
+    medicine?: string;
 }
 
 @Entity('Cart')
@@ -32,10 +32,15 @@ export class Cart extends BaseEntity {
     @Column({ nullable: true })
     status?: boolean;
 
-    @OneToOne(() => User, (user) => user.cart, { cascade: true, nullable: true })
-    @JoinColumn()
-    users?: User;
+    @OneToOne(() => User, (user) => user.cart)
+    // @JoinColumn()
+    // @Index({unique: false})
+    @Column({ nullable: true })
+    users?: string;
 
-    @OneToMany(() => Medicine, (medicine) => medicine.cart)
-    medicine?: Medicine[];
+    @OneToOne(() => Medicine, (medicine) => medicine.cart)
+    // @JoinColumn()
+    // @Index({unique: false})
+    @Column({ nullable: true })
+    medicine?: string;
 }

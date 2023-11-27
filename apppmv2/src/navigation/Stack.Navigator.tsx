@@ -7,6 +7,8 @@ import { Register } from '../screen/auth/Register.Auth';
 import { OTP } from '../screen/auth/OTP/OTP.Auth';
 import RegisterInformationPersonal from '../screen/auth/RegisterIn4.Auth';
 import DetailMedicine from '../screen/medicine/DetailMedicine.medicine';
+import AllMedicine from '../screen/medicine/AllMedicine.medicine';
+import SearchScreen from '../screen/search/Search';
 
 export type ScreenName =
     "Login" | 
@@ -14,7 +16,9 @@ export type ScreenName =
     "OTP" |
     "RegisterInformationPersonal" |
     "BottomTabNavigator" |
-    "DetailMedicine";
+    "DetailMedicine" |
+    "AllMedicine" | 
+    "SearchScreen";
 
 
 export type MainStackParams = {
@@ -29,6 +33,8 @@ export type RootStackParams = {
     MainStackNavigator: undefined;
     BottomTabNavigator: undefined;
     DetailMedicine: any;
+    AllMedicine: any;
+    SearchScreen: any;
 };
 
 export type AllStackParams = {
@@ -39,6 +45,8 @@ export type AllStackParams = {
     BottomTabNavigator: any | undefined;
     MainStackNavigator: undefined;
     DetailMedicine: any;
+    AllMedicine: any;
+    SearchScreen: any;
 }
 
 const MainStack = createStackNavigator<MainStackParams>();
@@ -69,6 +77,16 @@ export const RootStackNavigator: React.FC = () => (
             name='DetailMedicine'
             component={DetailMedicine}
             options={{ headerShown: false, gestureEnabled: false, }}
+        />
+        <RootStack.Screen
+            name='AllMedicine'
+            component={AllMedicine}
+            options={{ headerShown: false, }}
+        />
+        <RootStack.Screen
+            name='SearchScreen'
+            component={SearchScreen}
+            options={{ headerShown: false, }}
         />
     </RootStack.Navigator>
 );

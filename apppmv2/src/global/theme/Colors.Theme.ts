@@ -7,6 +7,7 @@ export const Colors = {
   colorGrey: '#cccccc',
   clDarkGreen: '#377547',
   black: '#000000',
+  colorGray_2: '#808080',
 
   fontSplashRegular: 'Splash-Regular',
 };

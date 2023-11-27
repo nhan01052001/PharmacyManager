@@ -23,49 +23,67 @@ interface IProps {
 const Medicine: React.FC<IProps> = (props: IProps) => {
     const navigation = useNavigation<StackNavigationProp<RootStackParams>>();
     const { item, colorBtn, mgBottom, handleClickProduct } = props;
+    let unitView: any[] = [];
+
+    if (item?.medicineDetail?.unitView && item?.medicineDetail?.unitView.length > 0) {
+        const arrUnitView = JSON.parse(item?.medicineDetail?.unitView);
+        if (Array.isArray(arrUnitView)) {
+            arrUnitView.map((value: any) => {
+                if (value?.isHave && value?.name) {
+                    unitView.push(value?.name);
+                }
+            })
+        }
+    }
 
     return (
         <TouchableOpacity
             style={[styles.container, mgBottom && { marginBottom: mgBottom }]}
             onPress={() => {
                 navigation.navigate("DetailMedicine", {
-                    item: {...item}
+                    item: { ...item }
                 });
             }}
         >
             <View style={{ flex: 1, padding: 12, justifyContent: 'flex-start', alignItems: 'center' }}>
                 <View style={{ width: '100%', height: '40%' }}>
                     <Image
-                        source={{ uri: item?.imgProduct }}
+                        source={{ uri: item?.medicineDetail?.lsImage?.split(',')[0] }}
                         resizeMode={'contain'}
                         style={{ width: '100%', height: '100%' }}
                     />
                 </View>
                 <View style={{ width: '100%', height: '60%', marginTop: 12, justifyContent: 'space-between' }}>
                     <View>
-                        <Text numberOfLines={2}>{item?.name}</Text>
+                        <Text numberOfLines={2}>{item?.fullName}</Text>
                     </View>
 
                     <View style={{ width: '100%' }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <Text style={[StylesTheme.sizeText, { color: 'red', fontWeight: '700' }]}>
-                                {item?.priceCourse} đ
+                                {
+                                    new Intl.NumberFormat('en-US', {
+                                        currency: 'VND',
+                                        style: 'currency',
+                                    }).format(item?.medicineDetail?.price ? item?.medicineDetail?.price : 0).replace('₫', '')
+                                }₫
                             </Text>
-                            {item?.isPromotion === true ? (
+                            {/* {item?.isPromotion === true ? (
                                 <Text
                                     style={[
                                         StylesTheme.sizeText,
                                         { color: '#ccc', textDecorationLine: 'line-through' },
                                     ]}
                                 >
-                                    555.000 đ
+                                    {item?.medicineDetail?.price}
                                 </Text>
-                            ) : null}
+                            ) : null} */}
                         </View>
                         <View style={{ flexDirection: 'row' }}>
                             <Text>Đơn vị tính: </Text>
                             <Text style={{ fontWeight: '600' }} numberOfLines={2}>
-                                {item?.unit?.box === true ? 'Hộp' : null}, {item?.unit?.pill === true ? 'Viên' : null},
+                                {/* {item?.unit?.box === true ? 'Hộp' : null}, {item?.unit?.pill === true ? 'Viên' : null}, */}
+                                {unitView.length > 0 ? unitView.join(',') : ''}
                             </Text>
                         </View>
                     </View>

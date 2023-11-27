@@ -15,6 +15,7 @@ import MedicineComponent from './Medicine.component';
 import { Colors } from '../../global/theme/Colors.Theme';
 import { Product } from '../../type/Product.type';
 import HttpService from '../../service/HttpService.Service';
+import { ENUM } from '../../global/enum';
 
 const { width } = Dimensions.get('window');
 
@@ -44,14 +45,28 @@ const ListMedicine: React.FC<IProps> = (props: IProps) => {
 
     const getData = () => {
 
-        HttpService.Get(api?.urlApi)
-            .then((res) => {                
-                if (res && Array.isArray(res)) {
+        HttpService.Get(api?.urlApi, api?.configHeader ? api?.configHeader : {})
+            .then((res: any) => {
+                if (res && res?.status === 200 && res?.statusText === ENUM.E_SUCCESS && Array.isArray(res?.data)) {
                     setState((prevState) => ({
                         ...prevState,
-                        dataLocal: [...res],
+                        dataLocal: [...res?.data],
                         isLoading: false,
                     }));
+                } else {
+                    if (!data || data.length === 0) {
+                        setState((prevState) => ({
+                            ...prevState,
+                            dataLocal: [],
+                            isLoading: false,
+                        }));
+                    } else {
+                        setState((prevState) => ({
+                            ...prevState,
+                            dataLocal: [],
+                            isLoading: false,
+                        }));
+                    }
                 }
             }).catch((error) => {
 
@@ -68,6 +83,7 @@ const ListMedicine: React.FC<IProps> = (props: IProps) => {
             });
         }
     }, []);
+console.log(dataLocal, 'dataLocal');
 
     return (
         <View style={{ width: width, maxWidth: width }}>
@@ -99,7 +115,7 @@ const ListMedicine: React.FC<IProps> = (props: IProps) => {
                     showsHorizontalScrollIndicator={false}
                     style={{ marginRight: 16 }}
                     renderItem={({ item }) => <MedicineComponent item={item} colorBtn={colorBtn} />}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item: Product) => item.id}
                 />
             )}
         </View>

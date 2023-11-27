@@ -75,7 +75,7 @@ export class Medicine extends BaseEntity {
     @OneToOne(() => MedicineDetail, (medicineDetail) => medicineDetail.medicine, {cascade: true, nullable: true})
     medicineDetail?: MedicineDetail;
 
-    @ManyToOne(() => Cart, (cart) => cart.medicine)
+    @OneToOne(() => Cart, (cart) => cart.medicine)
     cart?: Cart;
 
     @ManyToOne(() => Order, (order) => order.medicine)

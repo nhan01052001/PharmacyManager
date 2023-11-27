@@ -1,7 +1,7 @@
 import { Controller, Post, Req, Body, Get, Param, Headers, Query } from "@nestjs/common";
 
 import { MedicinesService } from "../service/medicine.service";
-import { MedicineDTO, MedicinesDTO } from "../validator/dto/medicine.dto";
+import { MedicineDTO, MedicinesDTO, SaleMedicineDTO } from "../validator/dto/medicine.dto";
 import { FindDTO } from "../validator/dto/find.dto";
 
 @Controller('medicine')
@@ -49,5 +49,10 @@ export class MedicinesController {
         @Body() body?: FindDTO
         ): Promise<unknown> {
         return this.medicinesService.findMedicine(headers, search, typeFind, body);
+    }
+
+    @Post('/addToCart')
+    addToCart(@Headers() headers: any,  @Body() body?: any) : Promise<unknown> {
+        return this.medicinesService.addToCart(headers, body );
     }
 }

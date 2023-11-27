@@ -1,5 +1,5 @@
 import { Transform, Type } from 'class-transformer';
-import { ArrayMinSize, IsEmail, IsEmpty, IsNotEmpty, IsPhoneNumber, IsString, MaxLength, MinLength, ValidateNested } from 'class-validator';
+import { ArrayMinSize, IsNotEmpty, IsString, ValidateNested, IsNumber } from 'class-validator';
 import { MedicineDetailDTO } from './medicineDetail.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -38,4 +38,15 @@ export class MedicinesDTO {
    @ArrayMinSize(1)
    @ValidateNested({each: true})
     medicines: MedicineDTO[];
+}
+
+export class SaleMedicineDTO {
+
+    @IsString()
+    @IsNotEmpty()
+    id?: string;
+
+    @IsNumber()
+    @IsNotEmpty()
+    quantity?: number;
 }

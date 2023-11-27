@@ -286,320 +286,322 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
     }
 
     return (
-        <View style={styles.container}>
+        <View style={{ flex: 1 }}>
             <HeaderComponent
                 titleHeader={'Đăng ký thông tin cá nhân'}
                 screenName='Register'
                 isOptionHome={false}
                 goBack={() => navigation.goBack()}
             />
-            <KeyboardAwareScrollView style={{ flex: 1 }}>
-                <View style={{ flex: 1, paddingHorizontal: 24 }}>
-                    {/* logo and slogan */}
-                    <View style={StylesTheme.flexCenter}>
-                        <Image source={require('../../global/assets/image/logo.png')} style={{ width: 200, height: 132 }} />
-                    </View>
-
-                    {/*  */}
-                    <View style={{ flex: 1 }}>
-
-                        {/* Avatar */}
-                        <View style={[styles.wrapXXX, { marginBottom: 0 }]}>
-                            <ImagePicker label={avatar.label} onComplete={(value: string) => {
-                                if (value.length > 0) {
-                                    setState((prevState: State) => ({
-                                        ...prevState,
-                                        avatar: {
-                                            ...prevState.avatar,
-                                            value: value,
-                                            isRefresh: !prevState.avatar?.isRefresh
-                                        }
-                                    }));
-                                }
-                            }} />
+            <View style={[styles.container]}>
+                <KeyboardAwareScrollView style={{ flex: 1 }}>
+                    <View style={{ flex: 1, paddingHorizontal: 24 }}>
+                        {/* logo and slogan */}
+                        <View style={StylesTheme.flexCenter}>
+                            <Image source={require('../../global/assets/image/logo.png')} style={{ width: 200, height: 132 }} />
                         </View>
 
-                        {/* First Name */}
-                        <View style={styles.wrapXXX}>
-                            <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
-                                <Text numberOfLines={2} style={[styles.textSubTitle]}>
-                                    {
-                                        firstName.value && firstName.value !== "" ? firstName.label : " "
-                                    }
-                                </Text>
-                                {
-                                    firstName.value && firstName.value !== "" && (
-                                        <Text style={styles.asteriskValid}>*</Text>
-                                    )
-                                }
-                            </View>
-                            <TextInputComponent
-                                style={[styles.textInput, {}]}
-                                placeholder={firstName.label}
-                                value={firstName.value}
-                                isObligatory={firstName.isObligatory}
-                                isClose={true}
-                                isShowIconError={isErrorObj.firstName}
-                                isError={isErrorObj.firstName}
-                                onComplete={(text) => {
-                                    setState((prevState: State) => ({
-                                        ...prevState,
-                                        firstName: {
-                                            ...prevState.firstName,
-                                            value: text,
-                                            isRefresh: !prevState.firstName?.isRefresh
-                                        }
-                                    }));
-                                }}
-                            />
-                        </View>
+                        {/*  */}
+                        <View style={{ flex: 1 }}>
 
-                        {/* Last Name */}
-                        <View style={styles.wrapXXX}>
-                            <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
-                                <Text numberOfLines={2} style={[styles.textSubTitle]}>
-                                    {
-                                        lastName.value && lastName.value !== "" ? lastName.label : " "
-                                    }
-                                </Text>
-                                {
-                                    lastName.value && lastName.value !== "" && (
-                                        <Text style={styles.asteriskValid}>*</Text>
-                                    )
-                                }
-                            </View>
-                            <TextInputComponent
-                                style={[styles.textInput, {}]}
-                                placeholder="Tên"
-                                value={lastName.value}
-                                isObligatory={lastName.isObligatory}
-                                isShowIconError={isErrorObj.lastName}
-                                isError={isErrorObj.lastName}
-                                onComplete={(text) => {
-                                    setState((prevState: State) => ({
-                                        ...prevState,
-                                        lastName: {
-                                            ...prevState.lastName,
-                                            value: text,
-                                            isRefresh: !prevState.lastName.isRefresh
-                                        }
-                                    }));
-                                }}
-                            />
-                        </View>
-
-                        {/* Birthday */}
-                        <View style={styles.wrapXXX}>
-                            <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
-                                <Text numberOfLines={2} style={[styles.textSubTitle]}>
-                                    {
-                                        birthday.value ? birthday.label : " "
-                                    }
-                                </Text>
-                                {
-                                    birthday.value && birthday.value !== "" && birthday.isObligatory && (
-                                        <Text style={styles.asteriskValid}>*</Text>
-                                    )
-                                }
-                            </View>
-                            <TouchableOpacity style={[styles.textInput, isErrorObj.birthday && { borderColor: 'red' }]} onPress={() => {
-                                setState((prevState: State) => ({
-                                    ...prevState,
-                                    isVisibleDate: true
-                                }));
-                            }}>
-                                <View style={StylesTheme.onlyFlexRow_AliCenter_JusSP}>
-                                    <Text style={[styles.text, { marginVertical: 0 }, birthday.value === null ? { color: "#ccc" } : { color: "#000" }]}>
-                                        {birthday.value ? moment(birthday.value).format('DD/MM/YYYY') : 'Chọn ngày tháng năm sinh'}
-                                    </Text>
-                                    {
-                                        birthday.isObligatory && !birthday.value && (
-                                            <View style={{ paddingRight: 8 }}>
-                                                <Text style={styles.asteriskValid}>*</Text>
-                                            </View>
-                                        )
-                                    }
-                                </View>
-                            </TouchableOpacity>
-                            {/* modal chọn ngày */}
-                            <View style={{ flex: 1, zIndex: 1, }}>
-                                <DateTimePickerModal
-                                    date={birthday.value === null ? new Date() : birthday.value}
-                                    // format="dd/MM/yyyy"
-                                    isVisible={isVisibleDate}
-                                    mode={'date'}
-                                    onConfirm={handleConfirm}
-                                    onCancel={() => {
-                                        hideDatePicker();
-                                    }}
-                                    cancelTextIOS={"Huỷ"}
-                                    confirmTextIOS={"Xác nhận"}
-                                    is24Hour={true}
-                                />
-                            </View>
-                        </View>
-
-                        {/* Gender */}
-                        <View style={styles.wrapXXX}>
-                            <View style={StylesTheme.onlyFlexDirectionAli_Center}>
-                                <Text style={[styles.textSubTitle]}>{gender.label}</Text>
-                                <Text style={[styles.text, styles.asteriskValid]}>*</Text>
-                            </View>
-                            <View style={styles.wrapCheckBoxGender}>
-                                <Pressable
-                                    style={StylesTheme.onlyFlexDirectionAli_Center}
-                                    onPress={() => {
-                                        eventGender(0);
-                                    }}
-                                >
-                                    {gender?.male.isMale === true ? (
-                                        <View style={styles.genderActive}></View>
-                                    ) : (
-                                        <View style={styles.genderNoActive}></View>
-                                    )}
-
-                                    <Text>Nam</Text>
-                                </Pressable>
-                                <Pressable
-                                    style={StylesTheme.onlyFlexDirectionAli_Center}
-                                    onPress={() => {
-                                        eventGender(1);
-                                    }}
-                                >
-                                    {gender?.female.isFemale === true ? (
-                                        <View style={styles.genderActive}></View>
-                                    ) : (
-                                        <View style={styles.genderNoActive}></View>
-                                    )}
-                                    <Text>Nữ</Text>
-                                </Pressable>
-                                <Pressable
-                                    style={StylesTheme.onlyFlexDirectionAli_Center}
-                                    onPress={() => {
-                                        eventGender(2);
-                                    }}
-                                >
-                                    {gender?.other.isOther === true ? (
-                                        <View style={styles.genderActive}></View>
-                                    ) : (
-                                        <View style={styles.genderNoActive}></View>
-                                    )}
-                                    <Text>Khác</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-
-                        {/* Email */}
-                        <View style={styles.wrapXXX}>
-                            <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
-                                <Text numberOfLines={2} style={[styles.textSubTitle]}>
-                                    {
-                                        email.value && email.value !== "" ? email.label : " "
-                                    }
-                                </Text>
-                                {
-                                    email.value && email.value !== "" && email.isObligatory && (
-                                        <Text style={styles.asteriskValid}>*</Text>
-                                    )
-                                }
-                            </View>
-                            <TextInputComponent
-                                style={[styles.textInput, {}]}
-                                placeholder="Nhập email của bạn"
-                                value={email.value}
-                                isObligatory={true}
-                                onComplete={(text) => {
-                                    setState((prevState: State) => ({
-                                        ...prevState,
-                                        email: {
-                                            ...prevState.email,
-                                            value: text,
-                                            isRefresh: !prevState.email.isRefresh
-                                        }
-                                    }));
-                                }}
-                            />
-                        </View>
-
-                        {/* địa chỉ */}
-
-                        <View style={styles.wrapXXX}>
-                            <Text style={styles.text}>{address.label}
-                                {
-                                    address.isObligatory && (
-                                        <Text style={styles.asteriskValid}>  *</Text>
-                                    )
-                                }
-                            </Text>
-                            <Address
-                                value={Array.isArray(address.value) ? address.value : []}
-                                style={styles.componentDisplay}
-                                placeholder="Vui lòng chọn địa chỉ!"
-                                isObligatory={address.isObligatory}
-                                isShowIconError={isErrorObj.address}
-                                isError={isErrorObj.address}
-                                onComplete={(value) => {
-                                    console.log(value, 'value');
-                                    if (Array.isArray(value)) {
+                            {/* Avatar */}
+                            <View style={[styles.wrapXXX, { marginBottom: 0 }]}>
+                                <ImagePicker label={avatar.label} onComplete={(value: string) => {
+                                    if (value.length > 0) {
                                         setState((prevState: State) => ({
                                             ...prevState,
-                                            address: {
-                                                ...prevState.address,
+                                            avatar: {
+                                                ...prevState.avatar,
                                                 value: value,
-                                                isRefresh: !prevState.address.isRefresh
+                                                isRefresh: !prevState.avatar?.isRefresh
                                             }
                                         }));
                                     }
-                                }}
-                            />
-                        </View>
-
-                        <View style={styles.wrapXXX}>
-                            <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
-                                <Text numberOfLines={2} style={[styles.textSubTitle]}>
-                                    {
-                                        addressDetail.value && addressDetail.value !== "" ? addressDetail.label : " "
-                                    }
-                                </Text>
-                                {
-                                    addressDetail.value && addressDetail.value !== "" && (
-                                        <Text style={styles.asteriskValid}>*</Text>
-                                    )
-                                }
+                                }} />
                             </View>
-                            <TextInputComponent
-                                style={[styles.textInput, {}]}
-                                placeholder="Nhập địa chỉ của bạn"
-                                value={addressDetail.value}
-                                isObligatory={addressDetail.isObligatory}
-                                isShowIconError={isErrorObj.addressDetail}
-                                isError={isErrorObj.addressDetail}
-                                onComplete={(text) => {
+
+                            {/* First Name */}
+                            <View style={styles.wrapXXX}>
+                                <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
+                                    <Text numberOfLines={2} style={[styles.textSubTitle]}>
+                                        {
+                                            firstName.value && firstName.value !== "" ? firstName.label : " "
+                                        }
+                                    </Text>
+                                    {
+                                        firstName.value && firstName.value !== "" && (
+                                            <Text style={styles.asteriskValid}>*</Text>
+                                        )
+                                    }
+                                </View>
+                                <TextInputComponent
+                                    style={[styles.textInput, {}]}
+                                    placeholder={firstName.label}
+                                    value={firstName.value}
+                                    isObligatory={firstName.isObligatory}
+                                    isClose={true}
+                                    isShowIconError={isErrorObj.firstName}
+                                    isError={isErrorObj.firstName}
+                                    onComplete={(text) => {
+                                        setState((prevState: State) => ({
+                                            ...prevState,
+                                            firstName: {
+                                                ...prevState.firstName,
+                                                value: text,
+                                                isRefresh: !prevState.firstName?.isRefresh
+                                            }
+                                        }));
+                                    }}
+                                />
+                            </View>
+
+                            {/* Last Name */}
+                            <View style={styles.wrapXXX}>
+                                <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
+                                    <Text numberOfLines={2} style={[styles.textSubTitle]}>
+                                        {
+                                            lastName.value && lastName.value !== "" ? lastName.label : " "
+                                        }
+                                    </Text>
+                                    {
+                                        lastName.value && lastName.value !== "" && (
+                                            <Text style={styles.asteriskValid}>*</Text>
+                                        )
+                                    }
+                                </View>
+                                <TextInputComponent
+                                    style={[styles.textInput, {}]}
+                                    placeholder="Tên"
+                                    value={lastName.value}
+                                    isObligatory={lastName.isObligatory}
+                                    isShowIconError={isErrorObj.lastName}
+                                    isError={isErrorObj.lastName}
+                                    onComplete={(text) => {
+                                        setState((prevState: State) => ({
+                                            ...prevState,
+                                            lastName: {
+                                                ...prevState.lastName,
+                                                value: text,
+                                                isRefresh: !prevState.lastName.isRefresh
+                                            }
+                                        }));
+                                    }}
+                                />
+                            </View>
+
+                            {/* Birthday */}
+                            <View style={styles.wrapXXX}>
+                                <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
+                                    <Text numberOfLines={2} style={[styles.textSubTitle]}>
+                                        {
+                                            birthday.value ? birthday.label : " "
+                                        }
+                                    </Text>
+                                    {
+                                        birthday.value && birthday.value !== "" && birthday.isObligatory && (
+                                            <Text style={styles.asteriskValid}>*</Text>
+                                        )
+                                    }
+                                </View>
+                                <TouchableOpacity style={[styles.textInput, isErrorObj.birthday && { borderColor: 'red' }]} onPress={() => {
                                     setState((prevState: State) => ({
                                         ...prevState,
-                                        addressDetail: {
-                                            ...prevState.addressDetail,
-                                            value: text,
-                                            isRefresh: !prevState.addressDetail.isRefresh
-                                        }
+                                        isVisibleDate: true
                                     }));
-                                }}
-                            />
+                                }}>
+                                    <View style={StylesTheme.onlyFlexRow_AliCenter_JusSP}>
+                                        <Text style={[styles.text, { marginVertical: 0 }, birthday.value === null ? { color: "#ccc" } : { color: "#000" }]}>
+                                            {birthday.value ? moment(birthday.value).format('DD/MM/YYYY') : 'Chọn ngày tháng năm sinh'}
+                                        </Text>
+                                        {
+                                            birthday.isObligatory && !birthday.value && (
+                                                <View style={{ paddingRight: 8 }}>
+                                                    <Text style={styles.asteriskValid}>*</Text>
+                                                </View>
+                                            )
+                                        }
+                                    </View>
+                                </TouchableOpacity>
+                                {/* modal chọn ngày */}
+                                <View style={{ flex: 1, zIndex: 1, }}>
+                                    <DateTimePickerModal
+                                        date={birthday.value === null ? new Date() : birthday.value}
+                                        // format="dd/MM/yyyy"
+                                        isVisible={isVisibleDate}
+                                        mode={'date'}
+                                        onConfirm={handleConfirm}
+                                        onCancel={() => {
+                                            hideDatePicker();
+                                        }}
+                                        cancelTextIOS={"Huỷ"}
+                                        confirmTextIOS={"Xác nhận"}
+                                        is24Hour={true}
+                                    />
+                                </View>
+                            </View>
+
+                            {/* Gender */}
+                            <View style={styles.wrapXXX}>
+                                <View style={StylesTheme.onlyFlexDirectionAli_Center}>
+                                    <Text style={[styles.textSubTitle]}>{gender.label}</Text>
+                                    <Text style={[styles.text, styles.asteriskValid]}>*</Text>
+                                </View>
+                                <View style={styles.wrapCheckBoxGender}>
+                                    <Pressable
+                                        style={StylesTheme.onlyFlexDirectionAli_Center}
+                                        onPress={() => {
+                                            eventGender(0);
+                                        }}
+                                    >
+                                        {gender?.male.isMale === true ? (
+                                            <View style={styles.genderActive}></View>
+                                        ) : (
+                                            <View style={styles.genderNoActive}></View>
+                                        )}
+
+                                        <Text>Nam</Text>
+                                    </Pressable>
+                                    <Pressable
+                                        style={StylesTheme.onlyFlexDirectionAli_Center}
+                                        onPress={() => {
+                                            eventGender(1);
+                                        }}
+                                    >
+                                        {gender?.female.isFemale === true ? (
+                                            <View style={styles.genderActive}></View>
+                                        ) : (
+                                            <View style={styles.genderNoActive}></View>
+                                        )}
+                                        <Text>Nữ</Text>
+                                    </Pressable>
+                                    <Pressable
+                                        style={StylesTheme.onlyFlexDirectionAli_Center}
+                                        onPress={() => {
+                                            eventGender(2);
+                                        }}
+                                    >
+                                        {gender?.other.isOther === true ? (
+                                            <View style={styles.genderActive}></View>
+                                        ) : (
+                                            <View style={styles.genderNoActive}></View>
+                                        )}
+                                        <Text>Khác</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+
+                            {/* Email */}
+                            <View style={styles.wrapXXX}>
+                                <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
+                                    <Text numberOfLines={2} style={[styles.textSubTitle]}>
+                                        {
+                                            email.value && email.value !== "" ? email.label : " "
+                                        }
+                                    </Text>
+                                    {
+                                        email.value && email.value !== "" && email.isObligatory && (
+                                            <Text style={styles.asteriskValid}>*</Text>
+                                        )
+                                    }
+                                </View>
+                                <TextInputComponent
+                                    style={[styles.textInput, {}]}
+                                    placeholder="Nhập email của bạn"
+                                    value={email.value}
+                                    isObligatory={true}
+                                    onComplete={(text) => {
+                                        setState((prevState: State) => ({
+                                            ...prevState,
+                                            email: {
+                                                ...prevState.email,
+                                                value: text,
+                                                isRefresh: !prevState.email.isRefresh
+                                            }
+                                        }));
+                                    }}
+                                />
+                            </View>
+
+                            {/* địa chỉ */}
+
+                            <View style={styles.wrapXXX}>
+                                <Text style={styles.text}>{address.label}
+                                    {
+                                        address.isObligatory && (
+                                            <Text style={styles.asteriskValid}>  *</Text>
+                                        )
+                                    }
+                                </Text>
+                                <Address
+                                    value={Array.isArray(address.value) ? address.value : []}
+                                    style={styles.componentDisplay}
+                                    placeholder="Vui lòng chọn địa chỉ!"
+                                    isObligatory={address.isObligatory}
+                                    isShowIconError={isErrorObj.address}
+                                    isError={isErrorObj.address}
+                                    onComplete={(value) => {
+                                        console.log(value, 'value');
+                                        if (Array.isArray(value)) {
+                                            setState((prevState: State) => ({
+                                                ...prevState,
+                                                address: {
+                                                    ...prevState.address,
+                                                    value: value,
+                                                    isRefresh: !prevState.address.isRefresh
+                                                }
+                                            }));
+                                        }
+                                    }}
+                                />
+                            </View>
+
+                            <View style={styles.wrapXXX}>
+                                <View style={[StylesTheme.onlyFlexDirectionAli_Center, { marginVertical: 2 }]}>
+                                    <Text numberOfLines={2} style={[styles.textSubTitle]}>
+                                        {
+                                            addressDetail.value && addressDetail.value !== "" ? addressDetail.label : " "
+                                        }
+                                    </Text>
+                                    {
+                                        addressDetail.value && addressDetail.value !== "" && (
+                                            <Text style={styles.asteriskValid}>*</Text>
+                                        )
+                                    }
+                                </View>
+                                <TextInputComponent
+                                    style={[styles.textInput, {}]}
+                                    placeholder="Nhập địa chỉ của bạn"
+                                    value={addressDetail.value}
+                                    isObligatory={addressDetail.isObligatory}
+                                    isShowIconError={isErrorObj.addressDetail}
+                                    isError={isErrorObj.addressDetail}
+                                    onComplete={(text) => {
+                                        setState((prevState: State) => ({
+                                            ...prevState,
+                                            addressDetail: {
+                                                ...prevState.addressDetail,
+                                                value: text,
+                                                isRefresh: !prevState.addressDetail.isRefresh
+                                            }
+                                        }));
+                                    }}
+                                />
+                            </View>
+                        </View>
+                        <View style={{ flex: 1, marginVertical: 22 }}>
+                            {/* Button Continue */}
+                            <TouchableOpacity
+                                style={StylesTheme.btnPrimary}
+                                onPress={handleRegister}
+                            >
+                                <Text style={StylesTheme.styleTextBtnBasic}>
+                                    Tiếp theo
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
-                    <View style={{ flex: 1, marginVertical: 22 }}>
-                        {/* Button Continue */}
-                        <TouchableOpacity
-                            style={StylesTheme.btnPrimary}
-                            onPress={handleRegister}
-                        >
-                            <Text style={StylesTheme.styleTextBtnBasic}>
-                                Tiếp theo
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </KeyboardAwareScrollView>
+                </KeyboardAwareScrollView>
+            </View>
         </View>
     );
 }

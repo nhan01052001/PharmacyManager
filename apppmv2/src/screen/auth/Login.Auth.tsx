@@ -253,6 +253,7 @@ export const Login: React.FC = () => {
             const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
             return subscriber; // unsubscribe on unmount
         } else {
+            LoadingService.hide();
             console.log('Please Login');
         }
     };
@@ -413,7 +414,14 @@ export const Login: React.FC = () => {
                         <View style={{ flex: 1 }}>
                             <TouchableOpacity
                                 style={StylesTheme.btnPrimary}
-                                onPress={handleLogin}
+                                onPress={
+                                    //handleLogin
+                                    () => {
+                                        navigation.navigate("BottomTabNavigator", {
+                                            // data: dataUser
+                                        });
+                                    }
+                                }
                             >
                                 <Text style={styles.textBtnLogin}>
                                     Đăng nhập

@@ -368,7 +368,7 @@ const DetailMedicine: React.FC = () => {
                         <View style={styles.in4MainProduct}>
                             <Text style={[styles.text]}>{item?.name}</Text>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={[styles.text, { color: '#5BC57E', fontSize: 22, marginRight: 12 }]}>
+                                <Text style={[styles.text, { color: '#5BC57E', fontSize: 22, marginRight: 12, fontFamily: 'OpenSans-Bold' }]}>
                                     199.000 đ / chai
                                 </Text>
                                 <Text

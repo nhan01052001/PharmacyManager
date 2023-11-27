@@ -25,6 +25,8 @@ import { RightArowIcon, BellIcon } from '../../global/icon/Icon';
 import { MainStackParams } from '../../navigation/Stack.Navigator';
 import StylesTheme, { width, height } from '../../global/theme/Styles.Theme';
 import { Product } from '../../type/Product.type';
+import { AllStackParams } from '../../navigation/Stack.Navigator';
+import { env } from '../../utils/env.utils';
 
 type Portfolio = {
     id: string,
@@ -185,7 +187,7 @@ const MIN_HEIGHT = 120;
 const HEIGHt85 = (85 / 100) * height;
 const SIZE_PADDING = Platform.OS === 'android' ? 32 : 48;
 const SIZE_ANIMATED = Platform.OS === 'android' ? 85 + SIZE_PADDING : 100 + SIZE_PADDING;
- 
+
 interface IState {
     valueSearch?: string;
     isShowHeader?: boolean;
@@ -234,7 +236,7 @@ const initialState: IState = {
 };
 
 const Home: React.FC = () => {
-    const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
+    const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
     const [{ valueSearch, isShowHeader, portfolios,
         products, promotionalProducts, bestSellingProducts, recommendTodayProduct
     }, setState] = useState<IState>({ ...initialState });
@@ -275,8 +277,10 @@ const Home: React.FC = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Animated.View style={[{ transform: [{ translateY: animated }] }, { flex: 1, position: 'absolute', top: 0, right: 0, left: 0, zIndex: 99,
-                    elevation: 99, }]}>
+            <Animated.View style={[{ transform: [{ translateY: animated }] }, {
+                flex: 1, position: 'absolute', top: 0, right: 0, left: 0, zIndex: 99,
+                elevation: 99,
+            }]}>
                 <View style={{
                     width: '100%',
                     height: Platform.OS === 'android' ? 85 : 100,
@@ -383,37 +387,35 @@ const Home: React.FC = () => {
 
                         {/* sản phẩm khuyến mãi */}
                         {
-                            promotionalProducts?.data && (
-                                <View style={styles.listProductRow}>
-                                    <View style={styles.flexDCenter}>
-                                        <Text style={styles.fs16fw500}>Sản phẩm khuyến mãi</Text>
-                                        <TouchableOpacity
-                                            style={{ flexDirection: 'row', alignItems: 'center' }}
-                                            onPress={() => {
-                                                // navigation.navigate('PM_AllProduct', {
-                                                //     api: {
-                                                //         urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
-                                                //     },
-                                                // });
-                                            }
-                                            }
-                                        >
-                                            <Text style={[styles.fs16fw500, { color: 'blue' }]}>Xem tất cả</Text>
-                                            <RightArowIcon color="blue" size={16} />
-                                        </TouchableOpacity>
-                                    </View>
-                                    <View style={styles.listProduct}>
-                                        <ListMedicine
-                                            data={promotionalProducts.data}
-                                            isHorizontal={true}
-                                            api={{
-                                                urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
-                                            }}
-                                            isRefresh={promotionalProducts.isRefresh}
-                                        />
-                                    </View>
+                            <View style={styles.listProductRow}>
+                                <View style={styles.flexDCenter}>
+                                    <Text style={styles.fs16fw500}>Sản phẩm khuyến mãi</Text>
+                                    <TouchableOpacity
+                                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                                        onPress={() => {
+                                            navigation.navigate('AllMedicine');
+                                        }
+                                        }
+                                    >
+                                        <Text style={[styles.fs16fw500, { color: 'blue' }]}>Xem tất cả</Text>
+                                        <RightArowIcon color="blue" size={16} />
+                                    </TouchableOpacity>
                                 </View>
-                            )
+                                <View style={styles.listProduct}>
+                                    <ListMedicine
+                                        data={[]}
+                                        isHorizontal={true}
+                                        api={{
+                                            urlApi: `${env.URL}/medicine/findMedicine`,
+                                            configHeader: {
+                                                'page': 1,
+                                                'pageSize': 5,
+                                            }
+                                        }}
+                                        isRefresh={promotionalProducts?.isRefresh}
+                                    />
+                                </View>
+                            </View>
                         }
 
                         {/* sản phẩm bán chạy */}

@@ -6,12 +6,15 @@ import { ILike, SelectQueryBuilder } from "typeorm";
 import { entities } from "../entities.provider";
 import { MedicineRepository } from "../repository/medicines.repository";
 import { Medicine } from "../entity/medicine.entity";
-import { MedicineDTO, MedicinesDTO } from "../validator/dto/medicine.dto";
+import { MedicineDTO, MedicinesDTO, SaleMedicineDTO } from "../validator/dto/medicine.dto";
 import { FilterParamsDTO } from "../validator/dto/Address-params.dto";
 import { ProvincesService } from "./provinces.service";
 import { FindDTO } from "../validator/dto/find.dto";
 import moment from "moment";
 import { ENUM } from "../util/enum.util";
+import { CartRepository } from "../repository/cart.repository";
+import { Cart } from "../entity/cart.entity";
+import { UserService } from "./user.service";
 
 @Injectable()
 export class MedicinesService {
@@ -20,7 +23,12 @@ export class MedicinesService {
         @InjectRepository(Medicine)
         private readonly medicineRepository: MedicineRepository,
 
+        @InjectRepository(Cart)
+        private readonly cartRepository: CartRepository,
+
         private provincesService: ProvincesService,
+
+        private userService: UserService,
 
     ) { }
 
@@ -143,14 +151,15 @@ export class MedicinesService {
         return null;
     }
 
-    async getMedicineById(id?: string, column?: string): Promise<Medicine[]> {
+    async getMedicineById(id?: string, column?: string): Promise<Medicine> {
         if (id) {
-            const result = await this.medicineRepository.query(`
-                select ${column && column.length > 0 ? column : '*'} 
-                    from Medicine 
-                    inner join MedicineDetail on Medicine.id = MedicineDetail.medicineId
-                    where Medicine.id = "${id}" and Medicine.isDelete = false and MedicineDetail.isDelete = false
-            `);
+            const result = await this.medicineRepository
+                .createQueryBuilder('Medicine')
+                .leftJoinAndSelect('Medicine.medicineDetail', 'd', 'Medicine.id = d.medicineId')
+                .where(`Medicine.id = "${id}"`)
+                .andWhere("Medicine.isDelete = false").andWhere("d.isDelete = false").getOne();
+
+
 
             return result;
         }
@@ -351,37 +360,38 @@ export class MedicinesService {
         try {
             let take = 1 * 20;
             let skip = take - 20;
-            let message= '';
+            let message = '';
 
             let data = await this.medicineRepository
                 .createQueryBuilder('Medicine')
-                .leftJoin('MedicineDetail', 'd', 'Medicine.id = d.medicineId')
+                .leftJoinAndSelect('Medicine.medicineDetail', 'd', 'Medicine.id = d.medicineId')
                 .where("Medicine.isDelete = false").andWhere("d.isDelete = false");
+
             let totalItem: number = await data.getCount(),
                 totalPage: number = 0;
 
             if (search && search.length > 0) {
-                data.andWhere(`Medicine.${typeFind && typeFind.length > 0 && typeFind !== 'type' ? typeFind : 'name' } LIKE :search`, { search: `%${search}%` });
+                data.andWhere(`Medicine.${typeFind && typeFind.length > 0 && typeFind !== 'type' ? typeFind : 'name'} LIKE :search`, { search: `%${search}%` });
             }
 
-            if(type) {
+            if (type) {
                 data.andWhere(`Medicine.type = ${type.value ? type.value : ''}`);
             }
 
-            if(quantity) {
+            if (quantity) {
                 data.andWhere(`d.quantity <= ${quantity.value ? quantity.value : 0} OR d.quantity = NULL`);
             }
 
-            if(findByPrice) {
+            if (findByPrice) {
                 data.andWhere(`d.price >= ${findByPrice.fromPrice ? findByPrice.fromPrice : 0} and d.price <= ${findByPrice.toPrice ? findByPrice.toPrice : 0}`);
-                if(findByPrice.fromPrice > findByPrice.toPrice) {
+                if (findByPrice.fromPrice > findByPrice.toPrice) {
                     message = message + ' | Đến giá không thể nhỏ hơn từ giá';
                 }
             }
 
-            if(findByDateEnd) {
+            if (findByDateEnd) {
                 data.andWhere(`d.dateEnd >= ${findByDateEnd.fromDate ? findByDateEnd.fromDate : moment(new Date()).format('YYYY-MM-DD HH:mm:ss')} and d.dateEnd <= ${findByDateEnd.toDate ? findByDateEnd.toDate : moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}`);
-                if(findByDateEnd.fromDate > findByDateEnd.toDate) {
+                if (findByDateEnd.fromDate > findByDateEnd.toDate) {
                     message = message + ' | Đến giá không thể nhỏ hơn từ giá';
                 }
             }
@@ -389,6 +399,18 @@ export class MedicinesService {
             if ((page && pagesize) || ((sort as boolean) && typesort)) {
                 const temp = await this.provincesService.handlePaging({ page, pagesize, sort, typesort }, totalItem, data, 'Medicine', 'name');
                 totalPage = temp.totalPage;
+
+                if (Number(page) > totalPage) {
+                    return {
+                        status: 200,
+                        statusText: 'EMPTY',
+                        message: 'Không có dữ liệu!',
+                        data: [],
+                        totalItem,
+                        totalPage
+                    }
+                }
+
                 if (temp.status === 'SUCCESS') {
                     data = temp.data;
                 }
@@ -397,8 +419,22 @@ export class MedicinesService {
             const result = await data.getMany();
             if (result) {
                 result.forEach((element) => {
+                    let unitView = [];
                     element.typeView = ENUM[`${element.type}`];
-                })
+                    if (element.medicineDetail.unit.length > 0) {
+                        element.medicineDetail.unit.split(',').map((value, index) => {
+                            unitView.push({
+                                id: index,
+                                name: ENUM[`${value}`],
+                                isHave: true,
+                                isActive: false
+                            })
+                        })
+                    }
+                    element.medicineDetail.unitView = JSON.stringify(unitView);
+                });
+                console.log(result, 'result');
+
                 return {
                     status: 200,
                     statusText: 'SUCCESS',
@@ -422,9 +458,46 @@ export class MedicinesService {
         }
     }
 
-    async saleMedicine(headers: any): Promise<unknown> {
+    async addToCart(headers: any, body?: any): Promise<unknown> {
+        try {
+            if (body) {
+                let profileID = body?.profileID ? body?.profileID : headers?.profileid;
+                let params: SaleMedicineDTO[] = body?.params;
 
-        return;
+                if (Array.isArray(params)) {
+                    const user = await this.userService.getUserByID(profileID);
+                    let lsSoldOut = [],
+                        lsDoesNotExists = [];
+
+                    await Promise.all(
+                        params.map(async (item) => {
+                            const medicines = await this.getMedicineById(item.id, null);
+
+                            if (medicines && user) {
+                                if (Number(medicines?.medicineDetail.quantity) < Number(item.quantity)) {
+                                    lsSoldOut.push(item.id);
+                                } else {
+                                    let quantity = Number(medicines?.medicineDetail.quantity) - Number(item.quantity);
+                                    // const saveCart = await this.cartRepository.save({
+                                    //     users: user.id,
+                                    //     status: false,
+                                    //     medicine: medicines.id
+                                    // });
+
+                                    console.log(quantity, 'quantity');
+                                }
+                            } else {
+                                lsDoesNotExists.push(item);
+                            }
+                        })
+                    )
+
+                    return;
+                }
+            }
+        } catch (error) {
+            throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
+        }
     }
 
 }

@@ -17,6 +17,7 @@ interface IMedicineDetail extends IBaseEntity {
     price?: number;
     quantity?: number;
     unit?: string;
+    unitView?: string;
     lsImage?: string;
     supplier?: Supplier;
     medicine?: Medicine;
@@ -38,6 +39,7 @@ export class MedicineDetail extends BaseEntity {
             price,
             quantity,
             unit,
+            unitView,
             lsImage,
             supplier,
             medicine,
@@ -59,6 +61,7 @@ export class MedicineDetail extends BaseEntity {
             price,
             quantity,
             unit,
+            unitView,
             lsImage,
             supplier,
             medicine,
@@ -100,6 +103,8 @@ export class MedicineDetail extends BaseEntity {
 
     @Column({ nullable: true })
     unit?: string;
+
+    unitView?: string;
 
     @Column({ nullable: true, type: 'mediumtext' })
     lsImage?: string;

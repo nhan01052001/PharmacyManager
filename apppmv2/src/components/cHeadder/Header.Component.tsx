@@ -39,14 +39,20 @@ export const HeaderComponent: React.FC<IProps> = (props: IProps) => {
         const { titleHeader, isOptionHome, screenName, goBack, goHome } = props;
 
         return (
-            <SafeAreaView
+            <View
                 style={[
                     StylesTheme.droidSafeArea,
-                    { width: '100%', backgroundColor: '#fff', borderBottomWidth: 0.3, borderBottomColor: '#ccc' },
+                    { width: '100%', 
+                    backgroundColor: '#fff', 
+                    borderBottomWidth: 0.3, 
+                    borderBottomColor: '#ccc', 
+                    // position: 'absolute',
+                    elevation: 99, zIndex: 99,
+                },
                 ]}
             >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ marginRight: 12 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                    <View style={{ marginRight: 12, }}>
                         {isOptionHome ? (
                             <TouchableOpacity style={{ padding: 6, marginLeft: 6 }} onPress={() => goHome()}>
                                 <HomeIcon size={32} color={'#000'} />
@@ -55,6 +61,8 @@ export const HeaderComponent: React.FC<IProps> = (props: IProps) => {
                             <TouchableOpacity
                                 style={{ padding: 6, marginLeft: 6, flexDirection: 'row', alignItems: 'center' }}
                                 onPress={() => {
+                                    console.log("123");
+                                    
                                     if(screenName) {
                                         navigation.navigate(screenName);
                                     } else
@@ -82,6 +90,6 @@ export const HeaderComponent: React.FC<IProps> = (props: IProps) => {
                         </Text>
                     </View>
                 </View>
-            </SafeAreaView>
+            </View>
         );
 }
