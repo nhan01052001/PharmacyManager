@@ -226,7 +226,11 @@ export const Login: React.FC = () => {
 
             const credential = auth.GoogleAuthProvider.credential(userInfo.idToken);
             await auth().signInWithCredential(credential);
+            console.log(credential, 'credential');
+            
+            _isSignedIn();
         } catch (error) {
+            LoadingService.hide();
             console.log(JSON.stringify(error), 'Message');
         }
     }
@@ -248,6 +252,8 @@ export const Login: React.FC = () => {
     const _isSignedIn = async () => {
         const isSignedIn = await GoogleSignin.isSignedIn();
         if (isSignedIn) {
+            console.log(isSignedIn, 'isSignedIn');
+            
             LoadingService.hide();
             let info = await GoogleSignin.signInSilently();
             const subscriber = auth().onAuthStateChanged(onAuthStateChanged);

@@ -7,7 +7,8 @@ import {
     View,
     SafeAreaView,
     TouchableOpacity,
-    Platform
+    Platform,
+    StatusBar
 } from 'react-native';
 import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
@@ -39,7 +40,12 @@ const Setting: React.FC = () => {
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={[StylesTheme.droidSafeArea, { width: '100%', height: 120, backgroundColor: Colors.primaryColor }]}>
+            <StatusBar
+                animated={true}
+                backgroundColor="#fff"
+                barStyle={'dark-content'}
+            />
+            <View style={[StylesTheme.droidSafeArea, { width: '100%', height: 120, backgroundColor: Colors.primaryColor, }, Platform.OS === 'android' && { paddingTop: 30 }]}>
                 <View style={[StylesTheme.droidSafeArea, { flex: 1, alignItems: 'flex-start', justifyContent: 'flex-end', paddingHorizontal: 12 }]}>
                     <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-start' }}>
                         <View>
@@ -78,7 +84,7 @@ const Setting: React.FC = () => {
                         }}
                     >
                         <ProfileIcon size={30} color={'#000'} />
-                        <Text style={[StylesTheme.textLabel, { fontSize: 16, marginLeft: 6 }]}>Chỉnh sửa thông tin cá nhân</Text>
+                        <Text style={[StylesTheme.textLabel, { fontSize: 16, marginLeft: 6, }]}>Chỉnh sửa thông tin cá nhân</Text>
                     </View>
                     <View
                         style={{

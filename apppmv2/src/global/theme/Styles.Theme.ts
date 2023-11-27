@@ -54,7 +54,7 @@ export default StyleSheet.create({
     },
 
     droidSafeArea: {
-        paddingTop: Platform.OS === 'android' ? 30 : 35,
+        paddingTop: Platform.OS === 'android' ? 0 : 35,
     },
 
     onlyFlexDirectionAli_Center: {
@@ -154,12 +154,10 @@ export default StyleSheet.create({
 
     text16: {
         fontSize: SMALL, fontWeight: PLATFORM_IOS ? '400' : '500', color: '#000',
-        fontFamily: 'OpenSans-Light'
     },
 
     textLabel: {
-        fontSize: MEDIUM, fontWeight: PLATFORM_IOS ? '500' : '700', color: '#000',
-        fontFamily: 'OpenSans-Bold'
+        fontSize: MEDIUM, fontWeight: PLATFORM_IOS ? '500' : '600', color: '#000',
     },
 
 });
