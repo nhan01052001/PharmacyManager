@@ -110,7 +110,7 @@ const Alert: React.FC = () => {
                     >
                         <View style={{ justifyContent: 'center', marginRight: 12 }}>
                         {
-                            status === "E_SUCCESS" ? (
+                            status === ENUM.E_SUCCESS ? (
                                 <Image source={require("../../global/assets/image/done.png")} style={{ width: 40, height: 40 }} />
                             ) : (
                                 <Image source={require("../../global/assets/image/error_server.png")} style={{ width: 40, height: 40 }} />

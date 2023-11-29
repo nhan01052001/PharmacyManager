@@ -16,14 +16,14 @@ const Item: React.FC<IProps> = (props: IProps) => {
         <Pressable
             style={[
                 { paddingHorizontal: 16, borderColor: '#000', borderWidth: 1, borderRadius: 12, marginRight: 12 },
-                value.isActive && { borderColor: '#5BC57E' },
+                value?.isActive && { borderColor: '#5BC57E' },
             ]}
             onPress={() => handleChoose(value)}
         >
             {/* <View style={{ position: 'absolute', right: 0 }}>
                 <VerifyIcon size={22} color="#5BC57E" />
             </View> */}
-            <Text style={[styles.text, value.isActive && { color: '#5BC57E' }]}>{value.name}</Text>
+            <Text style={[styles.text, value?.isActive && { color: '#5BC57E' }]}>{value.name}</Text>
         </Pressable>
     );
 }
@@ -38,10 +38,12 @@ const styles = StyleSheet.create({
 
 
 
-export default React.memo(Item, (prevProps, nextProps) => {
-    if(typeof nextProps.value === 'object' || Array.isArray(nextProps.value)) {
-        return Function.compare(prevProps.value, nextProps.value);
-    } else {
-        return prevProps.value === nextProps.value;
-    }
-});
+// export default React.memo(Item, (prevProps, nextProps) => {
+//     if(typeof nextProps.value === 'object' || Array.isArray(nextProps.value)) {
+//         return Function.compare(prevProps.value, nextProps.value);
+//     } else {
+//         return prevProps.value === nextProps.value;
+//     }
+// });
+
+export default Item;

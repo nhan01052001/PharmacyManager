@@ -8,6 +8,8 @@ interface ICart extends IBaseEntity {
     user?: string,
     status?: boolean;
     medicine?: string;
+    unitPurchase?: string,
+    quantityPurchase?: number;
 }
 
 @Entity('Cart')
@@ -17,6 +19,8 @@ export class Cart extends BaseEntity {
             user,
             status,
             medicine,
+            quantityPurchase,
+            unitPurchase,
             ...superItem
         } = props || {};
 
@@ -26,6 +30,8 @@ export class Cart extends BaseEntity {
             user,
             status,
             medicine,
+            unitPurchase,
+            quantityPurchase,
         });
     }
 
@@ -43,4 +49,13 @@ export class Cart extends BaseEntity {
     // @Index({unique: false})
     @Column({ nullable: true })
     medicine?: string;
+
+    @Column({ nullable: true })
+    quantityPurchase?: number;
+
+    @Column({ nullable: true })
+    unitPurchase?: string;
+
+    @Column('decimal', { nullable: true, })
+    pricePurchase?: number;
 }

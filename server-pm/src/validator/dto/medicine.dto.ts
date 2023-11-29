@@ -33,10 +33,10 @@ export class MedicineDTO {
 }
 
 export class MedicinesDTO {
-   @ApiProperty({ type: [MedicineDTO]})
-   @Type(() => MedicineDTO)
-   @ArrayMinSize(1)
-   @ValidateNested({each: true})
+    @ApiProperty({ type: [MedicineDTO] })
+    @Type(() => MedicineDTO)
+    @ArrayMinSize(1)
+    @ValidateNested({ each: true })
     medicines: MedicineDTO[];
 }
 
@@ -49,4 +49,8 @@ export class SaleMedicineDTO {
     @IsNumber()
     @IsNotEmpty()
     quantity?: number;
+
+    @IsString()
+    @IsNotEmpty()
+    unitPurchase?: string
 }

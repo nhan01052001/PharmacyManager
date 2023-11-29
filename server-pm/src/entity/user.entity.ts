@@ -2,6 +2,9 @@ import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne }
 import { BaseEntity, IBaseEntity } from './baseEntity/base.entity';
 import { Bill } from './bill.entity';
 import { Cart } from './cart.entity';
+import { provinces } from './provinces.entity';
+import { districts } from './districts.entity';
+import { wards } from './wards.entity';
 
 export interface IUser extends IBaseEntity {
     username: string;
@@ -19,6 +22,7 @@ export interface IUser extends IBaseEntity {
     isFirstLogin?: boolean;
     bill?: Bill[];
     cart?: Cart;
+    isLoginSocial?: boolean;
     provinces_code?: string;
     districts_code?: string;
     ward_code?: string;
@@ -46,6 +50,7 @@ export class User extends BaseEntity {
             bill,
             // permission,
             cart,
+            isLoginSocial,
             provinces_code,
             districts_code,
             ward_code,
@@ -71,6 +76,7 @@ export class User extends BaseEntity {
             bill,
             // permission,
             cart,
+            isLoginSocial,
             provinces_code,
             districts_code,
             ward_code,
@@ -122,12 +128,18 @@ export class User extends BaseEntity {
     @OneToOne(() => Cart, (cart) => cart.users)
     cart?: Cart;
 
+    @Column({ nullable: true, default: false })
+    isLoginSocial?: boolean;
+
+    @OneToOne(() => provinces)
     @Column({ nullable: true, width: 32 | 128 })
     provinces_code?: string;
 
+    @OneToOne(() => districts)
     @Column({ nullable: true, width: 32 | 128 })
     districts_code?: string;
 
+    @OneToOne(() => wards)
     @Column({ nullable: true, width: 32 | 128 })
     ward_code?: string;
 }

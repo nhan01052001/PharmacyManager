@@ -47,7 +47,7 @@ export const BottomTabNavigator: React.FC = () => (
         <BottomTabs.Screen
             name='Cart'
             component={Cart}
-            options={{ headerShown: false, title: 'Giỏ hàng' }}
+            options={{ headerShown: false, title: 'Giỏ hàng', tabBarBadge: 3 }}
         />
         <BottomTabs.Screen
             name='Setting'

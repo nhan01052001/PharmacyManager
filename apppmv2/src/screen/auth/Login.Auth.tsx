@@ -421,12 +421,12 @@ export const Login: React.FC = () => {
                             <TouchableOpacity
                                 style={StylesTheme.btnPrimary}
                                 onPress={
-                                    //handleLogin
-                                    () => {
-                                        navigation.navigate("BottomTabNavigator", {
-                                            // data: dataUser
-                                        });
-                                    }
+                                    handleLogin
+                                    // () => {
+                                    //     navigation.navigate("BottomTabNavigator", {
+                                    //         // data: dataUser
+                                    //     });
+                                    // }
                                 }
                             >
                                 <Text style={styles.textBtnLogin}>

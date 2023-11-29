@@ -17,9 +17,11 @@ import { Colors } from '../../global/theme/Colors.Theme';
 import StylesTheme from '../../global/theme/Styles.Theme';
 import { CheckIcon } from '../../global/icon/Icon';
 import QuantityComponent from '../../components/cQuantity/Quantity.component';
+import OptionChooseQuickly from '../../components/cOptionChooseQuickly/OptionChooseQuickly.component';
 
 interface IProps {
-
+    dataItem?: any;
+    onCheckItem: (cartId: string) => void,
 }
 
 interface IState {
@@ -32,31 +34,31 @@ const initialState: IState = {
 
 export const ItemCart: React.FC<IProps> = (props: IProps) => {
     const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
+    const { dataItem, onCheckItem } = props;
     const [{ isCheckAll }, setState] = useState<IState>({ ...initialState });
+    
 
     return (
-        <View style={{  }}>
+        <View style={{}}>
             <View style={{ width: '100%', borderBottomWidth: 3, borderBottomColor: '#edebeb', paddingVertical: 12, backgroundColor: Colors.clWhite }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 12 }}>
                     <TouchableOpacity
                         style={{
                             width: '10%', justifyContent: 'center', alignItems: 'center',
-                            paddingLeft: 12,
+                            paddingLeft: 18,
                         }}
                         onPress={() => {
-                            // setState((prevState: any) => ({
-                            //     ...prevState,
-                            //     isCheckAll: !isCheckAll
-                            // }));
+                            if(dataItem?.cartId && typeof dataItem?.cartId == 'string')
+                                onCheckItem(dataItem?.cartId);
                         }}
                     >
                         <View
                             style={[styles.styleCheckbox, {
                                 justifyContent: 'center', alignItems: 'center'
-                            }, !isCheckAll ? { borderWidth: 1, borderColor: Colors.black } : { backgroundColor: Colors.primaryColor, }]}
+                            }, !dataItem?.isChecked ? { borderWidth: 1, borderColor: Colors.black } : { backgroundColor: Colors.primaryColor, }]}
                         >
                             {
-                                isCheckAll && (
+                                dataItem?.isChecked && (
                                     <CheckIcon color={Colors.clWhite} size={16} />
                                 )
                             }
@@ -66,23 +68,20 @@ export const ItemCart: React.FC<IProps> = (props: IProps) => {
                     <TouchableOpacity style={{ width: '90%', maxWidth: '90%', paddingHorizontal: 12 }}>
                         <View style={{ flexDirection: 'row' }}>
                             <Image
-                                source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/pharmacy-manager-401ca.appspot.com/o/Medicine%2FEnterogen_1.jpeg?alt=media&token=2358b5e3-fdd3-4851-b02d-255de61cadd7' }}
+                                source={{ uri: dataItem?.lsImage?.split(',')[0] }}
                                 style={{ width: 65, height: 65, borderRadius: 8, borderColor: Colors.colorGrey, borderWidth: 1, }}
                                 resizeMode='contain'
                             />
-                            <View style={{ marginLeft: 8, }}>
-                                <Text numberOfLines={2} style={[StylesTheme.text16, { maxWidth: '90%', }]}>Thực phẩm bảo vệ sức khỏe viên sủi bổ sung vitamin và khoáng chất Berocca Performance hương xoài (Tuýp 10 viên)</Text>
+                            <View style={{ marginLeft: 8, width: '100%', justifyContent: 'flex-start' }}>
+                                <Text numberOfLines={2} style={[StylesTheme.text16, { maxWidth: '90%', }]}>{dataItem?.fullName}</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'flex-end', paddingVertical: 3 }}>
-                                    <Text style={[styles.text, { color: '#5BC57E', fontSize: 17, marginRight: 6 }]}>
-                                        199.000đ
-                                    </Text>
-                                    <Text
-                                        style={[
-                                            styles.text,
-                                            { color: '#ccc', fontSize: 15, textDecorationLine: 'line-through' },
-                                        ]}
-                                    >
-                                        299.000đ
+                                    <Text style={[styles.text, { color: '#e33232', fontSize: 17, marginRight: 6 }]}>
+                                        {
+                                            new Intl.NumberFormat('en-US', {
+                                                currency: 'VND',
+                                                style: 'currency',
+                                            }).format(dataItem?.pricePurchase !== null ? Number(dataItem?.pricePurchase) : 0).replace('₫', '')
+                                        }₫
                                     </Text>
                                 </View>
                             </View>
@@ -95,13 +94,18 @@ export const ItemCart: React.FC<IProps> = (props: IProps) => {
 
                         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                             <View>
-                                <Text>123</Text>
+                                <OptionChooseQuickly
+                                    data={Array.isArray(dataItem?.unitPurchaseView) ? dataItem?.unitPurchaseView : []}
+                                    onComplete={(item) => null}
+                                />
                             </View>
 
                             <QuantityComponent
-                                value={1}
+                                value={isNaN(Number(dataItem?.quantityPurchase)) ? 1 : Number(dataItem?.quantityPurchase)}
                                 limit={100}
                                 onComplete={(value: number) => {
+                                    console.log(value, 'value');
+                                    
                                     // handleQuantityPurchase(value);
                                 }}
                             />

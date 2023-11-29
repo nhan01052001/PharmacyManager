@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useNetInfo } from '@react-native-community/netinfo'
+import { dataProfile } from '../global/assets/service/Function.Service';
 
 // Add a request interceptor
 axios.interceptors.request.use(
@@ -33,8 +34,8 @@ export const handleCheckInternet = (): boolean => {
 }
 
 export default class HttpService {
-    static generateHeader = (headers?: any, newToken?: any) => {
-        const originHeader = {
+    static generateHeader = (headers?: any, newToken?: any) => {        
+        let originHeader: any = {
             "Accept": 'application/json',
             'Content-Type': 'application/json',
             'Application-Request': '',
@@ -42,10 +43,23 @@ export default class HttpService {
             'page': 1,
             'pageSize': 20,
             'sort': true,
-            'typeSort': 'ASC'
-
-            //'Authorization': `Bearer ${token}`,
+            'typeSort': 'ASC',
         };
+
+        if(dataProfile.data?.accessToken) {
+            originHeader = {
+                ...originHeader,
+                Authorization: `Bearer ${dataProfile.data?.accessToken}`,
+            }
+        }
+
+        if(dataProfile.data?.id) {
+            originHeader = {
+                ...originHeader,
+                profileid: dataProfile.data?.id,
+            }
+        }
+
         return { ...originHeader, ...headers };
     }
 

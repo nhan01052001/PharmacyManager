@@ -83,7 +83,6 @@ const ListMedicine: React.FC<IProps> = (props: IProps) => {
             });
         }
     }, []);
-console.log(dataLocal, 'dataLocal');
 
     return (
         <View style={{ width: width, maxWidth: width }}>

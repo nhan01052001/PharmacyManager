@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -22,7 +22,6 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { Product } from '../../type/Product.type';
 import StylesTheme from '../../global/theme/Styles.Theme';
 import { BackIcon, CartIcon } from '../../global/icon/Icon';
-import Function from '../../service/Function.Service';
 import QuantityComponent from '../../components/cQuantity/Quantity.component';
 import Evaluate from './tabView/Evaluate.TabView';
 import Describe from './tabView/Describe.TabView';
@@ -37,6 +36,11 @@ import { MainStackParams } from '../../navigation/Stack.Navigator';
 import PickerQuicklyComponent from '../../components/cPickerQuickly/PickerQuickly.component';
 import { TypeDefault } from '../../type/Type';
 import { LoadingService } from '../../components/cLoading/Loading.component';
+import HttpService from '../../service/HttpService.Service';
+import { env } from '../../utils/env.utils';
+import { Colors } from '../../global/theme/Colors.Theme';
+import { ENUM } from '../../global/enum';
+import Function from '../../global/assets/service/Function.Service';
 
 const DATA_SWIPER = [
     {
@@ -74,10 +78,15 @@ type Params = {
 }
 
 type valueProduct = {
+    id?: string;
     name?: string;
     price?: number;
     unit?: string;
     quantity?: number;
+    lsImage?: [];
+    lsUnit?: [];
+    isSale?: boolean;
+    priceDiscount?: number;
     isRefresh?: boolean;
 }
 
@@ -88,15 +97,12 @@ interface IState {
     isShowModalDeliveryForm?: boolean,
     deliveryForm?: TypeDefault,
     dataDefault?: any[
-    // {
-    //     id?: string,
-    //     label?: string,
-    //     isChecked?: boolean,
-    // }
     ],
-    listProductInCart?: any[],
+    quantityPurchase?: number,
+    numberProductInCart?: any[],
     unitProduct?: any,
-    product?: valueProduct
+    product?: valueProduct,
+    isGetMedicineInCart?: boolean,
 }
 
 const initialState: IState = {
@@ -130,23 +136,30 @@ const initialState: IState = {
             isChecked: false,
         }
     ],
-    listProductInCart: [],
+    quantityPurchase: 1,
+    numberProductInCart: [],
     unitProduct: null,
     product: {
+        id: '',
         name: '',
         price: 0,
-        quantity: 1,
+        quantity: 0,
         unit: '',
+        lsImage: [],
+        lsUnit: [],
+        isSale: false,
+        priceDiscount: 0,
         isRefresh: false,
-    }
+    },
+    isGetMedicineInCart: false,
 };
 
 const DetailMedicine: React.FC = () => {
     const route = useRoute();
-    const { item } = route.params;
+    const { item }: any = route.params;
     const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
     const [{ dataDefault, index, isActiveWhich, isShowHeader, isShowModalDeliveryForm,
-        deliveryForm, listProductInCart, unitProduct, product
+        deliveryForm, numberProductInCart, unitProduct, product, quantityPurchase, isGetMedicineInCart,
     }, setState] = useState<IState>({ ...initialState });
 
     const handleScroll = (value: any) => {
@@ -211,34 +224,155 @@ const DetailMedicine: React.FC = () => {
         }
     }, []);
 
-    const handleAddProductIntoCart = () => {
-        const data = {
-            id: Function.generateUUID(),
-            nameProduct: item?.name,
-            priceCourse: 199000,
-            pricePromotion: 199000,
-            isPromotion: item.isPromotion,
-            unit: unitProduct,
-            imgProduct: item.imgProduct,
-            createdAt: Date.now(),
-        };
-        setState((prevState: IState) => ({
-            ...prevState,
-            listProductInCart: listProductInCart ? [...listProductInCart, data] : [data],
-        }));
+    const handleAddProductIntoCart = async () => {
+        try {
+            if (product?.id) {
+                if (!unitProduct?.code) {
+                    AlertService.show(ENUM.E_ERROR, 'Vui lòng chọn đơn vị mua', 3000, "Không thành công");
+                    return;
+                }
+                let dataBody = {
+                    params: [
+                        {
+                            id: product?.id,
+                            quantity: quantityPurchase,
+                            unitPurchase: unitProduct?.code ? unitProduct?.code : '',
+                        }
+                    ],
+                    isSaveNew: true,
+                    isIncrease: true,
+                };
+                LoadingService.show()
+                const profile: any = await Function.getAppData(ENUM.KEY_IN4USER);
+                // console.log(profile, 'profile');
+
+                if (profile?.id) {
+                    HttpService.Post(`${env.URL}/medicine/addToCart`, {
+                        ...dataBody
+                    }, {
+                        profileid: profile?.id
+                    }).then((res: any) => {
+                        LoadingService.hide();
+                        console.log(res, 'res');
+                        if (res?.status === 201) {
+                            AlertService.show(ENUM.E_SUCCESS, 'THêm thành công!', 3000, null);
+                            setState((prevState: IState) => ({
+                                ...prevState,
+                                numberProductInCart: prevState.numberProductInCart !== undefined ? [...prevState.numberProductInCart, ...dataBody.params] : [],
+                            }));
+                        } else if(res?.status === 200) {
+                            AlertService.show(ENUM.E_SUCCESS, 'THêm thành công!', 3000, null);
+                            setState((prevState: IState) => ({
+                                ...prevState,
+                                isGetMedicineInCart: false
+                            }));
+                        } else {
+                            AlertService.show(ENUM.E_ERROR, res?.message ? res?.message : 'Không thành công!', 3000, null);
+                            setState((prevState: IState) => ({
+                                ...prevState,
+                                isGetMedicineInCart: false
+                            }));
+                        }
+                    }).catch((error) => {
+                        LoadingService.hide();
+                        console.log(error, 'error');
+                        // handle screen error
+                    })
+                }
+            }
+        } catch (error) {
+            console.log(error, 'error');
+            // handle screen error
+        }
     };
 
     const handleQuantityPurchase = useCallback((value: number) => {
         if (value) {
             setState((prevState: IState) => ({
                 ...prevState,
-                product: {
-                    ...prevState.product,
-                    quantity: value
-                }
+                quantityPurchase: value
             }));
         }
+    }, [quantityPurchase]);
+
+    const handleGetData = () => {
+        try {
+            if (item?.id) {
+                LoadingService.show();
+                HttpService.Get(`${env.URL}/medicine/getMedicineById/${item?.id}`)
+                    .then((res: any) => {
+
+                        LoadingService.hide();
+                        if (res && res?.id) {
+                            const handleUnit = res?.medicineDetail?.unitView ? JSON.parse(res?.medicineDetail?.unitView) : [];
+                            let handleUnitProduct: any = null;
+                            if (Array.isArray(handleUnit) && handleUnit.length === 1) {
+                                handleUnit.map((item) => {
+                                    item.isActive = true
+                                });
+
+                                handleUnitProduct = handleUnit[0];
+                            }
+                            setState((prevState: IState) => ({
+                                ...prevState,
+                                product: {
+                                    ...prevState.product,
+                                    id: res?.id,
+                                    name: res?.fullName,
+                                    price: res?.medicineDetail?.price,
+                                    quantity: res?.medicineDetail?.quantity,
+                                    isSale: res?.isSale ? true : false,
+                                    lsUnit: handleUnit,
+                                    lsImage: res?.medicineDetail?.lsImage ? res?.medicineDetail?.lsImage.split(', ') : [],
+                                    isRefresh: !prevState.product?.isRefresh
+                                },
+                                unitProduct: handleUnitProduct,
+                                isGetMedicineInCart: true
+                            }));
+                        }
+                    })
+            } else {
+                // show screen error
+            }
+        } catch (error) {
+            console.log(error);
+            // show screen error
+        }
+    }
+
+    const handleGetMedicineInCart = async () => {
+        try {
+            const profile: any = await Function.getAppData(ENUM.KEY_IN4USER);
+
+            if (profile?.id) {
+                HttpService.Get(`${env.URL}/cart/getCartByProfileID/${profile?.id}`)
+                    .then((res: any) => {
+                        console.log(res, 'res');
+                        if (res?.status === 200) {
+                            setState((prevState: IState) => ({
+                                ...prevState,
+                                numberProductInCart: Array.isArray(res?.data) ? res?.data : [],
+                                isGetMedicineInCart: false
+                            }));
+                        }
+                    }).catch((error) => {
+                        // show screen error
+                    })
+            }
+        } catch (error) {
+            // show screen error
+        }
+    }
+
+    useEffect(() => {
+        handleGetData();
     }, []);
+
+    useEffect(() => {
+        if (isGetMedicineInCart) {
+            handleGetMedicineInCart();
+        }
+    }, [isGetMedicineInCart])
 
     return (
         <SafeAreaView style={[styles.container, StylesTheme.droidSafeArea, { backgroundColor: '#fff' }]}>
@@ -277,13 +411,9 @@ const DetailMedicine: React.FC = () => {
                         </View>
                     ) : null}
                     <TouchableOpacity style={{ padding: 12, backgroundColor: '#e0e0e0', borderRadius: 12 }}>
-                        {listProductInCart !== null &&
-                            Array.isArray(listProductInCart) &&
-                            listProductInCart.length > 0 ? (
-                            <View style={styles.quantityCart}>
-                                <Text style={{ fontSize: 18, fontWeight: '700' }}>{listProductInCart.length}</Text>
-                            </View>
-                        ) : null}
+                        <View style={styles.quantityCart}>
+                            <Text style={{ fontSize: 18, fontWeight: '700' }}>{numberProductInCart?.length}</Text>
+                        </View>
                         <CartIcon size={26} color={'#000'} />
                     </TouchableOpacity>
                 </View>
@@ -298,98 +428,113 @@ const DetailMedicine: React.FC = () => {
             >
                 <KeyboardAwareScrollView style={{ flex: 1 }}>
                     {/* IMG */}
-                    <View style={styles.wrapImgProduct}>
-                        <Swiper
-                            key={DATA_SWIPER.length}
-                            // style={styles.wrapper}
-                            showsButtons={false}
-                            loop={true}
-                            autoplay={true}
-                            dot={
-                                <View
-                                    style={{
-                                        backgroundColor: 'black',
-                                        width: 8,
-                                        height: 8,
-                                        borderRadius: 7,
-                                        marginLeft: 7,
-                                        marginRight: 7,
+                    {
+                        product?.lsImage && product?.lsImage?.length > 0 ? (
+                            <View style={styles.wrapImgProduct}>
+                                <Swiper
+                                    key={product?.lsImage.length}
+                                    showsButtons={false}
+                                    loop={true}
+                                    autoplay={true}
+                                    dot={
+                                        <View
+                                            style={{
+                                                backgroundColor: 'black',
+                                                width: 8,
+                                                height: 8,
+                                                borderRadius: 7,
+                                                marginLeft: 7,
+                                                marginRight: 7,
+                                            }}
+                                        />
+                                    }
+                                    activeDot={
+                                        <View
+                                            style={{
+                                                backgroundColor: 'red',
+                                                width: 10,
+                                                height: 10,
+                                                borderRadius: 7,
+                                                marginLeft: 7,
+                                                marginRight: 7,
+                                            }}
+                                        />
+                                    }
+                                    paginationStyle={{
+                                        bottom: 10,
                                     }}
-                                />
-                            }
-                            activeDot={
-                                <View
-                                    style={{
-                                        backgroundColor: 'red',
-                                        width: 10,
-                                        height: 10,
-                                        borderRadius: 7,
-                                        marginLeft: 7,
-                                        marginRight: 7,
-                                    }}
-                                />
-                            }
-                            paginationStyle={{
-                                bottom: 10,
-                            }}
-                        >
-                            {/* {DATA_SWIPER.map((item) => {
-                            return (
-                                <View style={styles.slide} key={item.id}>
-                                    <Image
-                                        source={{
-                                            uri: 'https://cdn.nhathuoclongchau.com.vn/unsafe/fit-in/1600x400/filters:quality(100):fill(white)/https://nhathuoclongchau.com.vn/upload/slide/1680418566-Ijvp-bo-sung-dinh-duong.png',
-                                        }}
-                                        resizeMode={'contain'}
-                                        style={styles.image}
-                                    />
-                                </View>
-                            );
-                        })} */}
-                            <View style={styles.slide}>
-                                <Image
-                                    source={{ uri: 'https://cdn.youmed.vn/tin-tuc/wp-content/uploads/2021/03/new-vrohto.jpg' }}
-                                    resizeMode={'contain'}
-                                    style={styles.image}
-                                />
+                                >
+                                    {
+                                        product?.lsImage.map((item, index) => {
+                                            return (
+                                                <View style={[styles.slide, { width: '100%', height: '100%' }]} key={index}>
+                                                    <Image
+                                                        source={{
+                                                            uri: item,
+                                                        }}
+                                                        resizeMode={'contain'}
+                                                        style={[styles.image, { width: '100%', height: '100%' }]}
+                                                    />
+                                                </View>
+                                            );
+                                        })
+                                    }
+                                </Swiper>
                             </View>
-                            <View style={styles.slide}>
-                                <Image
-                                    source={{ uri: 'https://cdn.youmed.vn/tin-tuc/wp-content/uploads/2021/03/new-vrohto.jpg' }}
-                                    resizeMode={'contain'}
-                                    style={styles.image}
-                                />
-                            </View>
-                        </Swiper>
-                    </View>
+                        ) : (
+                            <ActivityIndicator size={'large'} color={Colors.primaryColor} />
+                        )
+                    }
 
                     {/* Content */}
                     <View style={styles.wrapContent}>
                         <View style={styles.in4MainProduct}>
-                            <Text style={[styles.text]}>{item?.name}</Text>
+                            <Text style={[StylesTheme.textLabel]}>{product?.name}</Text>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={[styles.text, { color: '#5BC57E', fontSize: 22, marginRight: 12, fontFamily: 'OpenSans-Bold' }]}>
-                                    199.000 đ / chai
+                                <Text style={[styles.text, StylesTheme.textLabel, { color: '#5BC57E', fontSize: 20, marginRight: 12 }]}>
+                                    {
+                                        new Intl.NumberFormat('en-US', {
+                                            currency: 'VND',
+                                            style: 'currency',
+                                        }).format(product?.price !== null ? Number(product?.price) : 0).replace('₫', '')
+                                    }₫{unitProduct?.name ? "/" + unitProduct?.name : ''}
                                 </Text>
-                                <Text
-                                    style={[
-                                        styles.text,
-                                        { color: '#ccc', fontSize: 22, textDecorationLine: 'line-through' },
-                                    ]}
-                                >
-                                    199.000 đ / chai
-                                </Text>
+                                {
+                                    product?.isSale && (
+                                        <Text
+                                            style={[
+                                                styles.text,
+                                                { color: '#ccc', fontSize: 18, textDecorationLine: 'line-through' },
+                                            ]}
+                                        >
+                                            {
+                                                new Intl.NumberFormat('en-US', {
+                                                    currency: 'VND',
+                                                    style: 'currency',
+                                                }).format(product?.priceDiscount !== null ? Number(product?.priceDiscount) : 0).replace('₫', '')
+                                            }₫
+                                        </Text>
+                                    )
+                                }
                             </View>
-                            <Text style={[styles.text, { fontSize: 16 }]}>Số luợng còn: 100</Text>
+                            <Text style={[StylesTheme.textBasic]}>
+                                Giá đã bao gồm thuế
+                            </Text>
+                            <Text style={[StylesTheme.textBasic]}>
+                                Các chi phí khác(nếu có) sẽ thể hiện khi bạn đặt hàng
+                            </Text>
+
+                            {/* <Text style={[styles.text, { fontSize: 16 }]}>Số luợng còn: {product?.quantity}</Text> */}
                             {/* Chọn đơn vị tính */}
-                            <View>
+                            <View style={{ marginTop: 22, }}>
                                 <OptionChooseQuickly
-                                    data={Array.isArray(item.unit) ? item.unit : []}
-                                    onComplete={(item) =>
+                                    data={Array.isArray(product?.lsUnit) ? product?.lsUnit : []}
+                                    onComplete={(item) => {
                                         setState((prevState: IState) => ({
                                             ...prevState,
                                             unitProduct: item,
                                         }))
+                                    }
                                     }
                                 />
                             </View>
@@ -398,7 +543,7 @@ const DetailMedicine: React.FC = () => {
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     <Text style={[styles.text, {}]}>Số lượng mua</Text>
                                     <QuantityComponent
-                                        value={product?.quantity}
+                                        value={quantityPurchase}
                                         limit={100}
                                         onComplete={(value: number) => {
                                             handleQuantityPurchase(value);
@@ -407,16 +552,32 @@ const DetailMedicine: React.FC = () => {
                                 </View>
                             </View>
                         </View>
+                        <View style={{ width: '100%', height: 1, backgroundColor: Colors.colorGrey }} />
+
+                        <View style={[styles.in4MainProduct]}>
+                            <Text style={[StylesTheme.textLabel]}>
+                                Thông tin khuyến mãi
+                            </Text>
+                            <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 8 }]}>
+                                <View style={{ paddingVertical: 12, paddingHorizontal: 8, backgroundColor: '#88c7f7', borderRadius: 8, marginTop: 8 }}>
+                                    <Text style={[StylesTheme.text16, { textAlign: 'center' }]}>
+                                        Sẩn phẩm này hiện tại chưa có chương trình khuyến mãi!
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
                         <View
                             style={[
                                 styles.in4MainProduct,
                                 { height: 10, backgroundColor: '#e0e0e0', width: '100%', padding: 0 },
                             ]}
                         ></View>
+
                         {/* hinh thuc nhan hang va chi phi van chuyen*/}
                         <View style={[styles.in4MainProduct]}>
                             {/* hinh thuc nhan hang */}
-                            <View style={{ marginVertical: 16 }}>
+                            {/* <View style={{ marginVertical: 16 }}>
                                 <PickerQuicklyComponent
                                     data={deliveryForm?.data}
                                     label='Hình thức nhận hàng'
@@ -428,10 +589,10 @@ const DetailMedicine: React.FC = () => {
                                     isRefresh={deliveryForm?.isRefresh}
                                     isDataLocal={true}
                                 />
-                            </View>
+                            </View> */}
 
                             {/* chi phi van chuyen */}
-                            <View>
+                            {/* <View>
                                 <View style={StylesTheme.onlyFlexRow_AliCenter_JusSP}>
                                     <View style={{ width: '50%', alignItems: 'flex-start' }}>
                                         <Text numberOfLines={2} style={[StylesTheme.text16]}>Chi phí vận chuyển: </Text>
@@ -440,7 +601,7 @@ const DetailMedicine: React.FC = () => {
                                         <Text numberOfLines={2} style={[StylesTheme.text16]}> 12.000đ - 22.000đ</Text>
                                     </View>
                                 </View>
-                            </View>
+                            </View> */}
                         </View>
                         {/* 
 

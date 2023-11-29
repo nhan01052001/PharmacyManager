@@ -9,5 +9,9 @@ export class CartController {
 
     }
 
-
+    @UseGuards(MyJwtGuard)
+    @Get('/getCartByProfileID/:id')
+    getCartByProfileID(@Param() param: any): Promise<unknown> {
+        return this.cartService.getCartByProfileID(param?.id);
+    }
 }

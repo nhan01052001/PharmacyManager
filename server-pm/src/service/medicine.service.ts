@@ -15,6 +15,7 @@ import { ENUM } from "../util/enum.util";
 import { CartRepository } from "../repository/cart.repository";
 import { Cart } from "../entity/cart.entity";
 import { UserService } from "./user.service";
+import { CartService } from "./cart.service";
 
 @Injectable()
 export class MedicinesService {
@@ -29,6 +30,8 @@ export class MedicinesService {
         private provincesService: ProvincesService,
 
         private userService: UserService,
+
+        private cartService: CartService,
 
     ) { }
 
@@ -159,7 +162,20 @@ export class MedicinesService {
                 .where(`Medicine.id = "${id}"`)
                 .andWhere("Medicine.isDelete = false").andWhere("d.isDelete = false").getOne();
 
-
+            let unitView = [];
+            result.typeView = ENUM[`${result.type.trim()}`];
+            if (result.medicineDetail.unit.length > 0) {
+                result.medicineDetail.unit.split(',').map((value, index) => {
+                    unitView.push({
+                        id: index,
+                        name: ENUM[`${value.trim()}`],
+                        isHave: true,
+                        isActive: false,
+                        code: value,
+                    })
+                })
+            }
+            result.medicineDetail.unitView = JSON.stringify(unitView);
 
             return result;
         }
@@ -420,14 +436,15 @@ export class MedicinesService {
             if (result) {
                 result.forEach((element) => {
                     let unitView = [];
-                    element.typeView = ENUM[`${element.type}`];
+                    element.typeView = ENUM[`${element.type.trim()}`];
                     if (element.medicineDetail.unit.length > 0) {
                         element.medicineDetail.unit.split(',').map((value, index) => {
                             unitView.push({
                                 id: index,
-                                name: ENUM[`${value}`],
+                                name: ENUM[`${value.trim()}`],
                                 isHave: true,
-                                isActive: false
+                                isActive: false,
+                                code: value,
                             })
                         })
                     }
@@ -463,36 +480,107 @@ export class MedicinesService {
             if (body) {
                 let profileID = body?.profileID ? body?.profileID : headers?.profileid;
                 let params: SaleMedicineDTO[] = body?.params;
+                let isIncrease = body?.isIncrease;
+                let isSaveNew = true;
 
                 if (Array.isArray(params)) {
                     const user = await this.userService.getUserByID(profileID);
+                    const getCartByProfileID: any = await this.cartService.getCartByProfileID(profileID);
                     let lsSoldOut = [],
-                        lsDoesNotExists = [];
+                        lsDoesNotExists = [],
+                        response = [],
+                        valueMedicineInCart = null,
+                        isUpdateCart = false;
+
+                    if (getCartByProfileID?.status === 200 && Array.isArray(getCartByProfileID?.data)) {
+                        response = [...getCartByProfileID?.data];
+                    }
 
                     await Promise.all(
                         params.map(async (item) => {
                             const medicines = await this.getMedicineById(item.id, null);
 
                             if (medicines && user) {
+                                response.find((value) => {
+                                    if (value?.medicine === item.id && value?.unitPurchase === item?.unitPurchase) {
+                                        isSaveNew = false;
+                                        valueMedicineInCart = value;
+                                    }
+                                })
+
                                 if (Number(medicines?.medicineDetail.quantity) < Number(item.quantity)) {
                                     lsSoldOut.push(item.id);
                                 } else {
-                                    let quantity = Number(medicines?.medicineDetail.quantity) - Number(item.quantity);
-                                    // const saveCart = await this.cartRepository.save({
-                                    //     users: user.id,
-                                    //     status: false,
-                                    //     medicine: medicines.id
-                                    // });
+                                    if (isSaveNew) {
+                                        let quantity = isIncrease
+                                            ? Number(medicines?.medicineDetail.quantity) - Number(item.quantity)
+                                            : Number(medicines?.medicineDetail.quantity) + Number(item.quantity);
+                                        let pricePurchase = Number(item.quantity) * Number(medicines.medicineDetail.price);
+                                        await this.cartRepository.save({
+                                            users: user.id,
+                                            status: false,
+                                            medicine: medicines.id,
+                                            quantityPurchase: Number(item.quantity),
+                                            pricePurchase,
+                                            unitPurchase: item?.unitPurchase
+                                        });
 
-                                    console.log(quantity, 'quantity');
+                                        await this.medicineRepository.createQueryBuilder()
+                                            .update('MedicineDetail')
+                                            .set({
+                                                quantity: quantity
+                                            })
+                                            .where("medicineId = :id", { id: item.id }).andWhere("MedicineDetail.isDelete = false")
+                                            .execute();
+                                    } else {
+                                        if (valueMedicineInCart && valueMedicineInCart?.cartId) {
+                                            if (valueMedicineInCart?.quantityPurchase === undefined) {
+                                                return;
+                                            }
+                                            let quantityPurchase = Number(valueMedicineInCart?.quantityPurchase) + Number(item.quantity);
+                                            let pricePurchase = quantityPurchase * Number(medicines.medicineDetail.price);
+                                            await this.medicineRepository.createQueryBuilder()
+                                                .update('Cart')
+                                                .set({
+                                                    quantityPurchase,
+                                                    pricePurchase
+                                                })
+                                                .where("id = :id", { id: valueMedicineInCart?.cartId }).andWhere("Cart.isDelete = false").andWhere("Cart.status = false")
+                                                .execute();
+
+                                            await this.medicineRepository.createQueryBuilder()
+                                                .update('MedicineDetail')
+                                                .set({
+                                                    quantity: Number(medicines?.medicineDetail.quantity) - Number(item.quantity)
+                                                })
+                                                .where("medicineId = :id", { id: item.id }).andWhere("MedicineDetail.isDelete = false")
+                                                .execute();
+
+                                            isUpdateCart = true;
+                                        }
+                                    }
                                 }
                             } else {
                                 lsDoesNotExists.push(item);
                             }
                         })
-                    )
+                    );
 
-                    return;
+                    if (lsSoldOut.length > 0) {
+                        return {
+                            status: 401,
+                            statusText: "ERROR",
+                            message: 'Đã hết hàng!',
+                            data: lsSoldOut,
+                        }
+                    }
+
+                    return {
+                        status: isUpdateCart ? 200 : 201,
+                        statusText: "SUCCESS",
+                        message: "Thêm thành công!",
+                        data: [],
+                    }
                 }
             }
         } catch (error) {

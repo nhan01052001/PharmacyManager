@@ -1,9 +1,18 @@
 import moment from "moment";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ENUM } from "../../enum";
+
+type DataProfile = {
+    data: any;
+}
+
+export const dataProfile: DataProfile = {
+    data: null,
+}
 
 export default class Function {
     // copy from HieuTran Leader Team App VnResource
-    static isEqual = (item1?: any, item2?: any, addIf?: any): boolean  => {
+    static isEqual = (item1?: any, item2?: any, addIf?: any): boolean => {
         let typeItem = Object.prototype.toString.call(item1);
         // kiem tra chung type
         if (typeItem !== Object.prototype.toString.call(item2)) {
@@ -88,13 +97,13 @@ export default class Function {
 
     static isValidNumberPhone = (numberPhone: string) => {
         return numberPhone.match(
-          /((0[3|5|7|8|9])+([0-9]{8})|([+]84[3|5|7|8|9])+([0-9]{8}))\b/g
+            /((0[3|5|7|8|9])+([0-9]{8})|([+]84[3|5|7|8|9])+([0-9]{8}))\b/g
         );
     };
 
     static isValidPassword = (password: string) => {
         return password.match(
-          /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,20}$/
+            /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,20}$/
         );
     };
 
@@ -113,11 +122,16 @@ export default class Function {
             return null;
         }
     };
-    
+
     static setAppData = async (storageKey: string, data: any) => {
         try {
-          await AsyncStorage.setItem(storageKey, JSON.stringify(data));
-        } catch {}
-      };
- 
+            if(storageKey === ENUM.KEY_IN4USER) {
+                dataProfile.data = {
+                    ...data
+                }
+            }
+            await AsyncStorage.setItem(storageKey, JSON.stringify(data));
+        } catch { }
+    };
+
 }

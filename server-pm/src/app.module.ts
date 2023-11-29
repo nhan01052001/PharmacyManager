@@ -13,6 +13,7 @@ import { DistrictsModule } from './module/districts.module';
 import { WardsModule } from './module/wards.module';
 import { MedicineModule } from './module/medicine.module';
 import { UploadModule } from './module/upload.module';
+import { CartModule } from './module/cart.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UploadModule } from './module/upload.module';
     WardsModule,
     MedicineModule,
     UploadModule,
+    CartModule,
     TypeOrmModule.forFeature(entities),
   ],
   controllers: [],
