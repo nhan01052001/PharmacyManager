@@ -22,6 +22,9 @@ import { ENUM } from '../../global/enum';
 import { Colors } from '../../global/theme/Colors.Theme';
 import StylesTheme from '../../global/theme/Styles.Theme';
 import * as Progress from 'react-native-progress';
+import HttpService from '../../service/HttpService.Service';
+import { env } from '../../utils/env.utils';
+import axios from 'axios';
 
 interface IState {
     filePath?: Asset,
@@ -103,7 +106,6 @@ const ImagePicker: React.FC<IProps> = (props: IProps) => {
         let isStoragePermitted = await requestExternalWritePermission();
         if (isCameraPermitted && isStoragePermitted) {
             launchCamera(options, (response) => {
-                console.log('Response = ', response);
 
                 if (response.didCancel) {
                     AlertService.show(ENUM.E_ERROR, '', 5000, "User cancelled camera picker");
@@ -156,25 +158,47 @@ const ImagePicker: React.FC<IProps> = (props: IProps) => {
                 filePath: Array.isArray(response?.assets) ? response?.assets[0] : undefined,
                 isShowModal: false,
             }));
+            uploadImg(Array.isArray(response?.assets) ? response?.assets[0] : null);
         });
     };
 
-    useEffect(() => {
-        if (filePath) {
-            onComplete(filePath?.uri ? filePath?.uri : "");
-        }
-    }, [filePath]);
+    // useEffect(() => {
+    //     if (filePath) {
+    //         uploadImg();
+    //     }
+    // }, [filePath]);
 
     useEffect(() => {
         if (value?.uri) {
-            console.log(value, 'value');
-            
             setState((prevState: IState) => ({
                 ...prevState,
                 filePath: value
             }));
         }
-    }, [])
+    }, []);
+
+    const uploadImg = (filePath: any) => {
+        try {
+            if (filePath) {
+                const body = new FormData();
+                body.append('photo', { uri: filePath?.uri, name: filePath?.fileName, filename: filePath?.fileName, type: filePath?.type });
+                body.append('Content-Type', `${filePath?.type}`);
+
+                axios.post(`${env.URL}/upload/image`, body, {
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then((res) => {
+                    if (res.data?.status === 200 && res.data?.data?.downloadURL) {
+                        onComplete(res.data?.data?.downloadURL);
+                    }
+                })
+            }
+        } catch (error) {
+            console.log(error, 'error');
+        }
+    }
 
     return (
         <View style={{ flex: 1 }}>

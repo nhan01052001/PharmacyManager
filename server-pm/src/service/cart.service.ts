@@ -6,7 +6,6 @@ import { CartRepository } from '../repository/cart.repository';
 import { ENUM } from '../util/enum.util';
 import { MedicineRepository } from '../repository/medicines.repository';
 import { Medicine } from '../entity/medicine.entity';
-import { async } from 'rxjs';
 
 @Injectable()
 export class CartService {
@@ -28,7 +27,7 @@ export class CartService {
 	                    LEFT JOIN User u ON u.id = c.users
                         LEFT JOIN Medicine m ON m.id = c.medicine
                         LEFT JOIN MedicineDetail d ON m.id = d.medicineId
-                        WHERE c.isDelete = false AND u.isDelete = false AND m.isDelete = false
+                        WHERE c.isDelete = false AND u.isDelete = false AND m.isDelete = false AND c.status = false
                         AND c.users = "${id}"
                     `
                 )
@@ -256,6 +255,128 @@ export class CartService {
                     message: '',
                     data: null,
                 };
+            }
+        } catch (error) {
+            throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
+        }
+    }
+
+    async setStatusItemInCart(id?: string): Promise<unknown> {
+        try {
+            if (id) {
+                await this.cartRepository.createQueryBuilder()
+                    .update('Cart')
+                    .set({
+                        status: true
+                    })
+                    .where("id = :id", { id: id }).andWhere("Cart.isDelete = false")
+                    .execute();
+
+                return {
+                    status: 200,
+                    statusText: ENUM.E_SUCCESS,
+                    message: 'Thành công',
+                    data: [],
+                };
+            }
+
+            return {
+                status: 500,
+                statusText: ENUM.E_ERROR,
+                message: 'Lỗi 500',
+                data: null,
+            };
+        } catch (error) {
+            throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
+        }
+    }
+
+    async setStatusItemsInCart(ids?: string[]): Promise<unknown> {
+        try {
+            if (ids && ids.length > 0) {
+                let idError = [];
+
+                await Promise.all(
+                    ids.map(async (item: string) => {
+                        const result: any = await this.setStatusItemInCart(item);
+                        if (result?.status !== 200) {
+                            idError.push(item);
+                        }
+                    })
+                );
+
+                if (idError.length === ids.length) {
+                    return {
+                        status: 500,
+                        statusText: ENUM.E_ERROR,
+                        message: 'Lỗi 500',
+                        data: null,
+                    };
+                }
+
+                return {
+                    status: 200,
+                    statusText: ENUM.E_SUCCESS,
+                    message: 'Đặt hàng thành công!',
+                    data: [],
+                };
+            } else {
+                return {
+                    status: 200,
+                    statusText: ENUM.E_SUCCESS,
+                    message: '',
+                    data: null,
+                };
+            }
+        } catch (error) {
+            throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
+        }
+    }
+
+    async getCartOrderByProfileID(id?: string): Promise<unknown> {
+        try {
+            if (id && id.length > 0) {
+                const result = await this.cartRepository.query(
+                    `
+                    select *, c.id as cartId, m.id as medicineID from Cart c
+	                    LEFT JOIN User u ON u.id = c.users
+                        LEFT JOIN Medicine m ON m.id = c.medicine
+                        LEFT JOIN MedicineDetail d ON m.id = d.medicineId
+                        WHERE c.isDelete = false AND u.isDelete = false AND m.isDelete = false AND c.status = true
+                        AND c.users = "${id}"
+                    `
+                )
+
+                if (result) {
+                    if (Array.isArray(result) && result.length > 0) {
+                        result.forEach((element, index) => {
+                            if (element?.unitPurchase) {
+                                element.unitPurchaseView = [
+                                    {
+                                        id: index,
+                                        name: ENUM[`${element?.unitPurchase.trim()}`],
+                                        isHave: true,
+                                        isActive: true,
+                                        code: element?.unitPurchase,
+                                    }
+                                ]
+                            }
+                        })
+                    }
+                    return {
+                        status: 200,
+                        statusText: ENUM.E_SUCCESS,
+                        message: "Thành công!",
+                        data: result,
+                    }
+                }
+            } else {
+                return {
+                    status: 400,
+                    statusText: ENUM.E_ERROR,
+                    message: "",
+                    data: null,
+                }
             }
         } catch (error) {
             throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });

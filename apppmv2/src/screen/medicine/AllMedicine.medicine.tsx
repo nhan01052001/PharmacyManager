@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/core';
+import { useNavigation, useRoute } from '@react-navigation/core';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useCallback, useRef, useState } from 'react';
 import {
@@ -233,7 +233,9 @@ const AllMedicine: React.FC = () => {
     const [{ valueSearch, isShowHeader, portfolios,
         products, promotionalProducts, bestSellingProducts, recommendTodayProduct
     }, setState] = useState<IState>({ ...initialState });
-
+    const route = useRoute();
+    const { api }: any = route.params;
+console.log(api, 'api');
     return (
         <View style={{ flex: 1 }}>
             <HeaderComponent
@@ -249,9 +251,9 @@ const AllMedicine: React.FC = () => {
                     style={{
                         flex: 1,
                         flexDirection: 'row',
-                        padding: 12,
+                        paddingVertical: 12,
                         alignItems: 'center',
-                        justifyContent: 'flex-start',
+                        justifyContent: 'center',
                     }}
                 >
                     <Search
@@ -264,10 +266,10 @@ const AllMedicine: React.FC = () => {
                         }
                         propsStyleWrapTextInput={{ borderRadius: 20 }}
                         propsStyleTextInput={{}}
-                        propsMargin={{}}
+                        propsMargin={{margin: 0}}
                     />
-                    <TouchableOpacity style={{ padding: 8, marginLeft: 12 }}>
-                        {/* <Image source={require('../../assets/filter.png')} style={{ width: 32, height: 32 }} /> */}
+                    <TouchableOpacity style={{ padding: 8, justifyContent: 'center', alignItems: 'center', marginRight: 12, }}>
+                        <Image source={require('../../global/assets/image/filter.png')} style={{ width: 32, height: 32 }} />
                     </TouchableOpacity>
                 </View>
                 <View
@@ -283,9 +285,7 @@ const AllMedicine: React.FC = () => {
                         isNumColumn={true}
                         numColumn={2}
                         colorBtn={'#d9c129'}
-                        api={{
-                            urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
-                        }}
+                        api={api}
                         isRefresh={promotionalProducts?.isRefresh}
                     />
                 </View>

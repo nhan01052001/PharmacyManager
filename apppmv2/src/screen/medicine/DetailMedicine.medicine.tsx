@@ -302,7 +302,6 @@ const DetailMedicine: React.FC = () => {
                 LoadingService.show();
                 HttpService.Get(`${env.URL}/medicine/getMedicineById/${item?.id}`)
                     .then((res: any) => {
-
                         LoadingService.hide();
                         if (res && res?.id) {
                             const handleUnit = res?.medicineDetail?.unitView ? JSON.parse(res?.medicineDetail?.unitView) : [];
@@ -684,9 +683,10 @@ const DetailMedicine: React.FC = () => {
                                         },
                                         dataBody: {
                                             "type": {
-                                                "value": product?.type
+                                                "value": product?.type ? product?.type : item?.type
                                             }
-                                        }
+                                        },
+                                        id: product?.id ? product?.id : item?.id
                                     }}
                                 />
                             </View>

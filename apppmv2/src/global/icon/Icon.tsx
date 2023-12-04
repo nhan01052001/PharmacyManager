@@ -16,6 +16,16 @@ type IconProps = {
 //     );
 // };
 
+export const OclockIcon: React.FC<IconProps> = ({ color = 'teal', size = '40' }) => {
+    return (
+        <Svg width={size} height={size} viewBox="0 0 25 25" fill={color}>
+            <Path
+                d="M12.5 23A10.5 10.5 0 1 1 23 12.5 10.51 10.51 0 0 1 12.5 23zm0-20a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 12.5 3zm5.5 9.5a.5.5 0 0 0-.5-.5H13V5.5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5z"
+            />
+        </Svg>
+    );
+};
+
 export const LocationIcon: React.FC<IconProps> = ({ color = 'teal', size = '40' }) => {
     return (
         <Svg width={size} height={size} viewBox="0 0 368.16 368.16" fill={color}>

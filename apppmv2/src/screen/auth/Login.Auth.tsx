@@ -181,7 +181,12 @@ export const Login: React.FC = () => {
                 }).then((res: any) => {
                     LoadingService.hide();
                     if (res?.status === 200 && res?.statusText === ENUM.E_SUCCESS && res?.data) {
-                        Function.setAppData(ENUM.KEY_IN4USER, {...res?.data, isRememberPassword: isRememberPassword, isLoginSocial: false});
+                        setState((prevState: any) => ({
+                            ...prevState,
+                            username: '',
+                            password: null,
+                        }))
+                        Function.setAppData(ENUM.KEY_IN4USER, { ...res?.data, isRememberPassword: isRememberPassword, isLoginSocial: false });
                         navigation.navigate("BottomTabNavigator", {
                             data: res?.data
                         });
@@ -227,7 +232,7 @@ export const Login: React.FC = () => {
             const credential = auth.GoogleAuthProvider.credential(userInfo.idToken);
             await auth().signInWithCredential(credential);
             console.log(credential, 'credential');
-            
+
             _isSignedIn();
         } catch (error) {
             LoadingService.hide();
@@ -253,7 +258,7 @@ export const Login: React.FC = () => {
         const isSignedIn = await GoogleSignin.isSignedIn();
         if (isSignedIn) {
             console.log(isSignedIn, 'isSignedIn');
-            
+
             LoadingService.hide();
             let info = await GoogleSignin.signInSilently();
             const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
@@ -265,7 +270,6 @@ export const Login: React.FC = () => {
     };
 
     const onAuthStateChanged = (user: any) => {
-        LoadingService.hide();
         const dataUser = {
             "username": user?._user?.email ? user?._user?.email : '',
             "firstName": "",
@@ -280,10 +284,33 @@ export const Login: React.FC = () => {
             "id": Array.isArray(user?._user?.providerData) ? user?._user?.providerData[0]?.uid : user?._user?.uid ? user?._user?.uid : '',
         };
         console.log(dataUser, user, 'user');
-        Function.setAppData(ENUM.KEY_IN4USER, {...dataUser, isRememberPassword: isRememberPassword, isLoginSocial: true});
-        navigation.navigate("BottomTabNavigator", {
-            data: dataUser
-        });
+        try {
+            HttpService.Get(`${env.URL}/user/getUserLoginSocial/${dataUser.id}`).then((res: any) => {
+                LoadingService.hide();
+                if (res) {
+                    console.log(res, 'dang nhap');
+                    Function.setAppData(ENUM.KEY_IN4USER, { ...dataUser, isRememberPassword: isRememberPassword, isLoginSocial: true });
+                    navigation.navigate("BottomTabNavigator", {
+                        data: dataUser
+                    });
+                } else {
+                    HttpService.Post(`${env.URL}/auth/registerWithSocial`, { ...dataUser }).then((res: any) => {
+                        console.log(res, 'dang ky');
+                        LoadingService.hide();
+                        if (res) {
+                            Function.setAppData(ENUM.KEY_IN4USER, { ...dataUser, isRememberPassword: isRememberPassword, isLoginSocial: true });
+                            navigation.navigate("BottomTabNavigator", {
+                                data: dataUser
+                            });
+                        } else {
+                            LoadingService.hide();
+                        }
+                    })
+                }
+            })
+        } catch (error) {
+            LoadingService.hide();
+        }
     }
 
     const _signOut = async () => {

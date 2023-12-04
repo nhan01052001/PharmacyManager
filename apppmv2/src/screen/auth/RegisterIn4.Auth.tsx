@@ -30,6 +30,9 @@ import { LoadingService } from '../../components/cLoading/Loading.component';
 import { AlertService } from '../../components/cAlert/Alert.component';
 import { ENUM } from '../../global/enum';
 import ImagePicker from '../../components/cImagePicker/ImagePicker.component';
+import HttpService from '../../service/HttpService.Service';
+import { env } from '../../utils/env.utils';
+import Function from '../../global/assets/service/Function.Service';
 
 const { width, height } = Dimensions.get('window');
 
@@ -198,7 +201,8 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
     };
 
     const handleRegister = () => {
-        if ((firstName.isObligatory && (!firstName.value || firstName.value === ''))
+        try {
+            if ((firstName.isObligatory && (!firstName.value || firstName.value === ''))
             || (lastName.isObligatory && (!lastName.value || lastName.value === ''))
             || (birthday.isObligatory && !birthday.value)
             || (gender.isObligatory && !gender.value)
@@ -214,21 +218,47 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
             return;
         }
 
+        let arrAddress = [];
+        if(address.value[2]?.full_name) {
+            arrAddress.push(address.value[2]?.full_name);
+        }
+        if(address.value[1]?.full_name) {
+            arrAddress.push(address.value[1]?.full_name);
+        }
+        if(address.value[0]?.full_name) {
+            arrAddress.push(address.value[0]?.full_name);
+        }
+
         let params = {
             username,
             password,
             firstName: firstName.value,
             lastName: lastName.value,
             avatar: avatar.value,
-            phone: phone.value,
+            phone: username,
             email: email.value,
             gender: gender.value,
             birthday: moment(birthday.value).format("DD/MM/YYYY"),
-            address: addressDetail.value + ", " + address.value,
-        };
+            address: addressDetail.value + ", " + arrAddress.join(', '),
+            provinces_code: address.value[0]?.code ? address.value[0]?.code : '',
+            districts_code: address.value[1]?.code ? address.value[1]?.code : '', 
+            ward_code: address.value[2]?.code ? address.value[2]?.code : '' 
+        }; 
 
-        console.log(params, 'params');
-
+        LoadingService.show();
+        HttpService.Post(`${env.URL}/auth/register`, {
+            ...params
+        }).then((res: any) => {
+            if(res && res?.id) {
+                LoadingService.hide();
+                Function.setAppData(ENUM.KEY_IN4USER, {...res, isRememberPassword: false, isLoginSocial: false});                
+                AlertService.show(ENUM.E_SUCCESS, 'Đăng ký thành công!', 3000, null);
+                navigation.navigate('BottomTabNavigator');
+            }
+        })
+        } catch (error) {
+            LoadingService.hide();
+        }
     }
 
     const eventGender = (value: number) => {
@@ -294,7 +324,7 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
                 goBack={() => navigation.goBack()}
             />
             <View style={[styles.container]}>
-                <KeyboardAwareScrollView style={{ flex: 1 }}>
+                <KeyboardAwareScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
                     <View style={{ flex: 1, paddingHorizontal: 24 }}>
                         {/* logo and slogan */}
                         <View style={StylesTheme.flexCenter}>

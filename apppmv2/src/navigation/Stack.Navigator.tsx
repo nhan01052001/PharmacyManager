@@ -12,6 +12,7 @@ import SearchScreen from '../screen/search/Search';
 import Order from '../screen/order/Order';
 import { Permission } from '../screen/auth/Permission.Auth';
 import Cart from '../screen/cart/Cart';
+import Bill from '../screen/bill/Bill';
 
 export type ScreenName =
     "Login" | 
@@ -24,7 +25,8 @@ export type ScreenName =
     "SearchScreen" |
     "Order" |
     "Permission" |
-    "Cart";
+    "Cart" |
+    "Bill";
 
 
 export type MainStackParams = {
@@ -44,6 +46,7 @@ export type RootStackParams = {
     SearchScreen: any
     Order: any;
     Cart: any;
+    Bill: any;
 };
 
 export type AllStackParams = {
@@ -59,6 +62,7 @@ export type AllStackParams = {
     SearchScreen: any;
     Order: any;
     Cart: any;
+    Bill: any;
 }
 
 const MainStack = createStackNavigator<MainStackParams>();
@@ -109,6 +113,11 @@ export const RootStackNavigator: React.FC = () => (
         <RootStack.Screen
             name='Cart'
             component={Cart}
+            options={{ headerShown: false, }}
+        />
+        <RootStack.Screen
+            name='Bill'
+            component={Bill}
             options={{ headerShown: false, }}
         />
     </RootStack.Navigator>

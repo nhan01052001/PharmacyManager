@@ -26,4 +26,16 @@ export class CartController {
     deleteItemsInCart(@Body() body: any): Promise<unknown> {
         return this.cartService.deleteItemsInCart(body?.ids);
     }
+
+    @UseGuards(MyJwtGuard)
+    @Get('/getCartOrderByProfileID/:id')
+    getCartOrderByProfileID(@Param() param: any): Promise<unknown> {
+        return this.cartService.getCartOrderByProfileID(param?.id);
+    }
+
+    @UseGuards(MyJwtGuard)
+    @Post('/setStatusItemsInCart')
+    setStatusItemsInCart(@Body() body: any): Promise<unknown> {
+        return this.cartService.setStatusItemsInCart(body?.ids);
+    }
 }

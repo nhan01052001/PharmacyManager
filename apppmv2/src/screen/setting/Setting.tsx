@@ -56,7 +56,7 @@ const Setting: React.FC = () => {
 
     const getData = async () => {
         try {
-            const rs = await Function.getAppData(ENUM.KEY_IN4USER); console.log(rs, 'rs');
+            const rs = await Function.getAppData(ENUM.KEY_IN4USER); 
 
             if (rs) {
                 setState((prevState: IState) => ({

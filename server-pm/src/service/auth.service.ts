@@ -166,4 +166,19 @@ export class AuthService {
             accessToken: jwt,
         };
     }
+
+    async registerWithSocial(dataBody?: any): Promise<unknown> {
+        try {
+            if (dataBody?.id) {
+                let fullName = dataBody?.firstName + " " + dataBody?.lastName;
+                const newUser = new User({ ...dataBody, id: dataBody?.id, username: "", fullName: dataBody?.fullName ? dataBody?.fullName : fullName, firstName: dataBody?.firstName, lastName: dataBody?.lastName, password: bcrypt.hashSync("", 10), isDeleted: false, isFirstLogin: false, isLoginSocial: true });
+                const user = await this.userRepository.save(newUser);
+                delete user.password;
+                return user;
+            }
+            return null;
+        } catch (error) {
+            throw new ErrorResponse(...error, { errorCode: error.errorCode || "DON'T_CREATE_ACCOUNT!" });
+        }
+    }
 }

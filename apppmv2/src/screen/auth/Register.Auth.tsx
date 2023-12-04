@@ -419,7 +419,11 @@ export const Register: React.FC<{ route: any }> = ({ route }) => {
                             >
                                 Bạn đã có tài khoản?{' '}
                             </Text>
-                            <Pressable>
+                            <Pressable
+                                onPress={() => {
+                                    navigation.navigate('Login');
+                                }}
+                            >
                                 <Text
                                     style={styles.textRegister}
                                 >

@@ -7,7 +7,8 @@ import {
     View,
     Pressable,
     FlatList,
-    TouchableOpacity
+    TouchableOpacity,
+    Image
 } from 'react-native';
 
 import { HeaderComponent } from '../../components/cHeadder/Header.Component';
@@ -69,7 +70,7 @@ const Cart: React.FC = () => {
                                 listProductInCart: data,
                                 listItemChecked: dataChecked,
                                 totalPrice: totalPriceTemp,
-                                isCheckAll: true
+                                isCheckAll: data.length > 0 ? true : false
                             }));
                         }
                         LoadingService.hide();
@@ -250,7 +251,7 @@ const Cart: React.FC = () => {
                 </View>
 
 
-                <View>
+                <View style={{ flex: 1, }}>
                     {
                         listProductInCart && listProductInCart?.length > 0 ? (
                             <FlatList
@@ -266,51 +267,73 @@ const Cart: React.FC = () => {
                                 />}
                                 keyExtractor={item => item.id}
                             />
-                        ) : null
+                        ) : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <Image source={require('../../global/assets/image/no-data.png')} style={{ width: 100, height: 100, }}
+                            />
+                            <Text style={[StylesTheme.text16]}>Bạn chưa có sản phẩm nào trong giỏ hàng!</Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    navigation.navigate('BottomTabNavigator');
+                                }}
+                                style={{ backgroundColor: '#f7f7f7', borderWidth: 1, borderColor: Colors.primaryColor, borderRadius: 8, width: '30%', paddingVertical: 10, alignItems: 'center', marginTop: 12 }}
+                            >
+                                <Text style={[StylesTheme.textLabel, { color: Colors.primaryColor }]}>Mua sắm</Text>
+                            </TouchableOpacity>
+                        </View>
                     }
                 </View>
 
-                <View style={{
-                    width: '100%',
-                    // height: 100,
-                    borderTopColor: '#ccc',
-                    borderTopWidth: 1,
-                    backgroundColor: '#fff',
-                    position: 'absolute',
-                    bottom: 0,
-                    padding: 12,
-                    paddingBottom: 22,
-                }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                        <Text style={[StylesTheme.text16]}>Tổng tiền</Text>
-                        <Text style={[StylesTheme.sizeTextLarge, { color: '#ed4040', fontWeight: '600' }]}>
-                            {
-                                new Intl.NumberFormat('en-US', {
-                                    currency: 'VND',
-                                    style: 'currency',
-                                }).format(totalPrice ? Number(totalPrice) : 0).replace('₫', '')
-                            } ₫
-                        </Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <TouchableOpacity
-                            style={{ backgroundColor: '#f7f7f7', borderWidth: 1, borderColor: Colors.primaryColor, borderRadius: 8, width: '30%', paddingVertical: 10, alignItems: 'center' }}
-                        >
-                            <Text style={[StylesTheme.textLabel, { color: Colors.primaryColor }]}>Mua thêm</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => {
-                                navigation.navigate('Order', {
-                                    params: listProductInCart,
-                                    totalPrice
-                                });
-                            }}
-                            style={{ backgroundColor: '#fa9450', borderWidth: 1, borderColor: Colors.primaryColor, borderRadius: 8, width: '65%', paddingVertical: 10, alignItems: 'center' }}
-                        >
-                            <Text style={[StylesTheme.textLabel, { color: Colors.clWhite }]}>Đặt hàng</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                {
+                    listProductInCart && listProductInCart?.length > 0 ? (
+                        <View style={{
+                            width: '100%',
+                            // height: 100,
+                            borderTopColor: '#ccc',
+                            borderTopWidth: 1,
+                            backgroundColor: '#fff',
+                            position: 'absolute',
+                            bottom: 0,
+                            padding: 12,
+                            paddingBottom: 22,
+                        }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                <Text style={[StylesTheme.text16]}>Tổng tiền</Text>
+                                <Text style={[StylesTheme.sizeTextLarge, { color: '#ed4040', fontWeight: '600' }]}>
+                                    {
+                                        new Intl.NumberFormat('en-US', {
+                                            currency: 'VND',
+                                            style: 'currency',
+                                        }).format(totalPrice ? Number(totalPrice) : 0).replace('₫', '')
+                                    } ₫
+                                </Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        navigation.navigate('BottomTabNavigator');
+                                    }}
+                                    style={{ backgroundColor: '#f7f7f7', borderWidth: 1, borderColor: Colors.primaryColor, borderRadius: 8, width: '30%', paddingVertical: 10, alignItems: 'center' }}
+                                >
+                                    <Text style={[StylesTheme.textLabel, { color: Colors.primaryColor }]}>Mua thêm</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        navigation.navigate('Order', {
+                                            params: listProductInCart,
+                                            totalPrice
+                                        });
+                                    }}
+                                    style={{ backgroundColor: '#fa9450', borderWidth: 1, borderColor: Colors.primaryColor, borderRadius: 8, width: '65%', paddingVertical: 10, alignItems: 'center' }}
+                                >
+                                    <Text style={[StylesTheme.textLabel, { color: Colors.clWhite }]}>Đặt hàng</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    ) : (
+                        null
+                    )
+                }
+
             </View>
         </View >
     )

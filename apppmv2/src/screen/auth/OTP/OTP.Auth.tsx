@@ -58,25 +58,25 @@ export const OTP: React.FC<{ route: any }> = ({ route }) => {
   const MAX_CODE_LENGTH = 6;
 
   const sendCode = async () => {
-    navigation.navigate("RegisterInformationPersonal", {
-      username: username,
-      password: password
-    });
-    // LoadingService.show();
-    // await auth().signInWithPhoneNumber(`+84${username.substring(1)}`, true).then((res) => {
-    //   console.log(res, 'res');
-    //   LoadingService.hide();
-    //   if (res) {
-    //     setConfirm(res);
-    //     setTimerCount(90);
-    //     setIsTimeCount(true);
-    //     countDown();
-    //   } else {
-    //     AlertService.show("", "Có lỗi trong quá trình xử lý!", 4000, "Lỗi xử lý");
-    //   }
-    // }).catch((error) => {
-    //   console.log(error, 'error');
+    // navigation.navigate("RegisterInformationPersonal", {
+    //   username: username,
+    //   password: password
     // });
+    LoadingService.show();
+    await auth().signInWithPhoneNumber(`+84${username.substring(1)}`, true).then((res) => {
+      console.log(res, 'res');
+      LoadingService.hide();
+      if (res) {
+        setConfirm(res);
+        setTimerCount(90);
+        setIsTimeCount(true);
+        countDown();
+      } else {
+        AlertService.show("", "Có lỗi trong quá trình xử lý!", 4000, "Lỗi xử lý");
+      }
+    }).catch((error) => {
+      console.log(error, 'error');
+    });
   };
 
   const confirmCode = () => {
@@ -99,7 +99,7 @@ export const OTP: React.FC<{ route: any }> = ({ route }) => {
           .catch((error: Error) => {
             console.log(error.message);
             LoadingService.hide();
-            AlertService.show("", error.message, 4000);
+            AlertService.show("", "OTP không chính xác", 4000);
           })
       }
     } else {

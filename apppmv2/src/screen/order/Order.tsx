@@ -27,6 +27,7 @@ import PickerQuicklyComponent from '../../components/cPickerQuickly/PickerQuickl
 import { TypeDefault } from '../../type/Type';
 import AddressComponent from '../../components/cAddress/Address.component';
 import TextInputComponent from '../../components/cTextInput/TextInput.component';
+import { AlertService } from '../../components/cAlert/Alert.component';
 
 interface IState {
     deliveryForm?: TypeDefault,
@@ -116,6 +117,72 @@ const Order: React.FC = () => {
             }));
         }
     }, []);
+
+    const handleOrder = () => {
+        try {
+            if (address.value.length < 3) {
+                AlertService.show(ENUM.E_ERROR, 'Vui lòng chọn địa chỉ!', 3000, "Cảnh báo");
+                return;
+            }
+
+            if (!addressDetail.value) {
+                AlertService.show(ENUM.E_ERROR, 'Vui lòng điền số nhà hoặc tên đường!', 3000, "Cảnh báo");
+                return;
+            }
+
+            if (!deliveryForm?.value) {
+                AlertService.show(ENUM.E_ERROR, 'Vui lòng chọn hình thức nhận hàng!', 3000, "Cảnh báo");
+                return;
+            }
+
+            if (!payments?.value) {
+                AlertService.show(ENUM.E_ERROR, 'Vui lòng chọn hình thức thanh toán!', 3000, "Cảnh báo");
+                return;
+            }
+
+            let cartId: string[] = [];
+
+            if (Array.isArray(params)) {
+                params.map((item: any) => {
+                    if (item?.cartId) {
+                        cartId.push(item?.cartId);
+                    }
+                })
+            }
+
+            let arrAddress = [];
+            if (address.value[2]?.full_name) {
+                arrAddress.push(address.value[2]?.full_name);
+            }
+            if (address.value[1]?.full_name) {
+                arrAddress.push(address.value[1]?.full_name);
+            }
+            if (address.value[0]?.full_name) {
+                arrAddress.push(address.value[0]?.full_name);
+            }
+
+            let dataBody = {
+                address: addressDetail.value + ", " + arrAddress.join(", "),
+                deliveryForm: deliveryForm.value?.Value,
+                paymentsForm: payments?.value.Value
+            }
+
+            if (cartId.length > 0) {
+                LoadingService.show();
+                HttpService.Post(`${env.URL}/cart/setStatusItemsInCart`, { ids: cartId }).then((res: any) => {
+                    LoadingService.hide();
+                    if (res && res?.status === 200) {
+                        AlertService.show(ENUM.E_SUCCESS, res?.message, 3000);
+                        navigation.navigate('BottomTabNavigator');
+                    } else {
+                        AlertService.show(ENUM.E_ERROR, 'Đặt hàng thành công!', 3000, "Lỗi");
+                    }
+                })
+            }
+        } catch (error) {
+            AlertService.show(ENUM.E_ERROR, 'Có lỗi trong quá trình xử lý!', 3000, "Lỗi");
+        }
+    }
 
     console.log(params, 'params');
 
@@ -238,7 +305,7 @@ const Order: React.FC = () => {
                     <View style={{ flex: 1, alignItems: 'flex-end' }}>
                         <TouchableOpacity
                             onPress={() => {
-
+                                handleOrder();
                             }}
                             style={{ backgroundColor: '#fa9450', borderRadius: 8, width: '75%', paddingVertical: 10, alignItems: 'center' }}
                         >

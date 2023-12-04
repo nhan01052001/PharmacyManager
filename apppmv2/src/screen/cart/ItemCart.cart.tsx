@@ -74,7 +74,7 @@ export const ItemCart: React.FC<IProps> = (props: IProps) => {
                                 resizeMode='contain'
                             />
                             <View style={{ marginLeft: 8, width: '100%', justifyContent: 'flex-start' }}>
-                                <Text numberOfLines={2} style={[StylesTheme.text16, { maxWidth: '90%', }]}>{dataItem?.fullName}</Text>
+                                <Text numberOfLines={2} style={[StylesTheme.text16, { maxWidth: '80%', }]}>{dataItem?.fullName}</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'flex-end', paddingVertical: 3 }}>
                                     <Text style={[styles.text, { color: '#e33232', fontSize: 17, marginRight: 6 }]}>
                                         {

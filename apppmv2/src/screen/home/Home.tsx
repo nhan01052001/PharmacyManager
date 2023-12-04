@@ -395,7 +395,15 @@ const Home: React.FC = () => {
                                     <TouchableOpacity
                                         style={{ flexDirection: 'row', alignItems: 'center' }}
                                         onPress={() => {
-                                            navigation.navigate('AllMedicine');
+                                            navigation.navigate('AllMedicine', {
+                                                api: {
+                                                    urlApi: `${env.URL}/medicine/findMedicine`,
+                                                    configHeader: {
+                                                        'page': 1,
+                                                        'pageSize': 20,
+                                                    }
+                                                }
+                                            });
                                         }
                                         }
                                     >
@@ -426,7 +434,20 @@ const Home: React.FC = () => {
                                 <View style={[styles.listProductRow, { marginTop: 12 }]}>
                                     <View style={styles.flexDCenter}>
                                         <Text style={styles.fs16fw500}>Sản phẩm bán chạy</Text>
-                                        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}
+                                            onPress={() => {
+                                                navigation.navigate('AllMedicine', {
+                                                    api: {
+                                                        urlApi: `${env.URL}/medicine/findMedicine`,
+                                                        configHeader: {
+                                                            'page': 1,
+                                                            'pageSize': 20,
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                            }
+                                        >
                                             <Text style={[styles.fs16fw500, { color: 'blue' }]}>Xem tất cả</Text>
                                             <RightArowIcon color="blue" size={16} />
                                         </TouchableOpacity>
@@ -467,6 +488,7 @@ const Home: React.FC = () => {
                                                 configHeader: {
                                                     'page': 1,
                                                     'pageSize': 20,
+                                                    'typeSort': 'DESC'
                                                 }
                                             }}
                                             isRefresh={recommendTodayProduct.isRefresh}

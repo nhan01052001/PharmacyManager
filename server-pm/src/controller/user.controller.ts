@@ -20,4 +20,9 @@ export class UserController {
     getUserByID(@Param() param: any): Promise<User> {
         return this.userService.getUserByID(param?.id);
     }
+
+    @Get('getUserLoginSocial/:id')
+    getUserLoginSocial(@Param() param: any): Promise<User> {
+        return this.userService.getUserLoginSocial(param?.id);
+    }
 }

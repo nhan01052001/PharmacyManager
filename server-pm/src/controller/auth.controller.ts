@@ -9,7 +9,7 @@ import { UserLoginDTO } from "../validator/dto/user-login.dto";
 export class AuthController {
     constructor(
         private authService: AuthService
-    ){}
+    ) { }
 
     @Post('/register')
     register(@Body() userRegister: UserRegisterDTO, @Headers() headers: any): Promise<unknown> {
@@ -19,5 +19,10 @@ export class AuthController {
     @Post('/login')
     login(@Body() userLogin: UserLoginDTO, @Headers() headers: any): Promise<unknown> {
         return this.authService.login(userLogin, headers);
+    }
+
+    @Post('/registerWithSocial')
+    registerWithSocial(@Body() body: any): Promise<unknown> {
+        return this.authService.registerWithSocial(body);
     }
 }

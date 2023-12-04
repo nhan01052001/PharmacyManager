@@ -44,14 +44,17 @@ const ListMedicine: React.FC<IProps> = (props: IProps) => {
     const [{ dataLocal, isLoading }, setState] = useState<IState>({ ...initialState });
 
     const getData = () => {
-console.log(api?.dataBody, 'api?.dataBody');
-
+        console.log(api, 'api');
+        
         HttpService.Post(api?.urlApi, api?.dataBody ? api?.dataBody : {},api?.configHeader ? api?.configHeader : {})
             .then((res: any) => {
                 if (res && res?.status === 200 && res?.statusText === ENUM.E_SUCCESS && Array.isArray(res?.data)) {
+                    const data = res?.data.filter((item: any) => {
+                        return item?.id !== api?.id;
+                    })
                     setState((prevState) => ({
                         ...prevState,
-                        dataLocal: [...res?.data],
+                        dataLocal: [...data],
                         isLoading: false,
                     }));
                 } else {
