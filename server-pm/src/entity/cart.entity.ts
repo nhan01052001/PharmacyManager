@@ -10,6 +10,7 @@ interface ICart extends IBaseEntity {
     medicine?: string;
     unitPurchase?: string,
     quantityPurchase?: number;
+    pricePurchase?: number;
 }
 
 @Entity('Cart')
@@ -21,6 +22,7 @@ export class Cart extends BaseEntity {
             medicine,
             quantityPurchase,
             unitPurchase,
+            pricePurchase,
             ...superItem
         } = props || {};
 
@@ -32,6 +34,7 @@ export class Cart extends BaseEntity {
             medicine,
             unitPurchase,
             quantityPurchase,
+            pricePurchase,
         });
     }
 

@@ -9,6 +9,9 @@ import RegisterInformationPersonal from '../screen/auth/RegisterIn4.Auth';
 import DetailMedicine from '../screen/medicine/DetailMedicine.medicine';
 import AllMedicine from '../screen/medicine/AllMedicine.medicine';
 import SearchScreen from '../screen/search/Search';
+import Order from '../screen/order/Order';
+import { Permission } from '../screen/auth/Permission.Auth';
+import Cart from '../screen/cart/Cart';
 
 export type ScreenName =
     "Login" | 
@@ -18,10 +21,14 @@ export type ScreenName =
     "BottomTabNavigator" |
     "DetailMedicine" |
     "AllMedicine" | 
-    "SearchScreen";
+    "SearchScreen" |
+    "Order" |
+    "Permission" |
+    "Cart";
 
 
 export type MainStackParams = {
+    Permission: any | undefined;
     Login: any | undefined;
     Register: any | undefined;
     OTP: any | undefined;
@@ -34,10 +41,13 @@ export type RootStackParams = {
     BottomTabNavigator: undefined;
     DetailMedicine: any;
     AllMedicine: any;
-    SearchScreen: any;
+    SearchScreen: any
+    Order: any;
+    Cart: any;
 };
 
 export type AllStackParams = {
+    Permission: any | undefined;
     Login: any | undefined;
     Register: any | undefined;
     OTP: any | undefined;
@@ -47,6 +57,8 @@ export type AllStackParams = {
     DetailMedicine: any;
     AllMedicine: any;
     SearchScreen: any;
+    Order: any;
+    Cart: any;
 }
 
 const MainStack = createStackNavigator<MainStackParams>();
@@ -54,6 +66,7 @@ const RootStack = createStackNavigator<RootStackParams>();
 
 const MainStackNavigator: React.FC = () => (
     <MainStack.Navigator>
+        <MainStack.Screen name='Permission' component={Permission} options={{ headerShown: false, gestureEnabled: false, }} />
         <MainStack.Screen name='Login' component={Login} options={{ headerShown: false, gestureEnabled: false, }} />
         <MainStack.Screen name='Register' component={Register} options={{ headerShown: false, gestureEnabled: false, }} />
         <MainStack.Screen name='OTP' component={OTP} options={{ headerShown: false, gestureEnabled: false, }} />
@@ -86,6 +99,16 @@ export const RootStackNavigator: React.FC = () => (
         <RootStack.Screen
             name='SearchScreen'
             component={SearchScreen}
+            options={{ headerShown: false, }}
+        />
+        <RootStack.Screen
+            name='Order'
+            component={Order}
+            options={{ headerShown: false, }}
+        />
+        <RootStack.Screen
+            name='Cart'
+            component={Cart}
             options={{ headerShown: false, }}
         />
     </RootStack.Navigator>

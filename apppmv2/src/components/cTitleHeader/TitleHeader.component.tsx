@@ -1,18 +1,27 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-import { MenuIcon, BellIcon } from '../../global/icon/Icon';
+import { MenuIcon, BellIcon, CartIcon } from '../../global/icon/Icon';
+import { AllStackParams } from '../../navigation/Stack.Navigator';
 
 const SIZE = 40;
 const COLOR = 'black';
 
 const TitleHeader: React.FC = () => {
+    const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
+
     return (
         <View style={styles.container}>
             <View style={styles.content}>
                 <View style={styles.wrapBtnMenu}>
-                    <TouchableOpacity style={{}}>
-                        <MenuIcon size={SIZE} color={COLOR} />
+                    <TouchableOpacity style={{}}
+                        onPress={() => {
+                            navigation.navigate('Cart')
+                        }}
+                    >
+                        <CartIcon size={36} color={COLOR} />
                     </TouchableOpacity>
                 </View>
 

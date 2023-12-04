@@ -83,6 +83,7 @@ type valueProduct = {
     price?: number;
     unit?: string;
     quantity?: number;
+    type?: string;
     lsImage?: [];
     lsUnit?: [];
     isSale?: boolean;
@@ -321,6 +322,7 @@ const DetailMedicine: React.FC = () => {
                                     name: res?.fullName,
                                     price: res?.medicineDetail?.price,
                                     quantity: res?.medicineDetail?.quantity,
+                                    type: res?.type,
                                     isSale: res?.isSale ? true : false,
                                     lsUnit: handleUnit,
                                     lsImage: res?.medicineDetail?.lsImage ? res?.medicineDetail?.lsImage.split(', ') : [],
@@ -675,7 +677,16 @@ const DetailMedicine: React.FC = () => {
                                     numColumn={2}
                                     colorBtn={'#d9c129'}
                                     api={{
-                                        urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
+                                        urlApi: `${env.URL}/medicine/findMedicine`,
+                                        configHeader: {
+                                            'page': 1,
+                                            'pageSize': 20,
+                                        },
+                                        dataBody: {
+                                            "type": {
+                                                "value": product?.type
+                                            }
+                                        }
                                     }}
                                 />
                             </View>

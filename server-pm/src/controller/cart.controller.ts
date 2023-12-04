@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, UseGuards, Body } from '@nestjs/common';
 import { MyJwtGuard } from '../service/guard/myjwt.guard';
 import { Cart } from '../entity/cart.entity';
 import { CartService } from '../service/cart.service';
@@ -13,5 +13,17 @@ export class CartController {
     @Get('/getCartByProfileID/:id')
     getCartByProfileID(@Param() param: any): Promise<unknown> {
         return this.cartService.getCartByProfileID(param?.id);
+    }
+
+    @UseGuards(MyJwtGuard)
+    @Post('/updateQuantityAndPrice')
+    updateQuantityAndPrice(@Body() body: any): Promise<unknown> {
+        return this.cartService.updateQuantityAndPrice(body)
+    }
+
+    @UseGuards(MyJwtGuard)
+    @Post('/deleteItemsInCart')
+    deleteItemsInCart(@Body() body: any): Promise<unknown> {
+        return this.cartService.deleteItemsInCart(body?.ids);
     }
 }

@@ -21,6 +21,7 @@ import HttpService from '../../service/HttpService.Service';
 import { env } from '../../utils/env.utils';
 import { ENUM } from '../../global/enum';
 import { LoadingService } from '../../components/cLoading/Loading.component';
+import { AlertService } from '../../components/cAlert/Alert.component';
 
 interface IState {
     isCheckAll?: boolean;
@@ -155,6 +156,55 @@ const Cart: React.FC = () => {
         }));
     }
 
+    const handleChangeQuantity = (id: string, value: number, medicineId: string) => {
+        try {
+            LoadingService.show();
+            HttpService.Post(`${env.URL}/cart/updateQuantityAndPrice`, {
+                id,
+                quantity: value,
+                medicineId
+            }).then((res: any) => {
+                LoadingService.hide();
+                if (res && res?.status === 200) {
+                    // AlertService.show(ENUM.E_SUCCESS, 'Thêm thành công!', 5000, null);
+                    listProductInCart?.forEach((e) => {
+                        if (e?.price && e?.cartId === id) {
+                            e.pricePurchase = value * e?.price,
+                                e.quantityPurchase = value
+                        }
+                    });
+                    setState((prevState: IState) => ({
+                        ...prevState,
+                        listProductInCart,
+                    }));
+                } else {
+                    AlertService.show(ENUM.E_ERROR, 'Sản phẩm đã hết hàng', 5000, null);
+                }
+            })
+        } catch (error) {
+            LoadingService.hide();
+        }
+    }
+
+    const handleDelete = () => {
+        try {
+            LoadingService.show();
+            HttpService.Post(`${env.URL}/cart/deleteItemsInCart`, {
+                ids: listItemChecked
+            }).then((res: any) => {
+                LoadingService.hide();
+                if (res && res?.status === 200) {
+                    AlertService.show(ENUM.E_SUCCESS, 'Xoá thành công!', 5000, null);
+                    handleGetData();
+                } else {
+                    AlertService.show(ENUM.E_ERROR, 'Có lỗi trong quá trình xử lý!', 5000, null);
+                }
+            })
+        } catch (error) {
+            LoadingService.hide();
+        }
+    }
+
     return (
         <View style={{ flex: 1, backgroundColor: '#edebeb' }}>
             <HeaderComponent
@@ -169,6 +219,8 @@ const Cart: React.FC = () => {
                         onPress={() => {
                             if (isCheckAll === false) {
                                 handleCheckAll();
+                            } else {
+                                handleUncheckAll();
                             }
                         }}
                     >
@@ -183,17 +235,17 @@ const Cart: React.FC = () => {
                                 )
                             }
                         </View>
-                        <Text style={[StylesTheme.textLabel, { fontSize: 16 }]}>Chọn tất cả {listProductInCart && listProductInCart?.length > 0 ? `(${listProductInCart?.length})` : ""}</Text>
+                        <Text style={[StylesTheme.textLabel, { fontSize: 16 }]}> {isCheckAll ? 'Huỷ tất cả' : 'Chọn tất cả'} {listProductInCart && listProductInCart?.length > 0 ? `(${listProductInCart?.length})` : ""}</Text>
                     </Pressable>
 
                     <Pressable
                         onPress={() => {
                             if (listItemChecked && listItemChecked?.length > 0) {
-                                handleUncheckAll();
+                                handleDelete();
                             }
                         }}
                     >
-                        <Text style={[StylesTheme.textLabel, { fontSize: 16, color: 'red' }]}>Huỷ {listItemChecked && listItemChecked?.length > 0 ? `(${listItemChecked?.length})` : ""}</Text>
+                        <Text style={[StylesTheme.textLabel, { fontSize: 16, color: 'red' }]}>Xoá {listItemChecked && listItemChecked?.length > 0 ? `(${listItemChecked?.length})` : ""}</Text>
                     </Pressable>
                 </View>
 
@@ -205,7 +257,13 @@ const Cart: React.FC = () => {
                                 data={listProductInCart}
                                 renderItem={({ item, index }) => <ItemCart key={index} dataItem={item} onCheckItem={(cartId: string) => {
                                     handleCheckItem(cartId);
-                                }} />}
+                                }}
+                                    onChangeQuantity={(cartId: string, value: number, medicineId: string) => {
+                                        if (cartId && medicineId && value !== null && value !== undefined) {
+                                            handleChangeQuantity(cartId, value, medicineId);
+                                        }
+                                    }}
+                                />}
                                 keyExtractor={item => item.id}
                             />
                         ) : null
@@ -221,6 +279,7 @@ const Cart: React.FC = () => {
                     position: 'absolute',
                     bottom: 0,
                     padding: 12,
+                    paddingBottom: 22,
                 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                         <Text style={[StylesTheme.text16]}>Tổng tiền</Text>
@@ -240,6 +299,12 @@ const Cart: React.FC = () => {
                             <Text style={[StylesTheme.textLabel, { color: Colors.primaryColor }]}>Mua thêm</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
+                            onPress={() => {
+                                navigation.navigate('Order', {
+                                    params: listProductInCart,
+                                    totalPrice
+                                });
+                            }}
                             style={{ backgroundColor: '#fa9450', borderWidth: 1, borderColor: Colors.primaryColor, borderRadius: 8, width: '65%', paddingVertical: 10, alignItems: 'center' }}
                         >
                             <Text style={[StylesTheme.textLabel, { color: Colors.clWhite }]}>Đặt hàng</Text>

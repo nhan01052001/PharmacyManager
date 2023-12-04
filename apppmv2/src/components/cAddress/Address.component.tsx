@@ -13,7 +13,7 @@ import {
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import StylesTheme from '../../global/theme/Styles.Theme';
 import TextInputComponent from '../cTextInput/TextInput.component';
-import { BackIcon, RightArowIcon, WarningIcon } from '../../global/icon/Icon';
+import { BackIcon, RightArowIcon, WarningIcon, LocationIcon } from '../../global/icon/Icon';
 import { Colors } from '../../global/theme/Colors.Theme';
 import HttpService from '../../service/HttpService.Service';
 import { LoadingService } from '../cLoading/Loading.component';
@@ -45,6 +45,7 @@ interface IProps {
     isObligatory?: boolean,
     isShowIconError?: boolean,
     isError?: boolean,
+    isSpecial?: boolean,
     onComplete: (value: any) => void,
     // also contains all props of the TextInput component
 }
@@ -158,7 +159,7 @@ let callOnEndReached: boolean = false,
     endLoading: boolean = false;
 
 const Address: React.FC<IProps> = (props: IProps) => {
-    const { value, placeholder, style, isObligatory, isShowIconError, isError, onComplete } = props;
+    const { value, placeholder, style, isObligatory, isShowIconError, isError, isSpecial, onComplete } = props;
     const cols: string = "name,name_with_type";
     const [{ search, provinces, districts, wards, isShowModal, isLoading, dataSource, valueView }, setState] = useState<State>({ ...initialState });
     // let listData = new Array(26).fill([]);
@@ -657,24 +658,48 @@ const Address: React.FC<IProps> = (props: IProps) => {
 
     return (
         <View style={{ flex: 1 }}>
-            <TouchableOpacity style={[styles.componentDisplay, { ...style, paddingHorizontal: 8 }, isError && { borderBottomColor: 'red' }]}
-                onPress={() => {
-                    setState((prevState: State) => ({
-                        ...prevState,
-                        isShowModal: true,
-                        isLoading: true,
-                    }));
-                }}
-            >
-                <Text numberOfLines={3} style={[StylesTheme.text16, !valueView && [StylesTheme.text14, { color: "#ccc" }], { maxWidth: '90%' }]}>{valueView ? valueView : placeholder}</Text>
-                {
-                    isError && isShowIconError ? (
-                        <WarningIcon size={28} color='red' />
-                    ) : (
-                        <RightArowIcon color={Colors.primaryColor} size={16} />
-                    )
-                }
-            </TouchableOpacity>
+            {
+                isSpecial ? (
+                    <TouchableOpacity style={{ padding: 12, borderColor: '#ccc', borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+                        onPress={() => {
+                            setState((prevState: State) => ({
+                                ...prevState,
+                                isShowModal: true,
+                                isLoading: true,
+                            }));
+                        }}
+                    >
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <LocationIcon size={22} color='#000' />
+                            <Text numberOfLines={2} style={[StylesTheme.text16, { marginLeft: 12, maxWidth: '90%'}]}>{valueView ? valueView : placeholder}</Text>
+                        </View>
+                        {
+                            !valueView && (
+                                <Text style={{ fontSize: 22, fontWeight: '700' }}>+</Text>
+                            )
+                        }
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity style={[styles.componentDisplay, { ...style, paddingHorizontal: 8 }, isError && { borderBottomColor: 'red' }]}
+                        onPress={() => {
+                            setState((prevState: State) => ({
+                                ...prevState,
+                                isShowModal: true,
+                                isLoading: true,
+                            }));
+                        }}
+                    >
+                        <Text numberOfLines={3} style={[StylesTheme.text16, !valueView && [StylesTheme.text14, { color: "#ccc" }], { maxWidth: '90%' }]}>{valueView ? valueView : placeholder}</Text>
+                        {
+                            isError && isShowIconError ? (
+                                <WarningIcon size={28} color='red' />
+                            ) : (
+                                <RightArowIcon color={Colors.primaryColor} size={16} />
+                            )
+                        }
+                    </TouchableOpacity>
+                )
+            }
             {
                 isShowModal && (
                     <View style={StylesTheme.flexCenter}>

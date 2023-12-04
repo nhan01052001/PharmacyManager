@@ -7,9 +7,10 @@ import { entities } from "../entities.provider";
 import { ProvincesService } from "../service/provinces.service";
 import { UserService } from "../service/user.service";
 import { CartService } from "../service/cart.service";
+import { AuthModule } from "./auth.module";
 
 @Module({
-    imports: [JwtModule.register({}), TypeOrmModule.forFeature(entities)],
+    imports: [TypeOrmModule.forFeature(entities), AuthModule],
     controllers: [
         MedicinesController
     ],

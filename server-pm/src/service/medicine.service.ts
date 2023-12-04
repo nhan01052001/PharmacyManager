@@ -391,7 +391,7 @@ export class MedicinesService {
             }
 
             if (type) {
-                data.andWhere(`Medicine.type = ${type.value ? type.value : ''}`);
+                data.andWhere(`Medicine.type LIKE :type`, {type: type.value ? `%${type.value}%` : ''});
             }
 
             if (quantity) {

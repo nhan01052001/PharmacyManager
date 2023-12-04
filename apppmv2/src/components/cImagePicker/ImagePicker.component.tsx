@@ -34,6 +34,7 @@ const initialState: IState = {
 }
 
 interface IProps {
+    value?: any,
     label?: string,
     width?: number,
     height?: number,
@@ -43,7 +44,7 @@ interface IProps {
 
 
 const ImagePicker: React.FC<IProps> = (props: IProps) => {
-    const { label, width, height, borderRadius, onComplete } = props;
+    const { label, width, height, borderRadius, value, onComplete } = props;
     const [{ filePath, isShowModal }, setState] = useState<IState>({ ...initialState });
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -163,6 +164,17 @@ const ImagePicker: React.FC<IProps> = (props: IProps) => {
             onComplete(filePath?.uri ? filePath?.uri : "");
         }
     }, [filePath]);
+
+    useEffect(() => {
+        if (value?.uri) {
+            console.log(value, 'value');
+            
+            setState((prevState: IState) => ({
+                ...prevState,
+                filePath: value
+            }));
+        }
+    }, [])
 
     return (
         <View style={{ flex: 1 }}>

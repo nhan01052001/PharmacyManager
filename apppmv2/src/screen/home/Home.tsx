@@ -21,7 +21,7 @@ import DrugStore from '../../components/cDrugStore/DrugStore.component';
 import ListMedicine from '../../components/cMedicine/ListMedicine.component';
 import SwiperImgMedicine from '../../components/cSwiperImgMedicine/SwiperImgMedicine.component';
 import MedicinePortfolio from '../../components/cMedicine/MedicinePortfolio.component';
-import { RightArowIcon, BellIcon } from '../../global/icon/Icon';
+import { RightArowIcon, BellIcon, CartIcon } from '../../global/icon/Icon';
 import { MainStackParams } from '../../navigation/Stack.Navigator';
 import StylesTheme, { width, height } from '../../global/theme/Styles.Theme';
 import { Product } from '../../type/Product.type';
@@ -295,13 +295,15 @@ const Home: React.FC = () => {
                             style={{
                                 position: 'absolute',
                                 left: 0,
+                                zIndex: 99, elevation: 99
                             }}
                         >
-                            <TouchableOpacity>
-                                <Image
-                                    source={require('../../global/assets/image/menu-button-of-three-horizontal-lines.png')}
-                                    style={{ width: 32, height: 32 }}
-                                />
+                            <TouchableOpacity
+                                onPress={() => {
+                                    navigation.navigate('Cart')
+                                }}
+                            >
+                                <CartIcon color='#000' size={36} />
                             </TouchableOpacity>
                         </View>
                         <Search
@@ -431,10 +433,14 @@ const Home: React.FC = () => {
                                     </View>
                                     <View style={styles.listProduct}>
                                         <ListMedicine
-                                            data={bestSellingProducts?.data}
+                                            data={[]}
                                             isHorizontal={true}
                                             api={{
-                                                urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
+                                                urlApi: `${env.URL}/medicine/findMedicine`,
+                                                configHeader: {
+                                                    'page': 1,
+                                                    'pageSize': 20,
+                                                }
                                             }}
                                             isRefresh={bestSellingProducts.isRefresh}
                                         />
@@ -452,13 +458,16 @@ const Home: React.FC = () => {
                                     </View>
                                     <View style={[styles.listProductPortfolio, styles.listProduct]}>
                                         <ListMedicine
-                                            data={recommendTodayProduct?.data}
                                             isHorizontal={false}
                                             isNumColumn={true}
                                             numColumn={2}
                                             colorBtn={'#d9c129'}
                                             api={{
-                                                urlApi: 'https://63eeef46c59531ccf166864a.mockapi.io/api/todo/tasks',
+                                                urlApi: `${env.URL}/medicine/findMedicine`,
+                                                configHeader: {
+                                                    'page': 1,
+                                                    'pageSize': 20,
+                                                }
                                             }}
                                             isRefresh={recommendTodayProduct.isRefresh}
                                         />

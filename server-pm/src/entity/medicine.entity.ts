@@ -4,6 +4,7 @@ import { BaseEntity, IBaseEntity } from './baseEntity/base.entity';
 import { MedicineDetail } from "./medicine-detail.entity";
 import { Cart } from "./cart.entity";
 import { Order } from "./oder.entity";
+import { Supplier } from "./supplier.entity";
 
 interface IMedicine extends IBaseEntity {
     code?: string;
@@ -16,6 +17,7 @@ interface IMedicine extends IBaseEntity {
     cart?: Cart;
     order?: Order;
     typeView?: string;
+    supplier?: string;
 }
 
 @Entity('Medicine')
@@ -32,6 +34,7 @@ export class Medicine extends BaseEntity {
             cart,
             order,
             typeView,
+            supplier,
             ...superItem
         } = props || {};
 
@@ -47,7 +50,8 @@ export class Medicine extends BaseEntity {
             medicineDetail,
             cart,
             order,
-            typeView
+            typeView,
+            supplier
         });
     }
 
@@ -77,6 +81,10 @@ export class Medicine extends BaseEntity {
 
     @OneToOne(() => Cart, (cart) => cart.medicine)
     cart?: Cart;
+
+    @OneToOne(() => Supplier, (supplier) => supplier.medicine, { cascade: true, nullable: true })
+    @Column({ nullable: true })
+    supplier?: string;
 
     @ManyToOne(() => Order, (order) => order.medicine)
     order?: Order;

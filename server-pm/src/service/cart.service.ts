@@ -4,17 +4,15 @@ import { ErrorResponse } from '../error/error-response.error';
 import { Cart } from '../entity/cart.entity';
 import { CartRepository } from '../repository/cart.repository';
 import { ENUM } from '../util/enum.util';
-import { MedicinesService } from './medicine.service';
 import { MedicineRepository } from '../repository/medicines.repository';
 import { Medicine } from '../entity/medicine.entity';
+import { async } from 'rxjs';
 
 @Injectable()
 export class CartService {
     constructor(
         @InjectRepository(Cart)
         private readonly cartRepository: CartRepository,
-
-        private readonly medicinesService: MedicinesService,
 
         @InjectRepository(Medicine)
         private readonly medicineRepository: MedicineRepository,
@@ -87,6 +85,34 @@ export class CartService {
         }
     }
 
+    async getMedicineById(id?: string, column?: string): Promise<Medicine> {
+        if (id) {
+            const result = await this.medicineRepository
+                .createQueryBuilder('Medicine')
+                .leftJoinAndSelect('Medicine.medicineDetail', 'd', 'Medicine.id = d.medicineId')
+                .where(`Medicine.id = "${id}"`)
+                .andWhere("Medicine.isDelete = false").andWhere("d.isDelete = false").getOne();
+
+            let unitView = [];
+            result.typeView = ENUM[`${result.type.trim()}`];
+            if (result.medicineDetail.unit.length > 0) {
+                result.medicineDetail.unit.split(',').map((value, index) => {
+                    unitView.push({
+                        id: index,
+                        name: ENUM[`${value.trim()}`],
+                        isHave: true,
+                        isActive: false,
+                        code: value,
+                    })
+                })
+            }
+            result.medicineDetail.unitView = JSON.stringify(unitView);
+
+            return result;
+        }
+        return null;
+    }
+
     async updateQuantityAndPrice(dataBody?: any): Promise<unknown> {
         try {
             const id = dataBody?.id ? dataBody?.id : null;
@@ -94,7 +120,7 @@ export class CartService {
             const medicineId = dataBody?.medicineId ? dataBody?.medicineId : null;
 
             if (id && quantity > 0 && medicineId) {
-                const medicines = await this.medicinesService.getMedicineById(medicineId);
+                const medicines = await this.getMedicineById(medicineId);
                 const carts = await this.getCartById(id);
                 const increase = Number(carts.quantityPurchase) < quantity ? true : false
                 const quantityTemp = increase
@@ -131,7 +157,106 @@ export class CartService {
                 }
             }
 
-            return;
+            return {
+                status: 200,
+                statusText: ENUM.E_SUCCESS,
+                message: 'Thêm Thành công!',
+                data: [],
+            }
+        } catch (error) {
+            throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
+        }
+    }
+
+    async deleteItemInCart(id?: string): Promise<unknown> {
+        try {
+            if (id) {
+                const carts = await this.getCartById(id);
+                const quantity = Number(carts.quantityPurchase);
+                const medicineId = carts?.medicine;
+                const medicines = await this.getMedicineById(medicineId);
+
+                if (carts && medicines) {
+                    await this.cartRepository.createQueryBuilder()
+                        .update('Cart')
+                        .set({
+                            isDelete: true
+                        })
+                        .where("id = :id", { id: id }).andWhere("Cart.isDelete = false").andWhere('Cart.status = false')
+                        .execute();
+
+                    await this.medicineRepository.createQueryBuilder()
+                        .update('MedicineDetail')
+                        .set({
+                            quantity: Number(medicines.medicineDetail.quantity) + quantity
+                        })
+                        .where("medicineId = :id", { id: medicineId }).andWhere("MedicineDetail.isDelete = false")
+                        .execute();
+
+                    return {
+                        status: 200,
+                        statusText: ENUM.E_SUCCESS,
+                        message: 'Xoá thành công',
+                        data: [],
+                    };
+                }
+
+                return {
+                    status: 500,
+                    statusText: ENUM.E_ERROR,
+                    message: 'Lỗi 500',
+                    data: null,
+                };
+            }
+
+            return {
+                status: 500,
+                statusText: ENUM.E_ERROR,
+                message: 'Lỗi 500',
+                data: null,
+            };
+        } catch (error) {
+            throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
+        }
+    }
+
+    async deleteItemsInCart(ids?: string[]): Promise<unknown> {
+        try {
+            if (ids && ids.length > 0) {
+                let idError = [];
+
+                await Promise.all(
+                    ids.map(async (item: string) => {
+                        const result: any = await this.deleteItemInCart(item);
+                        if (result?.status !== 200) {
+                            idError.push(item);
+                        }
+                    })
+                );
+
+                if (idError.length === ids.length) {
+                    return {
+                        status: 500,
+                        statusText: ENUM.E_ERROR,
+                        message: 'Lỗi 500',
+                        data: null,
+                    };
+                }
+
+                return {
+                    status: 200,
+                    statusText: ENUM.E_SUCCESS,
+                    message: 'Xoá thành công',
+                    data: [],
+                };
+            } else {
+                return {
+                    status: 200,
+                    statusText: ENUM.E_SUCCESS,
+                    message: '',
+                    data: null,
+                };
+            }
         } catch (error) {
             throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
         }

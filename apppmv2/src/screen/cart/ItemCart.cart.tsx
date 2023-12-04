@@ -22,6 +22,7 @@ import OptionChooseQuickly from '../../components/cOptionChooseQuickly/OptionCho
 interface IProps {
     dataItem?: any;
     onCheckItem: (cartId: string) => void,
+    onChangeQuantity: (cartId: string, value: number, medicineId: string) => void,
 }
 
 interface IState {
@@ -34,7 +35,7 @@ const initialState: IState = {
 
 export const ItemCart: React.FC<IProps> = (props: IProps) => {
     const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
-    const { dataItem, onCheckItem } = props;
+    const { dataItem, onCheckItem, onChangeQuantity } = props;
     const [{ isCheckAll }, setState] = useState<IState>({ ...initialState });
     
 
@@ -105,7 +106,7 @@ export const ItemCart: React.FC<IProps> = (props: IProps) => {
                                 limit={100}
                                 onComplete={(value: number) => {
                                     console.log(value, 'value');
-                                    
+                                    onChangeQuantity(dataItem?.cartId, value, dataItem?.medicineId);
                                     // handleQuantityPurchase(value);
                                 }}
                             />

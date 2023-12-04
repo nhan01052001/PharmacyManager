@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity, IBaseEntity } from './baseEntity/base.entity';
 import { MedicineDetail } from "./medicine-detail.entity";
+import { Medicine } from "./medicine.entity";
 
 interface ISupplier extends IBaseEntity {
     phone?: string;
@@ -9,7 +10,7 @@ interface ISupplier extends IBaseEntity {
     name?: string,
     address?: string;
     status?: boolean;
-    medicineDetail?: MedicineDetail;
+    medicine?: Medicine;
     provinces_code?: string;
     districts_code?: string;
     ward_code?: string;
@@ -24,7 +25,7 @@ export class Supplier extends BaseEntity {
             name,
             address,
             status,
-            medicineDetail,
+            medicine,
             provinces_code,
             districts_code,
             ward_code,
@@ -39,7 +40,7 @@ export class Supplier extends BaseEntity {
             name,
             address,
             status,
-            medicineDetail,
+            medicine,
             provinces_code,
             districts_code,
             ward_code,
@@ -61,8 +62,8 @@ export class Supplier extends BaseEntity {
     @Column({ nullable: true, width: 600 })
     address?: string;
 
-    @OneToOne(() => MedicineDetail, (medicineDetail) => medicineDetail.supplier)
-    medicineDetail?: MedicineDetail;
+    @OneToOne(() => Medicine, (medicine) => medicine.supplier)
+    medicine?: Medicine;
 
     @Column({ nullable: false, width: 32 | 128 })
     provinces_code?: string;

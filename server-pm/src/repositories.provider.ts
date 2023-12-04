@@ -1,6 +1,7 @@
 import { Provider } from "@nestjs/common";
 import { Connection } from "typeorm";
 
+import { BaseRepository } from "./repository/base.repository";
 import { UserRepository } from "./repository/user.repository";
 import { StaffRepository } from "./repository/staff.repository";
 import { DistrictsRepository } from "./repository/districts.repository";
@@ -10,6 +11,7 @@ import { MedicineRepository } from "./repository/medicines.repository";
 import { CartRepository } from "./repository/cart.repository";
 
 const repositories = [
+  BaseRepository,
     UserRepository,
     StaffRepository,
     ProvincesRepository,

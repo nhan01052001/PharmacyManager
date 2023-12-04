@@ -109,10 +109,6 @@ export class MedicineDetail extends BaseEntity {
     @Column({ nullable: true, type: 'mediumtext' })
     lsImage?: string;
 
-    @OneToOne(() => Supplier, (supplier) => supplier.medicineDetail, { cascade: true, nullable: true })
-    @JoinColumn()
-    supplier?: Supplier;
-
     @OneToOne(() => Medicine, (medicine) => medicine.medicineDetail)
     @JoinColumn()
     medicine?: Medicine;

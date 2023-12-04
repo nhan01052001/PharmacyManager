@@ -20,7 +20,7 @@ import { ENUM } from '../../global/enum';
 const { width } = Dimensions.get('window');
 
 interface IProps {
-    data?: Product[];
+    data?: any[];
     isHorizontal?: boolean;
     numColumn?: number;
     isNumColumn?: boolean;
@@ -30,7 +30,7 @@ interface IProps {
 }
 
 interface IState {
-    dataLocal?: Product[];
+    dataLocal?: any[];
     isLoading?: boolean;
 }
 
@@ -44,8 +44,9 @@ const ListMedicine: React.FC<IProps> = (props: IProps) => {
     const [{ dataLocal, isLoading }, setState] = useState<IState>({ ...initialState });
 
     const getData = () => {
+console.log(api?.dataBody, 'api?.dataBody');
 
-        HttpService.Get(api?.urlApi, api?.configHeader ? api?.configHeader : {})
+        HttpService.Post(api?.urlApi, api?.dataBody ? api?.dataBody : {},api?.configHeader ? api?.configHeader : {})
             .then((res: any) => {
                 if (res && res?.status === 200 && res?.statusText === ENUM.E_SUCCESS && Array.isArray(res?.data)) {
                     setState((prevState) => ({
@@ -114,7 +115,7 @@ const ListMedicine: React.FC<IProps> = (props: IProps) => {
                     showsHorizontalScrollIndicator={false}
                     style={{ marginRight: 16 }}
                     renderItem={({ item }) => <MedicineComponent item={item} colorBtn={colorBtn} />}
-                    keyExtractor={(item: Product) => item.id}
+                    keyExtractor={(item: any) => item?.id}
                 />
             )}
         </View>

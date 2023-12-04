@@ -14,7 +14,7 @@ const widthDefault = width > 400 ? (width * 45) / 100 : (width * 44) / 100;
 const fontSizeDefault = width > 400 ? 16 : 13;
 
 interface IProps {
-    item?: Product;
+    item?: any;
     colorBtn?: any;
     mgBottom?: any;
     handleClickProduct?: any;

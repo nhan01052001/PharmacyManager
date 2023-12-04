@@ -66,7 +66,7 @@ const initialState: IState = {
         }
     },
     isRememberPassword: false,
-    isPasswordVisibility: false,
+    isPasswordVisibility: true,
 };
 
 // const reducer = (state: IState, action: IAction) => { 
@@ -181,7 +181,7 @@ export const Login: React.FC = () => {
                 }).then((res: any) => {
                     LoadingService.hide();
                     if (res?.status === 200 && res?.statusText === ENUM.E_SUCCESS && res?.data) {
-                        Function.setAppData(ENUM.KEY_IN4USER, res?.data);
+                        Function.setAppData(ENUM.KEY_IN4USER, {...res?.data, isRememberPassword: isRememberPassword, isLoginSocial: false});
                         navigation.navigate("BottomTabNavigator", {
                             data: res?.data
                         });
@@ -280,7 +280,7 @@ export const Login: React.FC = () => {
             "id": Array.isArray(user?._user?.providerData) ? user?._user?.providerData[0]?.uid : user?._user?.uid ? user?._user?.uid : '',
         };
         console.log(dataUser, user, 'user');
-        Function.setAppData(ENUM.KEY_IN4USER, dataUser);
+        Function.setAppData(ENUM.KEY_IN4USER, {...dataUser, isRememberPassword: isRememberPassword, isLoginSocial: true});
         navigation.navigate("BottomTabNavigator", {
             data: dataUser
         });
@@ -312,7 +312,6 @@ export const Login: React.FC = () => {
                         }}
                     >
                         <Image source={require('../../global/assets/image/logo.png')} style={StylesTheme.sizeLogo} />
-                        <Text style={styles.textSlogan}>My slogan</Text>
                     </View>
 
                     {/* TextInput username, password */}

@@ -4,9 +4,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import Home from '../screen/home/Home';
 import Setting from '../screen/setting/Setting';
-import Cart from '../screen/cart/Cart';
-import { HomeIcon, SettingIcon, CartIcon } from '../global/icon/Icon';
+import { HomeIcon, SettingIcon, OrderIcon } from '../global/icon/Icon';
 import { Colors } from '../global/theme/Colors.Theme';
+import Bill from '../screen/bill/Bill';
 
 const BottomTabs = createBottomTabNavigator();
 
@@ -26,8 +26,8 @@ export const BottomTabNavigator: React.FC = () => (
                     return <HomeIcon color={color} size={size} />
                 }
 
-                if (route.name === 'Cart') {
-                    return <CartIcon color={color} size={size} />
+                if (route.name === 'Bill') {
+                    return <OrderIcon color={color} size={size} />
                 }
 
                 if (route.name === 'Setting') {
@@ -45,9 +45,9 @@ export const BottomTabNavigator: React.FC = () => (
             options={{ headerShown: false, title: 'Trang chủ' }}
         />
         <BottomTabs.Screen
-            name='Cart'
-            component={Cart}
-            options={{ headerShown: false, title: 'Giỏ hàng', tabBarBadge: 3 }}
+            name='Bill'
+            component={Bill}
+            options={{ headerShown: false, title: 'Đơn hàng', tabBarBadge: 3 }}
         />
         <BottomTabs.Screen
             name='Setting'

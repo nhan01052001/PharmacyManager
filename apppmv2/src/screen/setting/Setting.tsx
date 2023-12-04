@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/core';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     StyleSheet,
     Text,
@@ -8,7 +8,8 @@ import {
     SafeAreaView,
     TouchableOpacity,
     Platform,
-    StatusBar
+    StatusBar,
+    Image
 } from 'react-native';
 import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
@@ -17,10 +18,21 @@ import StylesTheme from '../../global/theme/Styles.Theme';
 import { Colors } from '../../global/theme/Colors.Theme';
 import ImagePicker from '../../components/cImagePicker/ImagePicker.component';
 import { RightArowIcon, HistoryIcon, ProfileIcon, InformationSecurityIcon, CustomerCareIcon, ContactIcon } from '../../global/icon/Icon';
+import Function from '../../global/assets/service/Function.Service';
+import { ENUM } from '../../global/enum';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+interface IState {
+    info?: any
+}
+
+const initialState: IState = {
+    info: null,
+};
 
 const Setting: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
+    const [{ info }, setState] = useState<IState>({ ...initialState });
 
     const _signOut = async () => {
         // Remove user session from the device.
@@ -30,13 +42,36 @@ const Setting: React.FC = () => {
             auth()
                 .signOut()
                 .then(() => {
-                    console.warn('Your are signed out!');
                     navigation.navigate('Login');
                 });
         } catch (error) {
             console.error(error);
         }
     };
+
+    const clearAsyncStorage = async() => {
+        navigation.navigate('Login');
+        AsyncStorage.clear();
+    }
+
+    const getData = async () => {
+        try {
+            const rs = await Function.getAppData(ENUM.KEY_IN4USER); console.log(rs, 'rs');
+
+            if (rs) {
+                setState((prevState: IState) => ({
+                    ...prevState,
+                    info: rs
+                }));
+            }
+        } catch (error) {
+
+        }
+    }
+
+    useEffect(() => {
+        getData();
+    }, []);
 
     return (
         <View style={{ flex: 1 }}>
@@ -49,7 +84,7 @@ const Setting: React.FC = () => {
                 <View style={[StylesTheme.droidSafeArea, { flex: 1, alignItems: 'flex-start', justifyContent: 'flex-end', paddingHorizontal: 12 }]}>
                     <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-start' }}>
                         <View>
-                            <ImagePicker label={""} width={60} height={60} borderRadius={60} onComplete={(value: string) => {
+                            <ImagePicker label={""} value={{ uri: info?.avatar ? info?.avatar : "https://fnege-medias.fr/wp-content/uploads/2021/07/user.jpg" }} width={60} height={60} borderRadius={60} onComplete={(value: string) => {
                                 // if (value.length > 0) {
                                 //     setState((prevState: State) => ({
                                 //         ...prevState,
@@ -63,7 +98,7 @@ const Setting: React.FC = () => {
                             }} />
                         </View>
                         <View style={{ marginLeft: 12 }}>
-                            <Text style={[StylesTheme.textLabel, { fontSize: 16 }]}>Nguyễn Thành Nhân</Text>
+                            <Text style={[StylesTheme.textLabel, { fontSize: 16 }]}>{info?.fullName}</Text>
                             <View style={{ backgroundColor: '#edd413', borderRadius: 8, justifyContent: 'center', alignItems: 'center', paddingVertical: 3 }}>
                                 <Text style={[StylesTheme.textLabel, { fontSize: 14 }]}>Thành viên vàng</Text>
                             </View>
@@ -196,7 +231,11 @@ const Setting: React.FC = () => {
                 }]}>
                     <TouchableOpacity
                         onPress={() => {
-                            _signOut();
+                            if(info?.isLoginSocial) {
+                                _signOut();
+                            } else {
+                                clearAsyncStorage();
+                            }
                         }}
                     ><Text style={[StylesTheme.textLabel]}>Đăng xuất</Text></TouchableOpacity>
                 </View>

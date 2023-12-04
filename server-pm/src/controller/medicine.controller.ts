@@ -41,7 +41,7 @@ export class MedicinesController {
         return this.medicinesService.getMedicineById(param?.id);
     }
 
-    @Get('/findMedicine/')
+    @Post('/findMedicine/')
     findMedicine(
         @Headers() headers: any, 
         @Query("typeFind") typeFind: string,
