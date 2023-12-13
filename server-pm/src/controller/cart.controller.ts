@@ -9,31 +9,31 @@ export class CartController {
 
     }
 
-    @UseGuards(MyJwtGuard)
+    // @UseGuards(MyJwtGuard)
     @Get('/getCartByProfileID/:id')
     getCartByProfileID(@Param() param: any): Promise<unknown> {
         return this.cartService.getCartByProfileID(param?.id);
     }
 
-    @UseGuards(MyJwtGuard)
+    // @UseGuards(MyJwtGuard)
     @Post('/updateQuantityAndPrice')
     updateQuantityAndPrice(@Body() body: any): Promise<unknown> {
         return this.cartService.updateQuantityAndPrice(body)
     }
 
-    @UseGuards(MyJwtGuard)
+    // @UseGuards(MyJwtGuard)
     @Post('/deleteItemsInCart')
     deleteItemsInCart(@Body() body: any): Promise<unknown> {
         return this.cartService.deleteItemsInCart(body?.ids);
     }
 
-    @UseGuards(MyJwtGuard)
+    // @UseGuards(MyJwtGuard)
     @Get('/getCartOrderByProfileID/:id')
     getCartOrderByProfileID(@Param() param: any): Promise<unknown> {
         return this.cartService.getCartOrderByProfileID(param?.id);
     }
 
-    @UseGuards(MyJwtGuard)
+    // @UseGuards(MyJwtGuard)
     @Post('/setStatusItemsInCart')
     setStatusItemsInCart(@Body() body: any): Promise<unknown> {
         return this.cartService.setStatusItemsInCart(body?.ids, body?.isPaid, body?.deliveryAddress);

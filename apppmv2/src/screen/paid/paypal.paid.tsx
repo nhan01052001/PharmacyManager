@@ -1,6 +1,6 @@
 import { useNavigation, useRoute } from '@react-navigation/core';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -18,6 +18,9 @@ import { AlertService } from '../../components/cAlert/Alert.component';
 import { ENUM } from '../../global/enum';
 import { HeaderComponent } from '../../components/cHeadder/Header.Component';
 import { AllStackParams } from '../../navigation/Stack.Navigator';
+import HttpService from '../../service/HttpService.Service';
+import { LoadingService } from '../../components/cLoading/Loading.component';
+import { env } from '../../utils/env.utils';
 
 
 const Paypal = () => {
@@ -25,6 +28,9 @@ const Paypal = () => {
   const [showGateway, setShowGateway] = useState(false);
   const [prog, setProg] = useState(false);
   const [progClr, setProgClr] = useState('#000');
+  const route = useRoute();
+  const { params }: any = route.params;
+
   function onMessage(e: any) {
     let data = e.nativeEvent.data;
     setShowGateway(false);
@@ -32,10 +38,29 @@ const Paypal = () => {
     let payment = JSON.parse(data);
     if (payment.status === 'COMPLETED') {
       AlertService.show(ENUM.E_SUCCESS, 'Thanh toán thành công!', 3000, null);
+      if (params?.deliveryAddress && params?.ids && params?.isPaid) {
+        LoadingService.show();
+        HttpService.Post(`${env.URL}/cart/setStatusItemsInCart`, {
+          ...params
+        }).then((res: any) => {
+          LoadingService.hide();
+          if (res && res?.status === 200) {
+            AlertService.show(ENUM.E_SUCCESS, res?.message, 3000);
+            navigation.navigate('BottomTabNavigator');
+          } else {
+            AlertService.show(ENUM.E_ERROR, 'Đặt hàng thành công!', 3000, "Lỗi");
+          }
+        })
+      }
     } else {
       AlertService.show(ENUM.E_ERROR, 'Thanh toán thất bại. Vui lòng thử lại!', 3000, null);
     }
   }
+
+  useEffect(() => {
+    console.log(params, 'params');
+  }, []);
+
   return (
     <View style={{ flex: 1 }}>
       <HeaderComponent

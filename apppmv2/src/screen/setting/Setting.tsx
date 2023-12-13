@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
-import { MainStackParams } from '../../navigation/Stack.Navigator';
+import { AllStackParams } from '../../navigation/Stack.Navigator';
 import StylesTheme from '../../global/theme/Styles.Theme';
 import { Colors } from '../../global/theme/Colors.Theme';
 import ImagePicker from '../../components/cImagePicker/ImagePicker.component';
@@ -31,7 +31,7 @@ const initialState: IState = {
 };
 
 const Setting: React.FC = () => {
-    const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
+    const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
     const [{ info }, setState] = useState<IState>({ ...initialState });
 
     const _signOut = async () => {
@@ -133,7 +133,7 @@ const Setting: React.FC = () => {
 
                 <TouchableOpacity style={[StylesTheme.onlyFlexRow_AliCenter_JusSP,
                 { paddingHorizontal: 12, paddingVertical: 16 }]} onPress={() => {
-
+                    navigation.navigate('HistoryBought')
                 }}>
                     <View
                         style={{

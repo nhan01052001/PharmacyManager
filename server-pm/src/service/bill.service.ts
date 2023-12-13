@@ -8,6 +8,7 @@ import { BillRepository } from '../repository/bill.repository';
 import { CartService } from './cart.service';
 import { CartRepository } from '../repository/cart.repository';
 import { Cart } from '../entity/cart.entity';
+import moment from 'moment';
 
 @Injectable()
 export class BillService {
@@ -134,7 +135,8 @@ export class BillService {
                     LEFT JOIN Medicine m ON m.id = b.medicine
                     LEFT JOIN MedicineDetail d ON m.id = d.medicineId
                     WHERE Bill.isDelete = false AND b.isDelete = false 
-                    AND Bill.userId = "${userId}" 
+                    AND Bill.userId = "${userId}"
+                    AND Bill.status = false
                     AND Bill.isConfirmed = true
                     AND Bill.isDelivering = false
                     AND Bill.isCanceled = false
@@ -188,6 +190,7 @@ export class BillService {
                     LEFT JOIN MedicineDetail d ON m.id = d.medicineId
                     WHERE Bill.isDelete = false AND b.isDelete = false 
                     AND Bill.userId = "${userId}" 
+                    AND Bill.status = false
                     AND Bill.isDelivering = true
                     AND Bill.isCanceled = false
                     `
@@ -241,6 +244,7 @@ export class BillService {
                     WHERE Bill.isDelete = false AND b.isDelete = false 
                     AND Bill.userId = "${userId}" 
                     AND Bill.isCanceled = true
+                    AND Bill.status = false
                     `
                 )
 
@@ -418,6 +422,97 @@ export class BillService {
                     message: '',
                     data: null,
                 };
+            }
+        } catch (error) {
+            throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
+        }
+    }
+
+    async setReceivedBill(id?: string): Promise<unknown> {
+        try {
+            if (id) {
+                const rs = await this.billRepository.createQueryBuilder()
+                    .update('Bill')
+                    .set({
+                        status: true,
+                        // updatedAt: moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+                    })
+                    .where("id = :id", { id: id }).andWhere("Bill.isDelete = false").andWhere("Bill.isDelivering = true")
+                    .execute();
+
+                if(rs.affected <= 0) {
+                    return {
+                        status: 500,
+                        statusText: ENUM.E_ERROR,
+                        message: 'Lỗi 500',
+                        data: null,
+                    };
+                }
+
+                return {
+                    status: 200,
+                    statusText: ENUM.E_SUCCESS,
+                    message: 'Thành công',
+                    data: [],
+                };
+            }
+
+            return {
+                status: 500,
+                statusText: ENUM.E_ERROR,
+                message: 'Lỗi 500',
+                data: null,
+            };
+        } catch (error) {
+            throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
+        }
+    }
+
+    async getBillReceived(userId?: string): Promise<unknown> {
+        try {
+            if (userId && userId.length > 0) {
+                const result = await this.cartRepository.query(
+                    `
+                    select *, Bill.createdAt as billCreateAt, Bill.id as billId, b.price as pricePurchase, b.unit as unitPurchase, b.quantity as quantityPurchase from Bill
+	                LEFT JOIN BillDetail b ON b.billId = Bill.id
+                    LEFT JOIN Medicine m ON m.id = b.medicine
+                    LEFT JOIN MedicineDetail d ON m.id = d.medicineId
+                    WHERE Bill.isDelete = false AND b.isDelete = false 
+                    AND Bill.userId = "${userId}" 
+                    AND Bill.status = true
+                    `
+                )
+
+                if (result) {
+                    if (Array.isArray(result) && result.length > 0) {
+                        result.forEach((element, index) => {
+                            if (element?.unitPurchase) {
+                                element.unitPurchaseView = [
+                                    {
+                                        id: index,
+                                        name: ENUM[`${element?.unitPurchase.trim()}`],
+                                        isHave: true,
+                                        isActive: true,
+                                        code: element?.unitPurchase,
+                                    }
+                                ]
+                            }
+                        })
+                    }
+                    return {
+                        status: 200,
+                        statusText: ENUM.E_SUCCESS,
+                        message: "Thành công!",
+                        data: result,
+                    }
+                }
+            } else {
+                return {
+                    status: 400,
+                    statusText: ENUM.E_ERROR,
+                    message: "",
+                    data: null,
+                }
             }
         } catch (error) {
             throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });

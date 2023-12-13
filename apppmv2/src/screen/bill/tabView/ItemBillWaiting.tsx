@@ -16,6 +16,7 @@ import { AllStackParams } from '../../../navigation/Stack.Navigator';
 import { Colors } from '../../../global/theme/Colors.Theme';
 import StylesTheme from '../../../global/theme/Styles.Theme';
 import { CheckIcon, OclockIcon } from '../../../global/icon/Icon';
+import moment from 'moment';
 
 interface IProps {
     dataItem?: any;
@@ -23,7 +24,9 @@ interface IProps {
     isDelivering?: boolean;
     isCanceled?: boolean;
     isAllowedCancel?: boolean;
+    isReceived?: boolean;
     onCancel?: (id: string) => void,
+    onReceived?: (id: string) => void,
 }
 
 interface IState {
@@ -36,7 +39,7 @@ const initialState: IState = {
 
 export const ItemBillWaiting: React.FC<IProps> = (props: IProps) => {
     const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
-    const { dataItem, isConfirmed, isAllowedCancel, isDelivering, isCanceled, onCancel } = props;
+    const { dataItem, isConfirmed, isAllowedCancel, isDelivering, isCanceled, isReceived, onCancel, onReceived } = props;
     const [{ isCheckAll }, setState] = useState<IState>({ ...initialState });
 
 
@@ -92,7 +95,7 @@ export const ItemBillWaiting: React.FC<IProps> = (props: IProps) => {
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <OclockIcon size={26} color='#000' />
                                 <Text numberOfLines={1} style={[StylesTheme.text16, { color: Colors.primaryColor, marginLeft: 6, maxWidth: '95%' }, isCanceled && { color: 'red' }]}>
-                                    {isConfirmed ? 'Đơn hàng của bạn đã được xác nhận!' : isDelivering ? 'Đơn hàng của bạn đang được giao' : isCanceled ? 'Đã huỷ' : 'Đơn hàng của bạn đang được xem xét!'}
+                                    {isConfirmed ? 'Đơn hàng của bạn đã được xác nhận!' : isDelivering ? 'Đơn hàng của bạn đang được giao' : isCanceled ? 'Đã huỷ' : isReceived ? `Vào lúc: ${dataItem?.billCreateAt ? moment(dataItem?.billCreateAt).format("DD/MM/YYYY HH:mm:ss") : ''}` : 'Đơn hàng của bạn đang được xem xét!'}
                                 </Text>
                             </View>
                         </View>
@@ -109,7 +112,7 @@ export const ItemBillWaiting: React.FC<IProps> = (props: IProps) => {
                             </TouchableOpacity>
 
                             {
-                                isAllowedCancel && (
+                                isAllowedCancel ? (
                                     <TouchableOpacity style={{ padding: 8, paddingHorizontal: 16, backgroundColor: '#e33232', borderRadius: 8 }}
                                         onPress={() => {
                                             if (onCancel) {
@@ -119,7 +122,17 @@ export const ItemBillWaiting: React.FC<IProps> = (props: IProps) => {
                                     >
                                         <Text numberOfLines={1} style={[StylesTheme.text16, { color: '#000' }]}>Huỷ</Text>
                                     </TouchableOpacity>
-                                )
+                                ) : isDelivering ? (
+                                    <TouchableOpacity style={{ padding: 8, paddingHorizontal: 16, backgroundColor: Colors.primaryColor, borderRadius: 8 }}
+                                        onPress={() => {
+                                            if (onReceived) {
+                                                onReceived(dataItem?.billId);
+                                            }
+                                        }}
+                                    >
+                                        <Text numberOfLines={1} style={[StylesTheme.text16, { color: '#000' }]}>Đã nhận hàng</Text>
+                                    </TouchableOpacity>
+                                ) : null
                             }
                         </View>
                     </View>

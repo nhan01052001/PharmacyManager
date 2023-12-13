@@ -14,6 +14,7 @@ import { Permission } from '../screen/auth/Permission.Auth';
 import Cart from '../screen/cart/Cart';
 import Bill from '../screen/bill/Bill';
 import Paypal from '../screen/paid/paypal.paid'; 
+import HistoryBought from '../screen/bill/historyBought/HistoryBought.bill';
 
 export type ScreenName =
     "Login" | 
@@ -28,7 +29,8 @@ export type ScreenName =
     "Permission" |
     "Cart" |
     "Bill" |
-    "Paypal";
+    "Paypal" |
+    "HistoryBought";
 
 
 export type MainStackParams = {
@@ -50,6 +52,7 @@ export type RootStackParams = {
     Cart: any;
     Bill: any;
     Paypal: any;
+    HistoryBought: any;
 };
 
 export type AllStackParams = {
@@ -67,6 +70,7 @@ export type AllStackParams = {
     Cart: any;
     Bill: any;
     Paypal: any;
+    HistoryBought: any;
 }
 
 const MainStack = createStackNavigator<MainStackParams>();
@@ -127,6 +131,11 @@ export const RootStackNavigator: React.FC = () => (
         <RootStack.Screen
             name='Paypal'
             component={Paypal}
+            options={{ headerShown: false, }}
+        />
+        <RootStack.Screen
+            name='HistoryBought'
+            component={HistoryBought}
             options={{ headerShown: false, }}
         />
     </RootStack.Navigator>

@@ -46,13 +46,13 @@ export class UserService {
             if (id.length > 0 && deliveryAddress.length > 0) {
                 const user = await this.getUserByID(id);
                 if (user) {
-                    let deliveryAddressTemp: any[] = JSON.parse(user.deliveryAddress);
+                    // let deliveryAddressTemp: any[] = JSON.parse(user.deliveryAddress);
                     let deliveryAddressNew: any[] = JSON.parse(deliveryAddress);
-                    deliveryAddressTemp.push(deliveryAddressNew);
+                    // deliveryAddressTemp.push(deliveryAddressNew);
 
                     const resultUpdateUser = await this.userRepository.createQueryBuilder()
                         .update('User')
-                        .set({ deliveryAddress: JSON.stringify(deliveryAddressTemp) })
+                        .set({ deliveryAddress: JSON.stringify(deliveryAddressNew) })
                         .where("id = :id", { id: id }).andWhere("isDelete = false")
                         .execute();
 

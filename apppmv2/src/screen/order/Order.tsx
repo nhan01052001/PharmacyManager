@@ -39,6 +39,7 @@ interface IState {
     listDeliveryAddress?: any[],
     modalVisibleA?: boolean,
     addressChoose?: any[];
+    isAddAddress?: boolean;
 }
 
 const initialState: IState = {
@@ -89,14 +90,15 @@ const initialState: IState = {
     },
     listDeliveryAddress: [],
     modalVisibleA: false,
-    addressChoose: []
+    addressChoose: [],
+    isAddAddress: false,
 };
 
 const Order: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
     const route = useRoute();
     const { params, totalPrice }: any = route.params;
-    const [{ deliveryForm, address, addressDetail, modalVisible, payments, listDeliveryAddress, modalVisibleA, addressChoose }, setState] = useState<IState>({ ...initialState });
+    const [{ deliveryForm, address, addressDetail, modalVisible, payments, listDeliveryAddress, modalVisibleA, addressChoose, isAddAddress }, setState] = useState<IState>({ ...initialState });
     const ref = useRef(null);
 
     const handleWhenSetDeliveryForm = useCallback((value: any) => {
@@ -132,10 +134,10 @@ const Order: React.FC = () => {
                 return;
             }
 
-            if (!addressDetail.value) {
-                AlertService.show(ENUM.E_ERROR, 'Vui lòng điền số nhà hoặc tên đường!', 3000, "Cảnh báo");
-                return;
-            }
+            // if (!addressDetail.value) {
+            //     AlertService.show(ENUM.E_ERROR, 'Vui lòng điền số nhà hoặc tên đường!', 3000, "Cảnh báo");
+            //     return;
+            // }
 
             if (!deliveryForm?.value) {
                 AlertService.show(ENUM.E_ERROR, 'Vui lòng chọn hình thức nhận hàng!', 3000, "Cảnh báo");
@@ -175,20 +177,31 @@ const Order: React.FC = () => {
             }
 
             if (cartId.length > 0) {
-                LoadingService.show();
-                HttpService.Post(`${env.URL}/cart/setStatusItemsInCart`, {
-                    ids: cartId,
-                    isPaid: dataBody.paymentsForm === 'E_ONLINE' ? true : false,
-                    deliveryAddress: dataBody.address
-                }).then((res: any) => {
-                    LoadingService.hide();
-                    if (res && res?.status === 200) {
-                        AlertService.show(ENUM.E_SUCCESS, res?.message, 3000);
-                        navigation.navigate('BottomTabNavigator');
-                    } else {
-                        AlertService.show(ENUM.E_ERROR, 'Đặt hàng thành công!', 3000, "Lỗi");
-                    }
-                })
+
+                if (dataBody.paymentsForm === 'E_ONLINE') {
+                    navigation.navigate('Paypal', {
+                        params: {
+                            ids: cartId,
+                            isPaid: true,
+                            deliveryAddress: dataBody.address
+                        }
+                    })
+                } else {
+                    LoadingService.show();
+                    HttpService.Post(`${env.URL}/cart/setStatusItemsInCart`, {
+                        ids: cartId,
+                        isPaid: false,
+                        deliveryAddress: dataBody.address
+                    }).then((res: any) => {
+                        LoadingService.hide();
+                        if (res && res?.status === 200) {
+                            AlertService.show(ENUM.E_SUCCESS, res?.message, 3000);
+                            navigation.navigate('BottomTabNavigator');
+                        } else {
+                            AlertService.show(ENUM.E_ERROR, 'Đặt hàng thành công!', 3000, "Lỗi");
+                        }
+                    })
+                }
             }
         } catch (error) {
             AlertService.show(ENUM.E_ERROR, 'Có lỗi trong quá trình xử lý!', 3000, "Lỗi");
@@ -235,6 +248,51 @@ const Order: React.FC = () => {
                         isRefresh: !prevState?.address.isRefresh
                     }
                 }));
+            } else {
+                if (user?.id) {
+                    LoadingService.show();
+                    HttpService.Get(`${env.URL}/user/getUserById/${user?.id}`).then((res: any) => {
+                        LoadingService.hide();
+                        if (res?.deliveryAddress) {
+                            const listDeliveryAddressTemp: any[] = JSON.parse(res?.deliveryAddress);
+                            let address: any[] = [];
+                            if (listDeliveryAddressTemp.length === 1) {
+                                listDeliveryAddressTemp.forEach((element) => {
+                                    if (Array.isArray(element) && element.length >= 3) {
+                                        if (element.length === 3) {
+                                            element.push({
+                                                code: '99999',
+                                                isSelected: true,
+                                            })
+                                        } else {
+                                            element[3] = {
+                                                ...element[3],
+                                                isSelected: true,
+                                            }
+                                        }
+                                    }
+                                });
+                                address = listDeliveryAddressTemp[0];
+                            } else {
+                                listDeliveryAddressTemp.find((item) => {
+                                    if (Array.isArray(item) && item.length >= 4 && item[3]?.isSelected) {
+                                        address = item;
+                                    }
+                                })
+                            }
+
+                            setState((prevState: IState) => ({
+                                ...prevState,
+                                listDeliveryAddress: listDeliveryAddressTemp,
+                                address: {
+                                    ...prevState?.address,
+                                    value: address,
+                                    isRefresh: !prevState?.address.isRefresh
+                                }
+                            }));
+                        }
+                    })
+                }
             }
         } catch (error) {
             AlertService.show(ENUM.E_ERROR, 'Không thể lấy được danh sách địa chỉ!', 3000, null);
@@ -244,7 +302,33 @@ const Order: React.FC = () => {
     useEffect(() => {
         handleGetDataUser();
     }, []);
-    console.log(listDeliveryAddress, 'listDeliveryAddress');
+
+    const handleAddDelivering = async () => {
+        try {
+            const user: any = await Function.getAppData(ENUM.KEY_IN4USER);
+            if (user?.id) {
+                HttpService.Post(`${env.URL}/user/addDeliveryAddress`, {
+                    id: user?.id,
+                    deliveryAddress: JSON.stringify(listDeliveryAddress)
+                }).then((res: any) => {
+                    if (res?.status === 200) {
+                        Function.setAppData(ENUM.KEY_IN4USER, { ...user, deliveryAddress: JSON.stringify(listDeliveryAddress) })
+                    }
+                    setState((prevState: IState) => ({
+                        ...prevState,
+                        isAddAddress: false
+                    }));
+                })
+            }
+        } catch (error) {
+        }
+    }
+
+    useEffect(() => {
+        if (isAddAddress) {
+            handleAddDelivering();
+        }
+    }, [isAddAddress])
 
     return (
         <View style={styles.container}>
@@ -352,8 +436,7 @@ const Order: React.FC = () => {
                     <View style={{ flex: 1, alignItems: 'flex-end' }}>
                         <TouchableOpacity
                             onPress={() => {
-                                // handleOrder();
-                                navigation.navigate('Paypal');
+                                handleOrder();
                             }}
                             style={{ backgroundColor: '#fa9450', borderRadius: 8, width: '75%', paddingVertical: 10, alignItems: 'center' }}
                         >
@@ -413,8 +496,27 @@ const Order: React.FC = () => {
                                             return (
                                                 <TouchableOpacity
                                                     onPress={() => {
-                                                        const rsFind = listDeliveryAddress.find((item) => item[3] && item[3]?.isSelected)
-                                                        console.log(rsFind, '123')
+                                                        if (Array.isArray(listDeliveryAddress) && listDeliveryAddress.length > 0) {
+                                                            listDeliveryAddress.forEach((item: any, i: number) => {
+                                                                if (index === i) {
+                                                                    item[3].isSelected = true
+                                                                } else {
+                                                                    item[3].isSelected = false
+                                                                }
+                                                            })
+
+                                                            setState((prevState: IState) => ({
+                                                                ...prevState,
+                                                                listDeliveryAddress: listDeliveryAddress,
+                                                                address: {
+                                                                    ...prevState?.address,
+                                                                    value: listDeliveryAddress[index] ? listDeliveryAddress[index] : [],
+                                                                    isRefresh: !prevState?.address.isRefresh
+                                                                },
+                                                                modalVisible: false,
+                                                            }));
+                                                        }
+                                                        // const rsFind = listDeliveryAddress.find((item) => item[3] && item[3]?.isSelected);
                                                     }}
                                                     key={index} style={{
                                                         width: '100%',
@@ -453,7 +555,7 @@ const Order: React.FC = () => {
                             }
                         </ScrollView>
 
-                        <View style={[listDeliveryAddress?.length === 0 ? { flex: 0.3, justifyContent: 'center', alignItems: 'center', } : { flex: 0.3, justifyContent: 'flex-start', alignItems: 'center', }]}>
+                        <View style={[listDeliveryAddress?.length === 0 ? { height: 50, width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 16, } : { flex: 0.3, justifyContent: 'flex-start', alignItems: 'center', }]}>
                             {/* <TouchableOpacity style={{ backgroundColor: Colors.primaryColor, paddingVertical: 12, paddingHorizontal: 22, borderRadius: 8 }}>
                                 <Text style={[StylesTheme.text16]}>Thêm địa chỉ
                                     <Text style={{ fontSize: 22, fontWeight: '700' }}>  +</Text>
@@ -546,17 +648,22 @@ const Order: React.FC = () => {
                         <View style={{ paddingHorizontal: 12, }}>
                             <TouchableOpacity style={{ backgroundColor: Colors.primaryColor, paddingVertical: 12, paddingHorizontal: 20, justifyContent: 'center', alignItems: 'center' }}
                                 onPress={() => {
-                                    if (addressChoose?.length === 3) {
-                                        const temp = [...addressChoose, { code: '99999', name: addressDetail?.value }];
+                                    if (addressDetail?.value) {
+                                        if (addressChoose?.length === 3) {
+                                            const temp = [...addressChoose, { code: '99999', name: addressDetail?.value }];
 
-                                        setState((prevState: IState) => ({
-                                            ...prevState,
-                                            listDeliveryAddress: prevState?.listDeliveryAddress ? [temp, ...prevState?.listDeliveryAddress] : [],
-                                            addressChoose: [],
-                                            modalVisibleA: false,
-                                            modalVisible: true,
-                                            addressDetail: ''
-                                        }));
+                                            setState((prevState: IState) => ({
+                                                ...prevState,
+                                                listDeliveryAddress: prevState?.listDeliveryAddress ? [temp, ...prevState?.listDeliveryAddress] : [],
+                                                addressChoose: [],
+                                                modalVisibleA: false,
+                                                modalVisible: true,
+                                                addressDetail: '',
+                                                isAddAddress: true,
+                                            }));
+                                        }
+                                    } else {
+                                        AlertService.show(ENUM.E_ERROR, 'Vui lòng điền số nhà hoặc tên đường!', 3000, "Cảnh báo");
                                     }
                                 }}
                             >

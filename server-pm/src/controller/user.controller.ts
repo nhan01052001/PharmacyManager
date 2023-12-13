@@ -9,13 +9,13 @@ export class UserController {
 
     }
 
-    @UseGuards(MyJwtGuard)
+    // @UseGuards(MyJwtGuard)
     @Get('getAllUser')
     getAll(): Promise<unknown> {
         return this.userService.getAll();
     }
 
-    @UseGuards(MyJwtGuard)
+    // @UseGuards(MyJwtGuard)
     @Get('getUserById/:id')
     getUserByID(@Param() param: any): Promise<User> {
         return this.userService.getUserByID(param?.id);

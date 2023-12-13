@@ -17,8 +17,9 @@ import { ENUM } from '../../../global/enum';
 import HttpService from '../../../service/HttpService.Service';
 import { env } from '../../../utils/env.utils';
 import StylesTheme from '../../../global/theme/Styles.Theme';
-import ItemBillWaiting from './ItemBillWaiting';
+import ItemBillWaiting from '../tabView/ItemBillWaiting';
 import { Colors } from '../../../global/theme/Colors.Theme';
+import { HeaderComponent } from '../../../components/cHeadder/Header.Component';
 
 interface IState {
     isCheckAll?: boolean;
@@ -34,7 +35,7 @@ const initialState: IState = {
     totalPrice: 0,
 };
 
-const Delevering: React.FC = () => {
+const HistoryBought: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
     const [{ isCheckAll, listProductInCart, listItemChecked, totalPrice }, setState] = useState<IState>({ ...initialState });
 
@@ -44,7 +45,7 @@ const Delevering: React.FC = () => {
 
             if (profile?.id) {
                 LoadingService.show();
-                HttpService.Get(`${env.URL}/bill/getBillDelivering/${profile?.id}`)
+                HttpService.Get(`${env.URL}/bill/getBillReceived/${profile?.id}`)
                     .then((res: any) => {
                         console.log(res, 'res');
                         if (res?.status === 200 && Array.isArray(res?.data)) {
@@ -84,26 +85,13 @@ const Delevering: React.FC = () => {
         handleGetData();
     }, []);
 
-    const handleReceived = async (id: string) => {
-        try {
-            LoadingService.show();
-            HttpService.Post(`${env.URL}/bill/setReceivedBill`, {
-                id
-            }).then((res: any) => {
-                LoadingService.hide();
-                if(res?.status === 200) {
-                    handleGetData();
-                }
-            }).catch((error) => {
-                LoadingService.hide();
-            })
-        } catch (error) {
-            LoadingService.hide();
-        }
-    }
-
     return (
         <View style={{ flex: 1, }}>
+            <HeaderComponent
+                titleHeader={'Lịch sử mua hàng'}
+                isOptionHome={false}
+                goBack={() => navigation.goBack()}
+            />
             {
                 listProductInCart && listProductInCart?.length > 0 ? (
                     <FlatList
@@ -112,10 +100,8 @@ const Delevering: React.FC = () => {
                             key={index}
                             dataItem={item}
                             isAllowedCancel={false}
-                            isDelivering={true}
-                            onReceived={(id) => {
-                                handleReceived(id);
-                            }}
+                            isDelivering={false}
+                            isReceived={true}
                         />}
                         keyExtractor={item => item?.billId}
                     />
@@ -148,4 +134,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Delevering;
+export default HistoryBought;

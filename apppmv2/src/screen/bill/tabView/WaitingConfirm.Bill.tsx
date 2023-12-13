@@ -84,6 +84,29 @@ const WaitingConfirm: React.FC = () => {
         handleGetData();
     }, []);
 
+    const handleCancel = async (id: string) => {
+        try {
+            if (id) {
+                LoadingService.show();
+                HttpService.Post(`${env.URL}/bill/setCanceledBills`, {
+                    ids: [id]
+                })
+                    .then((res: any) => {
+                        console.log(res, 'res');
+                        if (res?.status === 200 && Array.isArray(res?.data)) {
+                            handleGetData();
+                        }
+                        LoadingService.hide();
+                    }).catch((error) => {
+                        LoadingService.hide();
+                        // show screen error
+                    })
+            }
+        } catch (error) {
+            LoadingService.hide();
+        }
+    }
+
     return (
         <View style={{ flex: 1, }}>
             {
@@ -95,6 +118,9 @@ const WaitingConfirm: React.FC = () => {
                             dataItem={item}
                             isAllowedCancel={true}
                             isConfirmed={false}
+                            onCancel={(id) => {
+                                handleCancel(id);
+                            }}
                         />}
                         keyExtractor={item => item?.billId}
                     />
