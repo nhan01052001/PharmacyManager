@@ -47,12 +47,12 @@ export const BottomTabNavigator: React.FC = () => (
         <BottomTabs.Screen
             name='Bill'
             component={Bill}
-            options={{ headerShown: false, title: 'Đơn hàng', tabBarBadge: 3 }}
+            options={{ headerShown: false, title: 'Đơn hàng', tabBarBadge: 3, unmountOnBlur: true }}
         />
         <BottomTabs.Screen
             name='Setting'
             component={Setting}
-            options={{ headerShown: false, title: 'Cài đặt' }}
+            options={{ headerShown: false, title: 'Cài đặt', unmountOnBlur: true }}
         />
     </BottomTabs.Navigator>
 );

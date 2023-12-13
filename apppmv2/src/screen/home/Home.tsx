@@ -69,41 +69,48 @@ const DATA_PRODUCT_PORTFOLIO = [
         nameProductPortfolio: 'Thuốc',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/3140/3140343.png',
         api: '',
+        type: 'E_HEAD'
     },
     {
         id: "2",
         nameProductPortfolio: 'Vitamin, thuốc bổ',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/3159/3159960.png',
         api: '',
+        type: 'E_VITAMIN'
     },
     {
         id: "3",
         nameProductPortfolio: 'Chăm sóc da',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/4383/4383084.png',
         api: '',
+        type: 'E_SKINCARE'
     },
     {
         id: "4",
         nameProductPortfolio: 'Chăm sóc cơ thể',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/3023/3023711.png',
         api: '',
+        type: 'E_PROTECTHEALTH'
     },
     {
         id: "5",
         nameProductPortfolio: 'Tăng cường trí nhớ',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/2491/2491325.png',
         api: '',
+        type: 'E_IMPROVEMEMORY'
     },
     {
         id: "6",
         nameProductPortfolio: 'Tăng cường sinh lý',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/1019/1019174.png',
         api: '',
+        type: 'E_PROTECTHEALTH'
     },
     {
         id: "7",
         nameProductPortfolio: 'Sản phẩm',
         img_icon: 'https://cdn-icons-png.flaticon.com/512/4076/4076123.png',
+        type: 'E_HEAD, E_HEADACHE'
     },
 ];
 

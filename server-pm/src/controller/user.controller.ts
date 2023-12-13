@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { MyJwtGuard } from '../service/guard/myjwt.guard';
 import { UserService } from '../service/user.service';
 import { User } from '../entity/user.entity';
@@ -24,5 +24,13 @@ export class UserController {
     @Get('getUserLoginSocial/:id')
     getUserLoginSocial(@Param() param: any): Promise<User> {
         return this.userService.getUserLoginSocial(param?.id);
+    }
+
+    @Post('addDeliveryAddress')
+    addDeliveryAddress(@Body() body: {
+        id: string,
+        deliveryAddress: string
+    }): Promise<User> {
+        return this.userService.addDeliveryAddress(body);
     }
 }

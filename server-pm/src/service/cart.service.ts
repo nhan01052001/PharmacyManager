@@ -84,6 +84,22 @@ export class CartService {
         }
     }
 
+    async getCartWaitingById(id: string): Promise<Cart> {
+        try {
+            if (id.length > 0) {
+                const rs = this.cartRepository.createQueryBuilder('Cart')
+                    .where('Cart.isDelete = false')
+                    .andWhere('Cart.status = true')
+                    .andWhere(`Cart.id = "${id}"`).getOne();
+
+
+                return rs;
+            }
+        } catch (error) {
+            throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
+        }
+    }
+
     async getMedicineById(id?: string, column?: string): Promise<Medicine> {
         if (id) {
             const result = await this.medicineRepository
@@ -261,13 +277,35 @@ export class CartService {
         }
     }
 
-    async setStatusItemInCart(id?: string): Promise<unknown> {
+    async setStatusItemInCart(id?: string, isPaid?: boolean, deliveryAddress?: string): Promise<unknown> {
         try {
             if (id) {
+                let data = {
+
+                };
+
+                if(isPaid) {
+                    data = {
+                        ...data,
+                        isPaidTemp: isPaid,
+                    }
+                }
+
+                if(deliveryAddress) {
+                    if(isPaid) {
+                        data = {
+                            ...data,
+                            deliveryAddressTemp: deliveryAddress,
+                        }
+                    }
+                }
+console.log(data, 'data');
+
                 await this.cartRepository.createQueryBuilder()
                     .update('Cart')
                     .set({
-                        status: true
+                        status: true,
+                        ...data
                     })
                     .where("id = :id", { id: id }).andWhere("Cart.isDelete = false")
                     .execute();
@@ -291,14 +329,14 @@ export class CartService {
         }
     }
 
-    async setStatusItemsInCart(ids?: string[]): Promise<unknown> {
+    async setStatusItemsInCart(ids?: string[], isPaid?: boolean, deliveryAddress?: string): Promise<unknown> {
         try {
             if (ids && ids.length > 0) {
                 let idError = [];
 
                 await Promise.all(
                     ids.map(async (item: string) => {
-                        const result: any = await this.setStatusItemInCart(item);
+                        const result: any = await this.setStatusItemInCart(item, isPaid, deliveryAddress);
                         if (result?.status !== 200) {
                             idError.push(item);
                         }
@@ -378,6 +416,37 @@ export class CartService {
                     data: null,
                 }
             }
+        } catch (error) {
+            throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
+        }
+    }
+
+    async confirmCart(id?: string): Promise<unknown> {
+        try {
+            if (id) {
+                await this.cartRepository.createQueryBuilder()
+                    .update('Cart')
+                    .set({
+                        status: true,
+                        isDelete: true
+                    })
+                    .where("id = :id", { id: id }).andWhere("Cart.isDelete = false")
+                    .execute();
+
+                return {
+                    status: 200,
+                    statusText: ENUM.E_SUCCESS,
+                    message: 'Thành công',
+                    data: [],
+                };
+            }
+
+            return {
+                status: 500,
+                statusText: ENUM.E_ERROR,
+                message: 'Lỗi 500',
+                data: null,
+            };
         } catch (error) {
             throw new ErrorResponse({ ... new BadRequestException(error), errorCode: "FAIL" });
         }

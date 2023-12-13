@@ -203,59 +203,69 @@ export const RegisterInformationPersonal: React.FC<{ route: any }> = ({ route })
     const handleRegister = () => {
         try {
             if ((firstName.isObligatory && (!firstName.value || firstName.value === ''))
-            || (lastName.isObligatory && (!lastName.value || lastName.value === ''))
-            || (birthday.isObligatory && !birthday.value)
-            || (gender.isObligatory && !gender.value)
-            || (addressDetail.isObligatory && (!addressDetail.value || addressDetail.value === ''))
-            || (address.isObligatory && address.value.length < 3)
-        ) {
+                || (lastName.isObligatory && (!lastName.value || lastName.value === ''))
+                || (birthday.isObligatory && !birthday.value)
+                || (gender.isObligatory && !gender.value)
+                || (addressDetail.isObligatory && (!addressDetail.value || addressDetail.value === ''))
+                || (address.isObligatory && address.value.length < 3)
+            ) {
 
-            setState((prevState: State) => ({
-                ...prevState,
-                isError: true,
-            }));
-            AlertService.show(ENUM.E_ERROR, '', 5000, 'Vui lòng nhập đầy đủ thông tin!');
-            return;
-        }
-
-        let arrAddress = [];
-        if(address.value[2]?.full_name) {
-            arrAddress.push(address.value[2]?.full_name);
-        }
-        if(address.value[1]?.full_name) {
-            arrAddress.push(address.value[1]?.full_name);
-        }
-        if(address.value[0]?.full_name) {
-            arrAddress.push(address.value[0]?.full_name);
-        }
-
-        let params = {
-            username,
-            password,
-            firstName: firstName.value,
-            lastName: lastName.value,
-            avatar: avatar.value,
-            phone: username,
-            email: email.value,
-            gender: gender.value,
-            birthday: moment(birthday.value).format("DD/MM/YYYY"),
-            address: addressDetail.value + ", " + arrAddress.join(', '),
-            provinces_code: address.value[0]?.code ? address.value[0]?.code : '',
-            districts_code: address.value[1]?.code ? address.value[1]?.code : '', 
-            ward_code: address.value[2]?.code ? address.value[2]?.code : '' 
-        }; 
-
-        LoadingService.show();
-        HttpService.Post(`${env.URL}/auth/register`, {
-            ...params
-        }).then((res: any) => {
-            if(res && res?.id) {
-                LoadingService.hide();
-                Function.setAppData(ENUM.KEY_IN4USER, {...res, isRememberPassword: false, isLoginSocial: false});                
-                AlertService.show(ENUM.E_SUCCESS, 'Đăng ký thành công!', 3000, null);
-                navigation.navigate('BottomTabNavigator');
+                setState((prevState: State) => ({
+                    ...prevState,
+                    isError: true,
+                }));
+                AlertService.show(ENUM.E_ERROR, '', 5000, 'Vui lòng nhập đầy đủ thông tin!');
+                return;
             }
-        })
+
+            let arrAddress = [];
+            if (address.value[2]?.full_name) {
+                arrAddress.push(address.value[2]?.full_name);
+            }
+            if (address.value[1]?.full_name) {
+                arrAddress.push(address.value[1]?.full_name);
+            }
+            if (address.value[0]?.full_name) {
+                arrAddress.push(address.value[0]?.full_name);
+            }
+
+            const deliveryAddress = address.value;
+            deliveryAddress.push({
+                code: '99999',
+                name: addressDetail.value
+            })
+
+            let params = {
+                username,
+                password,
+                firstName: firstName.value,
+                lastName: lastName.value,
+                avatar: avatar.value,
+                phone: username,
+                email: email.value,
+                gender: gender.value,
+                birthday: moment(birthday.value).format("DD/MM/YYYY"),
+                address: addressDetail.value + ", " + arrAddress.join(', '),
+                deliveryAddress: JSON.stringify([deliveryAddress]),
+                provinces_code: address.value[0]?.code ? address.value[0]?.code : '',
+                districts_code: address.value[1]?.code ? address.value[1]?.code : '',
+                ward_code: address.value[2]?.code ? address.value[2]?.code : ''
+            };
+
+            LoadingService.show();
+            HttpService.Post(`${env.URL}/auth/register`, {
+                ...params
+            }).then((res: any) => {
+                if(res && res?.id) {
+                    LoadingService.hide();
+                    Function.setAppData(ENUM.KEY_IN4USER, {...res, isRememberPassword: false, isLoginSocial: false});                
+                    AlertService.show(ENUM.E_SUCCESS, 'Đăng ký thành công!', 3000, null);
+                    navigation.navigate('BottomTabNavigator');
+                } else {
+                    LoadingService.hide();
+                    AlertService.show(ENUM.E_ERROR, 'Có lỗi trong quá trình đăng ký!', 3000, null);
+                }
+            })
         } catch (error) {
             LoadingService.hide();
         }

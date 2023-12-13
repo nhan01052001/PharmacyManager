@@ -660,7 +660,7 @@ const Address: React.FC<IProps> = (props: IProps) => {
         <View style={{ flex: 1 }}>
             {
                 isSpecial ? (
-                    <TouchableOpacity style={{ padding: 12, borderColor: '#ccc', borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+                    <TouchableOpacity style={{ backgroundColor: Colors.primaryColor, paddingVertical: 12, paddingHorizontal: 22, borderRadius: 8 }}
                         onPress={() => {
                             setState((prevState: State) => ({
                                 ...prevState,
@@ -669,15 +669,9 @@ const Address: React.FC<IProps> = (props: IProps) => {
                             }));
                         }}
                     >
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <LocationIcon size={22} color='#000' />
-                            <Text numberOfLines={2} style={[StylesTheme.text16, { marginLeft: 12, maxWidth: '90%'}]}>{valueView ? valueView : placeholder}</Text>
-                        </View>
-                        {
-                            !valueView && (
-                                <Text style={{ fontSize: 22, fontWeight: '700' }}>+</Text>
-                            )
-                        }
+                        <Text style={[StylesTheme.text16]}>Thêm địa chỉ
+                            <Text style={{ fontSize: 22, fontWeight: '700' }}>  +</Text>
+                        </Text>
                     </TouchableOpacity>
                 ) : (
                     <TouchableOpacity style={[styles.componentDisplay, { ...style, paddingHorizontal: 8 }, isError && { borderBottomColor: 'red' }]}

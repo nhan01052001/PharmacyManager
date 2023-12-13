@@ -14,6 +14,7 @@ import { WardsModule } from './module/wards.module';
 import { MedicineModule } from './module/medicine.module';
 import { UploadModule } from './module/upload.module';
 import { CartModule } from './module/cart.module';
+import { BillModule } from './module/bill.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CartModule } from './module/cart.module';
     MedicineModule,
     UploadModule,
     CartModule,
+    BillModule,
     TypeOrmModule.forFeature(entities),
   ],
   controllers: [],

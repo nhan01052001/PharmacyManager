@@ -1,12 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, FlatList } from 'react-native';
-import Function from '../../service/Function.Service';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+
+import { AllStackParams } from '../../navigation/Stack.Navigator';
+import { env } from '../../utils/env.utils';
 
 type Portfolio = {
     id: string,
     nameProductPortfolio: string,
     img_icon: string,
     api?: string,
+    type?: string
 };
 
 interface IProps {
@@ -15,6 +20,7 @@ interface IProps {
 }
 
 const MedicinePortfolio: React.FC<IProps> = (props: IProps) => {
+    const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
     const { data, isRefresh } = props;
 
 
@@ -22,6 +28,23 @@ const MedicinePortfolio: React.FC<IProps> = (props: IProps) => {
         <View style={styles.container}>
             <View style={styles.wrapContent}>
                 <TouchableOpacity
+                onPress={() => {
+                    navigation.navigate('AllMedicine', {
+                        api: {
+                            urlApi: `${env.URL}/medicine/findMedicine`,
+                            configHeader: {
+                                'page': 1,
+                                'pageSize': 20,
+                            },
+                            dataBody: {
+                                "type": {
+                                    "value": data?.type ? data?.type : ''
+                                }
+                            },
+                        }
+                    });
+                }
+                }
                     style={{
                         justifyContent: 'center',
                         alignItems: 'center',

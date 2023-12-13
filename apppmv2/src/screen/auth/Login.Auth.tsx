@@ -190,10 +190,13 @@ export const Login: React.FC = () => {
                         navigation.navigate("BottomTabNavigator", {
                             data: res?.data
                         });
+                    } else {
+                        AlertService.show(ENUM.E_ERROR, 'Tài khoản hoặc mật khẩu không hợp lệ!', 5000, null)
+                    LoadingService.hide();
                     }
                 }).catch((error) => {
                     const textError = error?.response?.data?.message;
-                    AlertService.show(ENUM.E_ERROR, '', 5000, textError ? textError : 'Sai cú pháp')
+                    AlertService.show(ENUM.E_ERROR, 'Tài khoản hoặc mật khẩu không hợp lệ!', 5000, null)
                     LoadingService.hide();
                 })
             } else {
@@ -339,6 +342,7 @@ export const Login: React.FC = () => {
                         }}
                     >
                         <Image source={require('../../global/assets/image/logo.png')} style={StylesTheme.sizeLogo} />
+                        <Text>Nhà thuốc TN xin chào quý khách</Text>
                     </View>
 
                     {/* TextInput username, password */}

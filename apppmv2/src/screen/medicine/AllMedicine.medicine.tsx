@@ -172,6 +172,7 @@ type Portfolio = {
     nameProductPortfolio: string,
     img_icon: string,
     api?: string,
+    type?: string
 };
 
 type ListPortfolio = {

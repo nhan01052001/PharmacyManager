@@ -36,6 +36,6 @@ export class CartController {
     @UseGuards(MyJwtGuard)
     @Post('/setStatusItemsInCart')
     setStatusItemsInCart(@Body() body: any): Promise<unknown> {
-        return this.cartService.setStatusItemsInCart(body?.ids);
+        return this.cartService.setStatusItemsInCart(body?.ids, body?.isPaid, body?.deliveryAddress);
     }
 }

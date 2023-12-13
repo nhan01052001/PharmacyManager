@@ -14,21 +14,37 @@ import {
 
 import WaitingConfirm from './tabView/WaitingConfirm.Bill';
 import Confirm from './tabView/Confirm.Bill';
+import Delevering from './tabView/Delevering.Bill';
+import Cancel from './tabView/Cancel.Bill';
 import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { MainStackParams } from '../../navigation/Stack.Navigator';
 import { HeaderComponent } from '../../components/cHeadder/Header.Component';
+import { Colors } from '../../global/theme/Colors.Theme';
+import HttpService from '../../service/HttpService.Service';
+import Function from '../../global/assets/service/Function.Service';
+import { LoadingService } from '../../components/cLoading/Loading.component';
+import { env } from '../../utils/env.utils';
+import { ENUM } from '../../global/enum';
 
 const Tab = createMaterialTopTabNavigator();
 
 interface IState {
     index?: number;
     isActiveWhich?: boolean,
+    waiting?: number,
+    confirm?: number,
+    delivering?: number,
+    cancel?: number
 }
 
 const initialState: IState = {
     index: 0,
     isActiveWhich: false,
+    waiting: 0,
+    confirm: 0,
+    delivering: 0,
+    cancel: 0
 };
 
 const { width, height } = Dimensions.get('window');
@@ -39,25 +55,48 @@ const Bill: React.FC = () => {
     const route = useRoute();
     // const { item }: any = route.params;
     const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
-    const [{ index, isActiveWhich, }, setState] = useState<IState>({ ...initialState });
+    const [{ index, isActiveWhich, waiting, confirm, delivering, cancel }, setState] = useState<IState>({ ...initialState });
 
-    const handleActive = (value: any) => {
-        if (value === 1) {
-            if (isActiveWhich) {
-                setState((prevState: IState) => ({
-                    ...prevState,
-                    isActiveWhich: false,
-                }));
+    const handleGetData = async () => {
+        try {
+            const profile: any = await Function.getAppData(ENUM.KEY_IN4USER);
+
+            if (profile?.id) {
+                LoadingService.show();
+                Promise.all(
+                    [
+                        HttpService.Get(`${env.URL}/cart/getCartOrderByProfileID/${profile?.id}`),
+                        HttpService.Get(`${env.URL}/bill/getBillConfirmed/${profile?.id}`),
+                        HttpService.Get(`${env.URL}/bill/getBillDelivering/${profile?.id}`),
+                        HttpService.Get(`${env.URL}/bill/getBillCanceled/${profile?.id}`)
+                    ]
+                ).then((resAll: any) => {console.log(resAll, 'resAll');
+                
+                
+                        if(Array.isArray(resAll) && resAll.length === 4) {
+                            const [res1, res2, res3, res4] = resAll;
+                            setState((prevState: IState) => ({
+                                ...prevState,
+                                waiting: Array.isArray(res1?.data) ? res1?.data.length : 0,
+                                confirm: Array.isArray(res2?.data) ? res2?.data.length : 0,
+                                delivering: Array.isArray(res3?.data) ? res3?.data.length : 0,
+                                cancel: Array.isArray(res4?.data) ? res4?.data.length : 0,
+                            }));
+                        }
+                        LoadingService.hide();
+                    }).catch((error) => {
+                        LoadingService.hide();
+                        // show screen error
+                    })
             }
-        } else {
-            if (!isActiveWhich) {
-                setState((prevState: IState) => ({
-                    ...prevState,
-                    isActiveWhich: true,
-                }));
-            }
+        } catch (error) {
+            // handle screen error
         }
-    };
+    }
+
+    useEffect(() => {
+        handleGetData();
+    }, []);
 
     return (
         <View style={{ flex: 1 }}>
@@ -67,49 +106,53 @@ const Bill: React.FC = () => {
                 goBack={() => navigation.goBack()}
             />
             <View style={styles.tabView}>
-                {/* tab bar */}
-                <View style={styles.tabBar}>
-                    <View style={{ flexDirection: 'row' }}>
-                        <Pressable style={styles.btnTabBar} onPress={() => handleActive(1)}>
-                            <Text
-                                style={[
-                                    styles.text,
-                                    { fontSize: 20, fontWeight: '700' },
-                                    !isActiveWhich && { color: '#3ea861' },
-                                ]}
-                            >
-                                Chờ xác nhận
-                            </Text>
-                        </Pressable>
-                        <Pressable style={styles.btnTabBar} onPress={() => handleActive(2)}>
-                            <Text
-                                style={[
-                                    styles.text,
-                                    { fontSize: 20, fontWeight: '700' },
-                                    isActiveWhich && { color: '#3ea861' },
-                                ]}
-                            >
-                                Đã xác nhận
-                            </Text>
-                        </Pressable>
-                        <Pressable style={styles.btnTabBar} onPress={() => handleActive(2)}>
-                            <Text
-                                style={[
-                                    styles.text,
-                                    { fontSize: 20, fontWeight: '700' },
-                                    isActiveWhich && { color: '#3ea861' },
-                                ]}
-                            >
-                                Đang giao
-                            </Text>
-                        </Pressable>
-                    </View>
-                </View>
-
-                {/* content tab view */}
-                <View style={styles.contentTabView}>
-                    {!isActiveWhich ? <WaitingConfirm /> : <Confirm />}
-                </View>
+                <Tab.Navigator
+                    screenOptions={{
+                        tabBarActiveTintColor: Colors.primaryColor,
+                        tabBarInactiveTintColor: '#ccc',
+                        tabBarStyle: {
+                            backgroundColor: Colors.clWhite,
+                        },
+                        tabBarLabelStyle: {
+                            textAlign: 'center',
+                            fontSize: 12
+                        },
+                        tabBarIndicatorStyle: {
+                            borderBottomColor: '#87B56A',
+                            borderBottomWidth: 2,
+                        },
+                        tabBarScrollEnabled: true
+                    }}
+                >
+                    <Tab.Screen
+                        name="WaitingConfirm"
+                        component={WaitingConfirm}
+                        options={{
+                            tabBarLabel: 'Chờ xác nhận',
+                            tabBarBadge:()=> { return (  <Text style={{color: 'red'}}>{waiting}</Text> ) }
+                        }} />
+                    <Tab.Screen
+                        name="Confirm"
+                        component={Confirm}
+                        options={{
+                            tabBarLabel: 'Xác nhận',
+                            tabBarBadge:()=> { return (  <Text style={{color: 'red'}}>{confirm}</Text> ) }
+                        }} />
+                    <Tab.Screen
+                        name="Delevering"
+                        component={Delevering}
+                        options={{
+                            tabBarLabel: 'Đang giao',
+                            tabBarBadge:()=> { return (  <Text style={{color: 'red'}}>{delivering}</Text> ) }
+                        }} />
+                    <Tab.Screen
+                        name="Cancel"
+                        component={Cancel}
+                        options={{
+                            tabBarLabel: 'Đã huỷ',
+                            tabBarBadge:()=> { return (  <Text style={{color: 'red'}}>{cancel}</Text> ) }
+                        }} />
+                </Tab.Navigator>
             </View>
         </View>
     )

@@ -19,6 +19,11 @@ import { CheckIcon, OclockIcon } from '../../../global/icon/Icon';
 
 interface IProps {
     dataItem?: any;
+    isConfirmed?: boolean;
+    isDelivering?: boolean;
+    isCanceled?: boolean;
+    isAllowedCancel?: boolean;
+    onCancel?: (id: string) => void,
 }
 
 interface IState {
@@ -31,7 +36,7 @@ const initialState: IState = {
 
 export const ItemBillWaiting: React.FC<IProps> = (props: IProps) => {
     const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
-    const { dataItem } = props;
+    const { dataItem, isConfirmed, isAllowedCancel, isDelivering, isCanceled, onCancel } = props;
     const [{ isCheckAll }, setState] = useState<IState>({ ...initialState });
 
 
@@ -39,8 +44,8 @@ export const ItemBillWaiting: React.FC<IProps> = (props: IProps) => {
         <View style={{}}>
             <View style={{ width: '100%', borderBottomWidth: 3, borderBottomColor: '#edebeb', paddingVertical: 12, backgroundColor: Colors.clWhite }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 12 }}>
-                    <View style={{ width: '90%', maxWidth: '90%', paddingHorizontal: 12 }}>
-                        <View style={{ flexDirection: 'row' }}>
+                    <View style={{ width: '100%', maxWidth: '100%', paddingHorizontal: 12 }}>
+                        <View style={{ flexDirection: 'row', width: '90%', maxWidth: '90%', }}>
                             <Image
                                 source={{ uri: dataItem?.lsImage?.split(',')[0] }}
                                 style={{ width: 65, height: 65, borderRadius: 8, borderColor: Colors.colorGrey, borderWidth: 1, }}
@@ -82,14 +87,18 @@ export const ItemBillWaiting: React.FC<IProps> = (props: IProps) => {
                                 </View>
                             </View>
                         </View>
+
                         <View style={{ width: '100%', paddingVertical: 8, }}>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <OclockIcon size={26} color='#000' />
-                                <Text numberOfLines={1} style={[StylesTheme.text16, { color: Colors.primaryColor, marginLeft: 6, maxWidth: '95%' }]}>Đơn hàng của bạn đang được xem xét!</Text>
+                                <Text numberOfLines={1} style={[StylesTheme.text16, { color: Colors.primaryColor, marginLeft: 6, maxWidth: '95%' }, isCanceled && { color: 'red' }]}>
+                                    {isConfirmed ? 'Đơn hàng của bạn đã được xác nhận!' : isDelivering ? 'Đơn hàng của bạn đang được giao' : isCanceled ? 'Đã huỷ' : 'Đơn hàng của bạn đang được xem xét!'}
+                                </Text>
                             </View>
                         </View>
-                        <View style={{width: '100%', alignItems: 'flex-start'}}>
-                            <TouchableOpacity style={{padding: 8, backgroundColor: '#fa9450', borderRadius: 8}}
+
+                        <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <TouchableOpacity style={{ padding: 8, backgroundColor: '#fa9450', borderRadius: 8 }}
                                 onPress={() => {
                                     navigation.navigate("DetailMedicine", {
                                         item: { ...dataItem }
@@ -98,6 +107,20 @@ export const ItemBillWaiting: React.FC<IProps> = (props: IProps) => {
                             >
                                 <Text numberOfLines={1} style={[StylesTheme.text16, { color: '#000' }]}>Mua lại sản phẩm</Text>
                             </TouchableOpacity>
+
+                            {
+                                isAllowedCancel && (
+                                    <TouchableOpacity style={{ padding: 8, paddingHorizontal: 16, backgroundColor: '#e33232', borderRadius: 8 }}
+                                        onPress={() => {
+                                            if (onCancel) {
+                                                onCancel(dataItem?.billId);
+                                            }
+                                        }}
+                                    >
+                                        <Text numberOfLines={1} style={[StylesTheme.text16, { color: '#000' }]}>Huỷ</Text>
+                                    </TouchableOpacity>
+                                )
+                            }
                         </View>
                     </View>
                 </View>

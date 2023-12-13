@@ -13,6 +13,7 @@ import Order from '../screen/order/Order';
 import { Permission } from '../screen/auth/Permission.Auth';
 import Cart from '../screen/cart/Cart';
 import Bill from '../screen/bill/Bill';
+import Paypal from '../screen/paid/paypal.paid'; 
 
 export type ScreenName =
     "Login" | 
@@ -26,7 +27,8 @@ export type ScreenName =
     "Order" |
     "Permission" |
     "Cart" |
-    "Bill";
+    "Bill" |
+    "Paypal";
 
 
 export type MainStackParams = {
@@ -47,6 +49,7 @@ export type RootStackParams = {
     Order: any;
     Cart: any;
     Bill: any;
+    Paypal: any;
 };
 
 export type AllStackParams = {
@@ -63,6 +66,7 @@ export type AllStackParams = {
     Order: any;
     Cart: any;
     Bill: any;
+    Paypal: any;
 }
 
 const MainStack = createStackNavigator<MainStackParams>();
@@ -118,6 +122,11 @@ export const RootStackNavigator: React.FC = () => (
         <RootStack.Screen
             name='Bill'
             component={Bill}
+            options={{ headerShown: false, }}
+        />
+        <RootStack.Screen
+            name='Paypal'
+            component={Paypal}
             options={{ headerShown: false, }}
         />
     </RootStack.Navigator>

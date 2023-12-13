@@ -41,6 +41,7 @@ import { env } from '../../utils/env.utils';
 import { Colors } from '../../global/theme/Colors.Theme';
 import { ENUM } from '../../global/enum';
 import Function from '../../global/assets/service/Function.Service';
+import { AllStackParams } from '../../navigation/Stack.Navigator';
 
 const DATA_SWIPER = [
     {
@@ -158,7 +159,7 @@ const initialState: IState = {
 const DetailMedicine: React.FC = () => {
     const route = useRoute();
     const { item }: any = route.params;
-    const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
+    const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
     const [{ dataDefault, index, isActiveWhich, isShowHeader, isShowModalDeliveryForm,
         deliveryForm, numberProductInCart, unitProduct, product, quantityPurchase, isGetMedicineInCart,
     }, setState] = useState<IState>({ ...initialState });
@@ -411,7 +412,11 @@ const DetailMedicine: React.FC = () => {
                             </Text>
                         </View>
                     ) : null}
-                    <TouchableOpacity style={{ padding: 12, backgroundColor: '#e0e0e0', borderRadius: 12 }}>
+                    <TouchableOpacity style={{ padding: 12, backgroundColor: '#e0e0e0', borderRadius: 12 }}
+                        onPress={() => {
+                            navigation.navigate('Cart')
+                        }}
+                    >
                         <View style={styles.quantityCart}>
                             <Text style={{ fontSize: 18, fontWeight: '700' }}>{numberProductInCart?.length}</Text>
                         </View>

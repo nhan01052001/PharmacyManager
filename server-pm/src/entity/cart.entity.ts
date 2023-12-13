@@ -11,6 +11,8 @@ interface ICart extends IBaseEntity {
     unitPurchase?: string,
     quantityPurchase?: number;
     pricePurchase?: number;
+    isPaidTemp?: boolean,
+    deliveryAddressTemp?: string;
 }
 
 @Entity('Cart')
@@ -23,6 +25,8 @@ export class Cart extends BaseEntity {
             quantityPurchase,
             unitPurchase,
             pricePurchase,
+            isPaidTemp,
+            deliveryAddressTemp,
             ...superItem
         } = props || {};
 
@@ -35,6 +39,8 @@ export class Cart extends BaseEntity {
             unitPurchase,
             quantityPurchase,
             pricePurchase,
+            isPaidTemp,
+            deliveryAddressTemp,
         });
     }
 
@@ -61,4 +67,10 @@ export class Cart extends BaseEntity {
 
     @Column('decimal', { nullable: true, })
     pricePurchase?: number;
+
+    @Column({ nullable: true, default: false })
+    isPaidTemp?: boolean;
+
+    @Column({ nullable: true, type: 'mediumtext' })
+    deliveryAddressTemp?: string;
 }

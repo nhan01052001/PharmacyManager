@@ -26,6 +26,7 @@ export interface IUser extends IBaseEntity {
     provinces_code?: string;
     districts_code?: string;
     ward_code?: string;
+    deliveryAddress?: string;
     // permission?: string[];
     // cart?: string[];
 }
@@ -54,6 +55,7 @@ export class User extends BaseEntity {
             provinces_code,
             districts_code,
             ward_code,
+            deliveryAddress,
             ...superItem
         } = props || {};
 
@@ -80,6 +82,7 @@ export class User extends BaseEntity {
             provinces_code,
             districts_code,
             ward_code,
+            deliveryAddress,
         });
     }
 
@@ -122,7 +125,7 @@ export class User extends BaseEntity {
     @Column({ nullable: true, default: false })
     isFirstLogin?: boolean;
 
-    @OneToMany(() => Bill, (bill) => bill.users)
+    @OneToMany(() => Bill, (bill) => bill.user)
     bill?: Bill[];
 
     @OneToOne(() => Cart, (cart) => cart.users)
@@ -142,4 +145,7 @@ export class User extends BaseEntity {
     @OneToOne(() => wards)
     @Column({ nullable: true, width: 32 | 128 })
     ward_code?: string;
+
+    @Column({ nullable: true, type: 'mediumtext' })
+    deliveryAddress?: string;
 }

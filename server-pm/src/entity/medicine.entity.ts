@@ -1,3 +1,4 @@
+
 import "reflect-metadata";
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity, IBaseEntity } from './baseEntity/base.entity';
@@ -5,6 +6,7 @@ import { MedicineDetail } from "./medicine-detail.entity";
 import { Cart } from "./cart.entity";
 import { Order } from "./oder.entity";
 import { Supplier } from "./supplier.entity";
+import { BillDetail } from './bill-detail.entity';
 
 interface IMedicine extends IBaseEntity {
     code?: string;
@@ -15,6 +17,7 @@ interface IMedicine extends IBaseEntity {
     status?: boolean;
     medicineDetail?: MedicineDetail;
     cart?: Cart;
+    bill?: BillDetail;
     order?: Order;
     typeView?: string;
     supplier?: string;
@@ -32,6 +35,7 @@ export class Medicine extends BaseEntity {
             status,
             medicineDetail,
             cart,
+            bill,
             order,
             typeView,
             supplier,
@@ -49,6 +53,7 @@ export class Medicine extends BaseEntity {
             status,
             medicineDetail,
             cart,
+            bill,
             order,
             typeView,
             supplier
@@ -81,6 +86,9 @@ export class Medicine extends BaseEntity {
 
     @OneToOne(() => Cart, (cart) => cart.medicine)
     cart?: Cart;
+
+    @OneToOne(() => BillDetail, (bill) => bill.medicine)
+    bill?: BillDetail;
 
     @OneToOne(() => Supplier, (supplier) => supplier.medicine, { cascade: true, nullable: true })
     @Column({ nullable: true })

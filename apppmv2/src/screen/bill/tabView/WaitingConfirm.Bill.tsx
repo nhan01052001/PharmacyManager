@@ -90,9 +90,13 @@ const WaitingConfirm: React.FC = () => {
                 listProductInCart && listProductInCart?.length > 0 ? (
                     <FlatList
                         data={listProductInCart}
-                        renderItem={({ item, index }) => <ItemBillWaiting key={index} dataItem={item}
+                        renderItem={({ item, index }) => <ItemBillWaiting
+                            key={index}
+                            dataItem={item}
+                            isAllowedCancel={true}
+                            isConfirmed={false}
                         />}
-                        keyExtractor={item => item.id}
+                        keyExtractor={item => item?.billId}
                     />
                 ) : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Image source={require('../../../global/assets/image/no-data.png')} style={{ width: 100, height: 100, }}

@@ -9,7 +9,8 @@ import {
     FlatList,
     TouchableOpacity,
     Modal,
-    TextInput
+    TextInput,
+    ScrollView
 } from 'react-native';
 
 import { HeaderComponent } from '../../components/cHeadder/Header.Component';
@@ -34,7 +35,10 @@ interface IState {
     address?: any,
     modalVisible?: boolean,
     addressDetail?: any,
-    payments?: any
+    payments?: any,
+    listDeliveryAddress?: any[],
+    modalVisibleA?: boolean,
+    addressChoose?: any[];
 }
 
 const initialState: IState = {
@@ -77,19 +81,22 @@ const initialState: IState = {
             },
             {
                 id: '2',
-                name: 'Thanh toán online',
+                name: 'Thanh toán online bằng paypal',
                 Value: 'E_ONLINE',
             }
         ],
         isRefresh: false
     },
+    listDeliveryAddress: [],
+    modalVisibleA: false,
+    addressChoose: []
 };
 
 const Order: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
     const route = useRoute();
     const { params, totalPrice }: any = route.params;
-    const [{ deliveryForm, address, addressDetail, modalVisible, payments }, setState] = useState<IState>({ ...initialState });
+    const [{ deliveryForm, address, addressDetail, modalVisible, payments, listDeliveryAddress, modalVisibleA, addressChoose }, setState] = useState<IState>({ ...initialState });
     const ref = useRef(null);
 
     const handleWhenSetDeliveryForm = useCallback((value: any) => {
@@ -169,7 +176,11 @@ const Order: React.FC = () => {
 
             if (cartId.length > 0) {
                 LoadingService.show();
-                HttpService.Post(`${env.URL}/cart/setStatusItemsInCart`, { ids: cartId }).then((res: any) => {
+                HttpService.Post(`${env.URL}/cart/setStatusItemsInCart`, {
+                    ids: cartId,
+                    isPaid: dataBody.paymentsForm === 'E_ONLINE' ? true : false,
+                    deliveryAddress: dataBody.address
+                }).then((res: any) => {
                     LoadingService.hide();
                     if (res && res?.status === 200) {
                         AlertService.show(ENUM.E_SUCCESS, res?.message, 3000);
@@ -184,7 +195,56 @@ const Order: React.FC = () => {
         }
     }
 
-    console.log(params, 'params');
+    const handleGetDataUser = async () => {
+        try {
+            const user: any = await Function.getAppData(ENUM.KEY_IN4USER);
+            if (user?.deliveryAddress && Array.isArray(JSON.parse(user?.deliveryAddress)) && JSON.parse(user?.deliveryAddress).length > 0) {
+                const listDeliveryAddressTemp: any[] = JSON.parse(user?.deliveryAddress);
+                let address: any[] = [];
+                if (listDeliveryAddressTemp.length === 1) {
+                    listDeliveryAddressTemp.forEach((element) => {
+                        if (Array.isArray(element) && element.length >= 3) {
+                            if (element.length === 3) {
+                                element.push({
+                                    code: '99999',
+                                    isSelected: true,
+                                })
+                            } else {
+                                element[3] = {
+                                    ...element[3],
+                                    isSelected: true,
+                                }
+                            }
+                        }
+                    });
+                    address = listDeliveryAddressTemp[0];
+                } else {
+                    listDeliveryAddressTemp.find((item) => {
+                        if (Array.isArray(item) && item.length >= 4 && item[3]?.isSelected) {
+                            address = item;
+                        }
+                    })
+                }
+
+                setState((prevState: IState) => ({
+                    ...prevState,
+                    listDeliveryAddress: listDeliveryAddressTemp,
+                    address: {
+                        ...prevState?.address,
+                        value: address,
+                        isRefresh: !prevState?.address.isRefresh
+                    }
+                }));
+            }
+        } catch (error) {
+            AlertService.show(ENUM.E_ERROR, 'Không thể lấy được danh sách địa chỉ!', 3000, null);
+        }
+    }
+
+    useEffect(() => {
+        handleGetDataUser();
+    }, []);
+    console.log(listDeliveryAddress, 'listDeliveryAddress');
 
     return (
         <View style={styles.container}>
@@ -223,45 +283,32 @@ const Order: React.FC = () => {
                         />
                     </View>
                     <View style={{ height: 70, width: '100%', paddingHorizontal: 12, }}>
-                        <AddressComponent
-                            value={Array.isArray(address.value) ? address.value : []}
-                            isSpecial={true}
-                            style={[]}
-                            placeholder="Chọn địa chỉ"
-                            onComplete={(value) => {
-                                console.log(value, 'value');
-                                if (Array.isArray(value)) {
-                                    setState((prevState: IState) => ({
-                                        ...prevState,
-                                        address: {
-                                            ...prevState.address,
-                                            value: value,
-                                            isRefresh: !prevState.address.isRefresh
-                                        }
-                                    }));
-                                }
-                            }}
-                        />
-                    </View>
-                    <View style={{ padding: 12, }}>
-                        <View>
-                            <Text style={StylesTheme.text16}>Số nhà, tên đường</Text>
-                        </View>
-                        <TextInput
-                            style={[{ padding: 12, paddingVertical: 16, fontSize: 14, borderBottomColor: '#ccc', borderBottomWidth: 0.5 }]}
-                            placeholder={"Vui lòng nhập!"}
-                            value={addressDetail.value}
-                            onChangeText={(text) => {
+                        <TouchableOpacity style={{ padding: 12, borderColor: '#ccc', borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+                            onPress={() => {
                                 setState((prevState: IState) => ({
                                     ...prevState,
-                                    addressDetail: {
-                                        ...prevState.addressDetail,
-                                        value: text,
-                                        isRefresh: !prevState.addressDetail?.isRefresh
-                                    }
+                                    modalVisible: true,
                                 }));
                             }}
-                        />
+                        >
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <LocationIcon size={22} color='#000' />
+                                <Text numberOfLines={2} style={[StylesTheme.text16, { marginLeft: 12, maxWidth: '90%' }]}>
+                                    {
+                                        !Array.isArray(address?.value) || (Array.isArray(address?.value) && address?.value.length === 0)
+                                            ? 'Chọn địa chỉ'
+                                            : `${address?.value[3]?.name ? address?.value[3]?.name + ',' : ''
+                                            } ${address?.value[2]?.full_name}, ${address?.value[1]?.full_name}, ${address?.value[0]?.full_name}
+                                        `
+                                    }
+                                </Text>
+                            </View>
+                            {
+                                !Array.isArray(address?.value) || (Array.isArray(address?.value) && address?.value.length === 0) && (
+                                    <Text style={{ fontSize: 22, fontWeight: '700' }}>+</Text>
+                                )
+                            }
+                        </TouchableOpacity>
                     </View>
                     <View style={{ height: 60, width: '100%', justifyContent: 'center', padding: 16, }}>
                         <PickerQuicklyComponent
@@ -305,7 +352,8 @@ const Order: React.FC = () => {
                     <View style={{ flex: 1, alignItems: 'flex-end' }}>
                         <TouchableOpacity
                             onPress={() => {
-                                handleOrder();
+                                // handleOrder();
+                                navigation.navigate('Paypal');
                             }}
                             style={{ backgroundColor: '#fa9450', borderRadius: 8, width: '75%', paddingVertical: 10, alignItems: 'center' }}
                         >
@@ -319,6 +367,7 @@ const Order: React.FC = () => {
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
+                style={{ zIndex: 98, elevation: 98 }}
             >
                 <View style={styles.centeredView}>
                     <TouchableOpacity style={{ flex: 1, }}
@@ -331,7 +380,7 @@ const Order: React.FC = () => {
                     >
 
                     </TouchableOpacity>
-                    <View style={{
+                    <View style={[{
                         flex: 1, backgroundColor: '#fff', borderTopLeftRadius: 22, borderTopRightRadius: 22,
                         shadowColor: '#000',
                         shadowOffset: {
@@ -341,7 +390,7 @@ const Order: React.FC = () => {
                         shadowOpacity: 0.25,
                         shadowRadius: 4,
                         elevation: 5,
-                    }}>
+                    }, listDeliveryAddress?.length === 0 && { flex: 0.3, }]}>
                         <View style={{ padding: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                             <Text style={[StylesTheme.text16]}>Chọn địa chỉ</Text>
                             <Pressable
@@ -354,6 +403,165 @@ const Order: React.FC = () => {
                                 }}>
                                 <CloseIcon size={16} color='#000' />
                             </Pressable>
+                        </View>
+
+                        <ScrollView style={{ flex: 1, }}>
+                            {
+                                listDeliveryAddress && listDeliveryAddress?.length > 0 && (
+                                    listDeliveryAddress?.map((item, index) => {
+                                        if (Array.isArray(item)) {
+                                            return (
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        const rsFind = listDeliveryAddress.find((item) => item[3] && item[3]?.isSelected)
+                                                        console.log(rsFind, '123')
+                                                    }}
+                                                    key={index} style={{
+                                                        width: '100%',
+                                                        borderColor: '#ccc',
+                                                        borderBottomWidth: 1, paddingVertical: 12,
+                                                        justifyContent: 'center'
+                                                    }}>
+                                                    <View style={{
+                                                        paddingHorizontal: 12,
+                                                        flexDirection: 'row',
+                                                        alignItems: 'center'
+                                                    }}>
+                                                        <View style={[{
+                                                            width: 26,
+                                                            height: 26,
+                                                            borderRadius: 26,
+                                                            borderColor: 'black',
+                                                            borderWidth: 1
+                                                        }, item[3]?.isSelected && { backgroundColor: Colors.primaryColor }]} />
+                                                        <View style={{
+                                                            marginLeft: 12,
+                                                        }}>
+                                                            <Text style={[StylesTheme.text16, { maxWidth: '100%', paddingRight: 8 }]} numberOfLines={2}>
+                                                                {item[3]?.name ? item[3]?.name : ''},
+                                                                {item[2]?.full_name},
+                                                                {item[1]?.full_name},
+                                                                {item[0]?.full_name}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
+                                                </TouchableOpacity>
+                                            )
+                                        }
+                                    })
+                                )
+                            }
+                        </ScrollView>
+
+                        <View style={[listDeliveryAddress?.length === 0 ? { flex: 0.3, justifyContent: 'center', alignItems: 'center', } : { flex: 0.3, justifyContent: 'flex-start', alignItems: 'center', }]}>
+                            {/* <TouchableOpacity style={{ backgroundColor: Colors.primaryColor, paddingVertical: 12, paddingHorizontal: 22, borderRadius: 8 }}>
+                                <Text style={[StylesTheme.text16]}>Thêm địa chỉ
+                                    <Text style={{ fontSize: 22, fontWeight: '700' }}>  +</Text>
+                                </Text>
+                            </TouchableOpacity> */}
+                            <AddressComponent
+                                value={[]}
+                                isSpecial={true}
+                                style={[]}
+                                placeholder="Chọn địa chỉ"
+                                onComplete={(value) => {
+                                    if (Array.isArray(value)) {
+                                        setState((prevState: IState) => ({
+                                            ...prevState,
+                                            addressChoose: value,
+                                            modalVisibleA: true,
+                                            modalVisible: false,
+                                        }));
+                                    }
+                                }}
+                            />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisibleA}
+                style={{ zIndex: 99, elevation: 99 }}
+            >
+                <View style={styles.centeredView}>
+                    <TouchableOpacity style={{ flex: 1, }}
+                        onPress={() => {
+                            setState((prevState: IState) => ({
+                                ...prevState,
+                                modalVisibleA: false,
+                            }));
+                        }}
+                    >
+
+                    </TouchableOpacity>
+                    <View style={[{
+                        flex: 1, backgroundColor: '#fff', borderTopLeftRadius: 22, borderTopRightRadius: 22,
+                        shadowColor: '#000',
+                        shadowOffset: {
+                            width: 0,
+                            height: 2,
+                        },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 4,
+                        elevation: 5,
+                    },]}>
+                        <View style={{ padding: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text style={[StylesTheme.text16]}>Nhập tên dường, số nhà</Text>
+                            <Pressable
+                                style={[{ padding: 12 }]}
+                                onPress={() => {
+                                    setState((prevState: IState) => ({
+                                        ...prevState,
+                                        modalVisibleA: false,
+                                    }));
+                                }}>
+                                <CloseIcon size={16} color='#000' />
+                            </Pressable>
+                        </View>
+
+                        <View style={{ padding: 12, }}>
+                            <View>
+                                <Text style={StylesTheme.text16}>Số nhà, tên đường</Text>
+                            </View>
+                            <TextInput
+                                style={[{ padding: 12, paddingVertical: 16, fontSize: 14, borderBottomColor: '#ccc', borderBottomWidth: 0.5 }]}
+                                placeholder={"Vui lòng nhập!"}
+                                value={addressDetail.value}
+                                onChangeText={(text) => {
+                                    setState((prevState: IState) => ({
+                                        ...prevState,
+                                        addressDetail: {
+                                            ...prevState.addressDetail,
+                                            value: text,
+                                            isRefresh: !prevState.addressDetail?.isRefresh
+                                        }
+                                    }));
+                                }}
+                            />
+                        </View>
+
+                        <View style={{ paddingHorizontal: 12, }}>
+                            <TouchableOpacity style={{ backgroundColor: Colors.primaryColor, paddingVertical: 12, paddingHorizontal: 20, justifyContent: 'center', alignItems: 'center' }}
+                                onPress={() => {
+                                    if (addressChoose?.length === 3) {
+                                        const temp = [...addressChoose, { code: '99999', name: addressDetail?.value }];
+
+                                        setState((prevState: IState) => ({
+                                            ...prevState,
+                                            listDeliveryAddress: prevState?.listDeliveryAddress ? [temp, ...prevState?.listDeliveryAddress] : [],
+                                            addressChoose: [],
+                                            modalVisibleA: false,
+                                            modalVisible: true,
+                                            addressDetail: ''
+                                        }));
+                                    }
+                                }}
+                            >
+                                <Text>Hoàn tất</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>
