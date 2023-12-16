@@ -76,6 +76,9 @@ export const Permission: React.FC = () => {
         }
     };
 
+    // login to facebook
+    // https://www.section.io/engineering-education/react-native-firebase-facebook-authentication/
+
 
     const onAuthStateChanged = (user: any) => {
         const dataUser = {
