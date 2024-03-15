@@ -1,7 +1,6 @@
 import { Controller, Post, Req, Body, Get, Param, Headers, Query } from "@nestjs/common";
 
 import { ProvincesService } from "../service/provinces.service";
-import { FilterParamsDTO } from "../validator/dto/Address-params.dto";
 
 @Controller('provinces')
 export class ProvincesController {
