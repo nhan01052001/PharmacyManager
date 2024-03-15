@@ -290,7 +290,7 @@ export class BillService {
                 await this.billRepository.createQueryBuilder()
                     .update('Bill')
                     .set({
-                        isDelivering: true,
+                        isDelivering: true, 
                     })
                     .where("id = :id", { id: id }).andWhere("Bill.isDelete = false")
                     .execute();

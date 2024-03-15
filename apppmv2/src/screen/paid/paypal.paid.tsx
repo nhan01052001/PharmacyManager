@@ -48,11 +48,13 @@ const Paypal = () => {
             AlertService.show(ENUM.E_SUCCESS, res?.message, 3000);
             navigation.navigate('BottomTabNavigator');
           } else {
+            LoadingService.hide();
             AlertService.show(ENUM.E_ERROR, 'Đặt hàng thành công!', 3000, "Lỗi");
           }
         })
       }
     } else {
+      LoadingService.hide();
       AlertService.show(ENUM.E_ERROR, 'Thanh toán thất bại. Vui lòng thử lại!', 3000, null);
     }
   }
