@@ -50,6 +50,8 @@
 	<string/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string/>
+	<key>NSCameraUsageDescription</key>
+	<string	string>For taking photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow access to the photo library for selecting images</string>
 	<key>UILaunchStoryboardName</key>

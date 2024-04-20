@@ -173,11 +173,6 @@ const Address: React.FC<IProps> = (props: IProps) => {
                 'pageSize': provinces?.pageSize ? provinces?.pageSize : 20,
             })
                 .then((res: any) => {
-                    console.log(`${env.URL}/provinces/getProvinces/?search=${search}`, {
-                        'page': provinces?.page ? provinces?.page : 1,
-                        'pageSize': provinces?.pageSize ? provinces?.pageSize : 20,
-                    }, res, 'res');
-
                     callOnEndReached = false;
                     const nameData: [] = res?.data;
                     // nameData.sort(function (a: any, b: any) {

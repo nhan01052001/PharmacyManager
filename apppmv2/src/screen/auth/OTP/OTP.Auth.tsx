@@ -64,7 +64,6 @@ export const OTP: React.FC<{ route: any }> = ({ route }) => {
     // });
     LoadingService.show();
     await auth().signInWithPhoneNumber(`+84${username.substring(1)}`, true).then((res) => {
-      console.log(res, 'res');
       LoadingService.hide();
       if (res) {
         setConfirm(res);
@@ -86,7 +85,6 @@ export const OTP: React.FC<{ route: any }> = ({ route }) => {
         confirm?.confirm(code)
           .then((res: any) => {
             LoadingService.hide();
-            console.log(res, 'res');
             if (res?.user?._user?.uid) {
               navigation.navigate("RegisterInformationPersonal", {
                 username: username,

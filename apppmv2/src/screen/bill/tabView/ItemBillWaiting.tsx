@@ -5,9 +5,6 @@ import {
     StyleSheet,
     Text,
     View,
-    SafeAreaView,
-    ScrollView,
-    Pressable,
     TouchableOpacity,
     Image
 } from 'react-native';
@@ -17,6 +14,7 @@ import { Colors } from '../../../global/theme/Colors.Theme';
 import StylesTheme from '../../../global/theme/Styles.Theme';
 import { CheckIcon, OclockIcon } from '../../../global/icon/Icon';
 import moment from 'moment';
+import Function from '../../../service/Function.Service';
 
 interface IProps {
     dataItem?: any;
@@ -156,4 +154,12 @@ const styles = StyleSheet.create({
     },
 })
 
-export default ItemBillWaiting;
+export default React.memo(ItemBillWaiting, (prevProps, nextProps) => {
+    return (prevProps.isReceived !== nextProps.isReceived)
+        || (prevProps.isAllowedCancel !== nextProps.isAllowedCancel)
+        || (prevProps.isCanceled !== nextProps.isCanceled)
+        || (prevProps.isDelivering !== nextProps.isDelivering)
+        || (prevProps.isConfirmed !== nextProps.isConfirmed)
+        || !Function.compare(prevProps.dataItem, nextProps.dataItem)
+        ? false : true;
+});

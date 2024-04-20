@@ -50,7 +50,6 @@ const Cart: React.FC = () => {
                 LoadingService.show();
                 HttpService.Get(`${env.URL}/cart/getCartByProfileID/${profile?.id}`)
                     .then((res: any) => {
-                        console.log(res, 'res');
                         if (res?.status === 200 && Array.isArray(res?.data)) {
                             const data: any[] = res?.data;
                             const dataChecked: any[] = [];

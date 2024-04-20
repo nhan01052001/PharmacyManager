@@ -255,7 +255,6 @@ const DetailMedicine: React.FC = () => {
                         profileid: profile?.id
                     }).then((res: any) => {
                         LoadingService.hide();
-                        console.log(res, 'res');
                         if (res?.status === 201) {
                             AlertService.show(ENUM.E_SUCCESS, 'THêm thành công!', 3000, null);
                             setState((prevState: IState) => ({
@@ -349,7 +348,6 @@ const DetailMedicine: React.FC = () => {
             if (profile?.id) {
                 HttpService.Get(`${env.URL}/cart/getCartByProfileID/${profile?.id}`)
                     .then((res: any) => {
-                        console.log(res, 'res');
                         if (res?.status === 200) {
                             setState((prevState: IState) => ({
                                 ...prevState,

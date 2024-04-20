@@ -276,3 +276,13 @@ export const SuccessIcon: React.FC<IconProps> = ({ color = 'teal', size = '40' }
         </Svg>
     );
 };
+
+export const ScanIcon: React.FC<IconProps> = ({ color = 'teal', size = '40' }) => {
+    return (
+        <Svg width={size} height={size} viewBox="0 1 511 511.999" fill={color}>
+            <Path
+                d="M12 3a1 1 0 0 1-1 1H7C5.346 4 4 5.346 4 7v4a1 1 0 0 1-2 0V7c0-2.757 2.243-5 5-5h4a1 1 0 0 1 1 1zm13-1h-4a1 1 0 1 0 0 2h4c1.654 0 3 1.346 3 3v4a1 1 0 1 0 2 0V7c0-2.757-2.243-5-5-5zM11 28H7c-1.654 0-3-1.346-3-3v-4a1 1 0 1 0-2 0v4c0 2.757 2.243 5 5 5h4a1 1 0 1 0 0-2zm18-8a1 1 0 0 0-1 1v4c0 1.654-1.346 3-3 3h-4a1 1 0 1 0 0 2h4c2.757 0 5-2.243 5-5v-4a1 1 0 0 0-1-1z"
+            />
+        </Svg>
+    );
+};

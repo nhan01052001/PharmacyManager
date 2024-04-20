@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/core';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useCallback, useState, Reducer, useReducer, useEffect } from 'react';
+import React, { useCallback, useState, Reducer, useReducer, useEffect, useRef } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
@@ -26,7 +26,7 @@ import HttpService from '../../service/HttpService.Service';
 import { LoadingService } from '../../components/cLoading/Loading.component';
 import { AlertService } from '../../components/cAlert/Alert.component';
 import { ENUM } from '../../global/enum';
-import { User } from '../../type/User.Type';
+import Permission from './Permission.Auth';
 
 interface IErrorUsernamePassword {
     errorUsername: {
@@ -94,23 +94,9 @@ export const Login: React.FC = () => {
                     isErrorUsername: true,
                     messErrorUsername: "Tài khoản không được để trống!"
                 }
-                // isError: {
-                //     ...isError,
-                //     errorUsername: {
-                //         isErrorUsername: true,
-                //         messErrorUsername: "Tài khoản không được để trống!"
-                //     }
-                // },
             };
         } else {
             nextState = {
-                // isError: {
-                //     ...isError,
-                //     errorUsername: {
-                //         isErrorUsername: false,
-                //         messErrorUsername: ""
-                //     }
-                // },
                 errorUsername: {
                     isErrorUsername: false,
                     messErrorUsername: ""
@@ -137,13 +123,6 @@ export const Login: React.FC = () => {
                     isErrorPassword: true,
                     messErrorPassword: "Mật khẩu không được để trống!"
                 }
-                // isError: {
-                //     ...isError,
-                //     errorPassword: {
-                //         isErrorPassword: true,
-                //         messErrorPassword: "Mật khẩu không được để trống!"
-                //     }
-                // },
             };
         } else {
             nextState = {
@@ -151,13 +130,6 @@ export const Login: React.FC = () => {
                     isErrorPassword: false,
                     messErrorPassword: ""
                 }
-                // isError: {
-                //     ...isError,
-                //     errorPassword: {
-                //         isErrorPassword: false,
-                //         messErrorPassword: ""
-                //     }
-                // },
             }
         }
         setState((prevState: any) => ({
@@ -172,14 +144,16 @@ export const Login: React.FC = () => {
     }, [password]);
 
     const handleLogin = () => {
+        debugger
         try {
             if (typeof username === 'string' && typeof password === 'string' && username.length > 0 && password.length > 0) {
-                LoadingService.show();
+
+                // LoadingService.show();
                 HttpService.Post(`${env.URL}/auth/login`, {
                     username,
                     password
                 }).then((res: any) => {
-                    LoadingService.hide();
+                    // LoadingService.hide();
                     if (res?.status === 200 && res?.statusText === ENUM.E_SUCCESS && res?.data) {
                         setState((prevState: any) => ({
                             ...prevState,
@@ -187,12 +161,14 @@ export const Login: React.FC = () => {
                             password: null,
                         }))
                         Function.setAppData(ENUM.KEY_IN4USER, { ...res?.data, isRememberPassword: isRememberPassword, isLoginSocial: false });
-                        navigation.navigate("BottomTabNavigator", {
-                            data: res?.data
+
+                        navigation.navigate("Permission", {
+                            data: res?.data,
+                            isLogin: true,
                         });
                     } else {
                         AlertService.show(ENUM.E_ERROR, 'Tài khoản hoặc mật khẩu không hợp lệ!', 5000, null)
-                    LoadingService.hide();
+                        // LoadingService.hide();
                     }
                 }).catch((error) => {
                     const textError = error?.response?.data?.message;
@@ -260,8 +236,6 @@ export const Login: React.FC = () => {
     const _isSignedIn = async () => {
         const isSignedIn = await GoogleSignin.isSignedIn();
         if (isSignedIn) {
-            console.log(isSignedIn, 'isSignedIn');
-
             LoadingService.hide();
             let info = await GoogleSignin.signInSilently();
             const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
@@ -286,12 +260,11 @@ export const Login: React.FC = () => {
             "address": '',
             "id": Array.isArray(user?._user?.providerData) ? user?._user?.providerData[0]?.uid : user?._user?.uid ? user?._user?.uid : '',
         };
-        console.log(dataUser, user, 'user');
+
         try {
             HttpService.Get(`${env.URL}/user/getUserLoginSocial/${dataUser.id}`).then((res: any) => {
                 LoadingService.hide();
                 if (res) {
-                    console.log(res, 'dang nhap');
                     Function.setAppData(ENUM.KEY_IN4USER, { ...dataUser, isRememberPassword: isRememberPassword, isLoginSocial: true });
                     navigation.navigate("BottomTabNavigator", {
                         data: dataUser
@@ -356,6 +329,7 @@ export const Login: React.FC = () => {
                                 </Text>
                             </View>
                             <TextInputComponent
+                                placeholderTextColor={Colors.colorGray_2}
                                 style={[styles.textInput, {}]}
                                 placeholder="Số điện thoại hoặc"
                                 keyboardType={'numeric'}
@@ -379,6 +353,7 @@ export const Login: React.FC = () => {
                             </View>
                             <View style={StylesTheme.onlyFlexDirectionAli_Center}>
                                 <TextInputComponent
+                                    placeholderTextColor={Colors.colorGray_2}
                                     style={[styles.textInput, {}]}
                                     isError={isError?.errorPassword?.isErrorPassword}
                                     isObligatory={true}
@@ -513,7 +488,9 @@ export const Login: React.FC = () => {
                             {/* Login with facebook */}
                             <View>
                                 <TouchableOpacity
-                                    onPress={_signOut}
+                                    onPress={() => {
+                                        navigation.navigate("FaceScanSetting");
+                                    }}
 
                                     style={styles.btnLoginDiff}
                                 >

@@ -10,27 +10,35 @@ import DetailMedicine from '../screen/medicine/DetailMedicine.medicine';
 import AllMedicine from '../screen/medicine/AllMedicine.medicine';
 import SearchScreen from '../screen/search/Search';
 import Order from '../screen/order/Order';
-import { Permission } from '../screen/auth/Permission.Auth';
+import Permission from '../screen/auth/Permission.Auth';
 import Cart from '../screen/cart/Cart';
 import Bill from '../screen/bill/Bill';
-import Paypal from '../screen/paid/paypal.paid'; 
+import Paypal from '../screen/paid/paypal.paid';
 import HistoryBought from '../screen/bill/historyBought/HistoryBought.bill';
+import ScanFace from '../screen/ScanFace';
+import FaceScanSetting from '../FaceScanSetting';
+
+import FaceDetectionScreen from '../screen/FaceDetectionScreen';
 
 export type ScreenName =
-    "Login" | 
+    "Login" |
     "Register" |
     "OTP" |
     "RegisterInformationPersonal" |
     "BottomTabNavigator" |
     "DetailMedicine" |
-    "AllMedicine" | 
+    "AllMedicine" |
     "SearchScreen" |
     "Order" |
     "Permission" |
     "Cart" |
     "Bill" |
     "Paypal" |
-    "HistoryBought";
+    "HistoryBought" |
+    "FaceDetectionScreen" |
+    "ScanFace" |
+    "FaceScanSetting"
+    ;
 
 
 export type MainStackParams = {
@@ -40,6 +48,8 @@ export type MainStackParams = {
     OTP: any | undefined;
     RegisterInformationPersonal: any | undefined;
     BottomTabNavigator: any | undefined;
+    FaceDetectionScreen: any | undefined;
+    FaceScanSetting: any | undefined;
 };
 
 export type RootStackParams = {
@@ -53,6 +63,9 @@ export type RootStackParams = {
     Bill: any;
     Paypal: any;
     HistoryBought: any;
+    FaceDetectionScreen: any;
+    ScanFace: any;
+    FaceScanSetting: any;
 };
 
 export type AllStackParams = {
@@ -71,6 +84,9 @@ export type AllStackParams = {
     Bill: any;
     Paypal: any;
     HistoryBought: any;
+    FaceDetectionScreen: any;
+    ScanFace: any;
+    FaceScanSetting: any;
 }
 
 const MainStack = createStackNavigator<MainStackParams>();
@@ -136,6 +152,21 @@ export const RootStackNavigator: React.FC = () => (
         <RootStack.Screen
             name='HistoryBought'
             component={HistoryBought}
+            options={{ headerShown: false, }}
+        />
+        <RootStack.Screen
+            name='FaceDetectionScreen'
+            component={FaceDetectionScreen}
+            options={{ headerShown: false, }}
+        />
+        <RootStack.Screen
+            name='ScanFace'
+            component={ScanFace}
+            options={{ headerShown: false, }}
+        />
+        <RootStack.Screen
+            name='FaceScanSetting'
+            component={FaceScanSetting}
             options={{ headerShown: false, }}
         />
     </RootStack.Navigator>

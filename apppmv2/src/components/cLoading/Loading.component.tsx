@@ -28,12 +28,10 @@ const Loading: React.FC = () => {
     const [isVisible, setIsVisible] = useState<boolean>(false);
 
     const show = () => {
-        console.log("show");
         setIsVisible(true,);
     };
 
     const hide = () => {
-        console.log("hide");
         setIsVisible(false);
     };
 

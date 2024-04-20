@@ -15,6 +15,8 @@ import { env } from '../../utils/env.utils';
 import Function from '../../global/assets/service/Function.Service';
 import OptionChooseQuickly from '../cOptionChooseQuickly/OptionChooseQuickly.component';
 import { Colors } from '../../global/theme/Colors.Theme';
+import { useAppDispatch, useAppSelector } from '../../redux/reduxHook.redux';
+import { CartStore, addItemIntoCart, setDataCount } from '../../redux/cart-slice.redux';
 
 const { width } = Dimensions.get('window');
 
@@ -45,6 +47,18 @@ const Medicine: React.FC<IProps> = (props: IProps) => {
     const [{ modalVisible, unitProduct, lsUnit }, setState] = useState<IState>({ ...initialState });
     const { item, colorBtn, mgBottom, handleClickProduct } = props;
     let unitView: any[] = [];
+    const data: {
+        listItemCart: any[],
+        dataCount: {
+            countCart?: number,
+            coutnBillWaitingConfirm?: number,
+            countBillConfirmed?: number,
+            countBillDelivering?: number,
+            countBillCanceled?: number,
+            totalCountInBill?: number,
+        }
+    } = useAppSelector(CartStore);
+    const dispatch = useAppDispatch();
 
     if (item?.medicineDetail?.unitView && item?.medicineDetail?.unitView.length > 0) {
         const arrUnitView = JSON.parse(item?.medicineDetail?.unitView);
@@ -77,7 +91,6 @@ const Medicine: React.FC<IProps> = (props: IProps) => {
                 };
                 LoadingService.show()
                 const profile: any = await Function.getAppData(ENUM.KEY_IN4USER);
-                // console.log(profile, 'profile');
 
                 if (profile?.id) {
                     HttpService.Post(`${env.URL}/medicine/addToCart`, {
@@ -86,25 +99,28 @@ const Medicine: React.FC<IProps> = (props: IProps) => {
                         profileid: profile?.id
                     }).then((res: any) => {
                         LoadingService.hide();
-                        if (res?.status === 201) {
-                            AlertService.show(ENUM.E_SUCCESS, 'Thêm thành công!', 3000, null);
-                            setState((prevState: IState) => ({
-                                ...prevState,
-                                modalVisible: false,
-                            }));
-                        } else if (res?.status === 200) {
-                            AlertService.show(ENUM.E_SUCCESS, 'Thêm thành công!', 3000, null);
-                            setState((prevState: IState) => ({
-                                ...prevState,
-                                modalVisible: false
-                            }));
-                        } else {
+                        if (res?.status !== 201 && res?.status !== 200) {
                             AlertService.show(ENUM.E_ERROR, res?.message ? res?.message : 'Không thành công!', 3000, null);
                             setState((prevState: IState) => ({
                                 ...prevState,
                                 modalVisible: false
                             }));
+                            return;
                         }
+
+                        let countInCart = data?.dataCount?.countCart ? data?.dataCount?.countCart : 0;
+
+                        AlertService.show(ENUM.E_SUCCESS, 'Thêm thành công!', 3000, null);
+
+                        // save to redux state
+                        dispatch(setDataCount({ ...data.dataCount, countCart: [...data.listItemCart, dataBody.params].length + countInCart }));
+                        dispatch(addItemIntoCart(dataBody.params));
+
+                        setState((prevState: IState) => ({
+                            ...prevState,
+                            modalVisible: false,
+                        }));
+
                     }).catch((error) => {
                         LoadingService.hide();
                         console.log(error, 'error');

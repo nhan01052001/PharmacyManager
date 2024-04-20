@@ -42,6 +42,7 @@ const Setting: React.FC = () => {
             auth()
                 .signOut()
                 .then(() => {
+                    AsyncStorage.clear();
                     navigation.navigate('Login');
                 });
         } catch (error) {

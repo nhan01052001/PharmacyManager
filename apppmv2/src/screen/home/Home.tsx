@@ -27,6 +27,8 @@ import StylesTheme, { width, height } from '../../global/theme/Styles.Theme';
 import { Product } from '../../type/Product.type';
 import { AllStackParams } from '../../navigation/Stack.Navigator';
 import { env } from '../../utils/env.utils';
+import { useAppSelector } from '../../redux/reduxHook.redux';
+import { CartStore } from '../../redux/cart-slice.redux';
 
 type Portfolio = {
     id: string,
@@ -249,6 +251,7 @@ const Home: React.FC = () => {
     }, setState] = useState<IState>({ ...initialState });
     const animated = new Animated.Value(-SIZE_ANIMATED);
     const duration = 200;
+    const data = useAppSelector(CartStore);
 
     const handleScroll = (value: number) => {
         if (HEIGHT15 > MIN_HEIGHT) {
@@ -312,6 +315,25 @@ const Home: React.FC = () => {
                             >
                                 <CartIcon color='#000' size={36} />
                             </TouchableOpacity>
+                            <View
+                                style={{
+                                    backgroundColor: 'red',
+                                    position: 'absolute',
+                                    borderRadius: 22,
+                                    width: 22,
+                                    height: 22,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    right: -10,
+                                    top: -10,
+                                }}
+                            >
+                                <Text
+                                    style={{ fontSize: 16, fontWeight: '700' }}
+                                >
+                                    {data.dataCount?.countCart ? data.dataCount?.countCart : 0}
+                                </Text>
+                            </View>
                         </View>
                         <Search
                             propsValue={valueSearch}

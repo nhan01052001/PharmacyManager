@@ -236,7 +236,7 @@ const AllMedicine: React.FC = () => {
     }, setState] = useState<IState>({ ...initialState });
     const route = useRoute();
     const { api }: any = route.params;
-console.log(api, 'api');
+
     return (
         <View style={{ flex: 1 }}>
             <HeaderComponent

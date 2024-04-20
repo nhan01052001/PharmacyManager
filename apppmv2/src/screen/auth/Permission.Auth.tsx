@@ -1,15 +1,9 @@
-import { useNavigation } from '@react-navigation/core';
+import { useNavigation, useRoute } from '@react-navigation/core';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useCallback, useState, Reducer, useReducer, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
-    SafeAreaView,
-    StyleSheet,
     View,
-    Text,
-    TouchableOpacity,
-    Pressable,
     Image,
-    ActivityIndicator
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
@@ -29,8 +23,12 @@ import { ENUM } from '../../global/enum';
 import { User } from '../../type/User.Type';
 import * as Progress from 'react-native-progress';
 
-export const Permission: React.FC = () => {
+import { useAppDispatch } from '../../redux/reduxHook.redux';
+import { setDataCount } from '../../redux/cart-slice.redux';
+
+const Permission: React.FC<{ route: any }> = ({ route }) => {
     const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         // Initial configuration
@@ -41,28 +39,33 @@ export const Permission: React.FC = () => {
             // Generated from Firebase console
             webClientId: '493934264080-edtlckbg0dlfqomsa7j1291oql9bhgks.apps.googleusercontent.com',
         });
+
         // Check if user is already signed in
         handleCheckRememberLogin();
-    }, []);
+    }, [route]);
 
     const handleCheckRememberLogin = async () => {
-       const storage: any = await Function.getAppData(ENUM.KEY_IN4USER);
-       if(storage) {
-        if(storage?.isLoginSocial) {
-            _isSignedIn();
-        } else {
-            if(storage?.isRememberPassword && storage?.id) {
-                Function.setAppData(ENUM.KEY_IN4USER, {...storage, isRememberPassword: true, isLoginSocial: false});
-                navigation.navigate("BottomTabNavigator", {
-                    data: storage
-                });
+        const storage: any = await Function.getAppData(ENUM.KEY_IN4USER);
+        if (storage) {
+            if (storage?.isLoginSocial) {
+                _isSignedIn();
             } else {
-                navigation.navigate("Login");
+                if (storage?.isRememberPassword && storage?.id) {
+                    Function.setAppData(ENUM.KEY_IN4USER, { ...storage, isRememberPassword: true, isLoginSocial: false });
+                    console.log(storage, 'storage');
+
+                    getNumberCount(storage);
+                } else {
+                    if (route.params?.data && route.params?.isLogin) {
+                        getNumberCount(route.params?.data);
+                    } else {
+                        navigation.navigate("Login");
+                    }
+                }
             }
+        } else {
+            navigation.navigate("Login");
         }
-       } else {
-        navigation.navigate("Login");
-       }
     }
 
     const _isSignedIn = async () => {
@@ -75,7 +78,6 @@ export const Permission: React.FC = () => {
             navigation.navigate("Login");
         }
     };
-
 
     const onAuthStateChanged = (user: any) => {
         const dataUser = {
@@ -91,11 +93,31 @@ export const Permission: React.FC = () => {
             "address": '',
             "id": Array.isArray(user?._user?.providerData) ? user?._user?.providerData[0]?.uid : user?._user?.uid ? user?._user?.uid : '',
         };
-        console.log(dataUser, user, 'user');
-        Function.setAppData(ENUM.KEY_IN4USER, {...dataUser, isRememberPassword: true, isLoginSocial: true});
-        navigation.navigate("BottomTabNavigator", {
-            data: dataUser
-        });
+        Function.setAppData(ENUM.KEY_IN4USER, { ...dataUser, isRememberPassword: true, isLoginSocial: true });
+        getNumberCount(dataUser);
+    }
+
+    const getNumberCount = (dataUser: any) => {
+        try {
+            const { id } = dataUser;
+            if (id) {
+                HttpService.Get(`${env.URL}/user/countNumberCartAndBill/${id}`).then((res: any) => {
+                    console.log(res, 'res');
+                    if (res?.status === 200 && res?.statusText === ENUM.E_SUCCESS) {
+                        // save to redux state
+                        dispatch(setDataCount(res?.data ? res?.data : {}));
+                        navigation.navigate("BottomTabNavigator", {
+                            data: dataUser
+                        });
+                    }
+                })
+            } else {
+                navigation.navigate("Login");
+                AlertService.show(ENUM.E_ERROR, 'Phiên bản đã hết hạn\nVui lòng đăng nhập lại!', 5000, 'ERROR');
+            }
+        } catch (error) {
+
+        }
     }
 
     return (
@@ -116,3 +138,4 @@ export const Permission: React.FC = () => {
         </View>
     );
 }
+export default Permission;

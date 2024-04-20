@@ -46,7 +46,6 @@ const WaitingConfirm: React.FC = () => {
                 LoadingService.show();
                 HttpService.Get(`${env.URL}/cart/getCartOrderByProfileID/${profile?.id}`)
                     .then((res: any) => {
-                        console.log(res, 'res');
                         if (res?.status === 200 && Array.isArray(res?.data)) {
                             const data: any[] = res?.data;
                             const dataChecked: any[] = [];
@@ -92,7 +91,6 @@ const WaitingConfirm: React.FC = () => {
                     ids: [id]
                 })
                     .then((res: any) => {
-                        console.log(res, 'res');
                         if (res?.status === 200 && Array.isArray(res?.data)) {
                             handleGetData();
                         }

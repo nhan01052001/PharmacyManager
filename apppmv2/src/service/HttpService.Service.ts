@@ -98,6 +98,14 @@ export default class HttpService {
     static async Post(url: string, body?: any, header?: any): Promise<unknown> {
         return new Promise((resolve, reject) => {
             if (handleCheckInternet() === true) {
+                // console.log(
+                //     JSON.stringify({
+                //         url: url,
+                //         body: body,
+                //         header: this.generateHeader(header, null),
+                //     })
+                // );
+                
                 axios
                     .post(url, body, {
                         headers: this.generateHeader(header, null),

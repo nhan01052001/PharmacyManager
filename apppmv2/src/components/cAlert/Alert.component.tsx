@@ -5,7 +5,6 @@ import {
     View,
     Dimensions,
     TouchableOpacity,
-    Modal,
     Text,
     Pressable,
     SafeAreaView,
@@ -16,6 +15,7 @@ import StylesTheme from "../../global/theme/Styles.Theme";
 import { CloseIcon, SuccessIcon } from "../../global/icon/Icon";
 import { Colors } from "../../global/theme/Colors.Theme";
 import { ENUM } from "../../global/enum";
+import Modal from 'react-native-modal';
 
 type typeStatus = {
     show?: any;
@@ -88,9 +88,15 @@ const Alert: React.FC = () => {
 
     return (
         <Modal
-            animationType="slide"
-            transparent={true}
-            visible={isVisible} //isVisible
+            animationIn={'slideInDown'}
+            animationInTiming={300}
+            animationOut={'slideOutUp'}
+            animationOutTiming={300}
+            backdropOpacity={0}
+            isVisible={isVisible}
+            onBackdropPress={() => {
+                setState({ ...initialState });
+            }}
         // onRequestClose={this.handleCloseModal}
         >
             <SafeAreaView style={[StylesTheme.droidSafeArea, { flex: 1, marginTop: 70 }]}>
@@ -109,13 +115,13 @@ const Alert: React.FC = () => {
                         style={[styles.wrapNotify, { borderColor: borderColor !== null && borderColor }]}
                     >
                         <View style={{ justifyContent: 'center', marginRight: 12 }}>
-                        {
-                            status === ENUM.E_SUCCESS ? (
-                                <Image source={require("../../global/assets/image/done.png")} style={{ width: 40, height: 40 }} />
-                            ) : (
-                                <Image source={require("../../global/assets/image/error_server.png")} style={{ width: 40, height: 40 }} />
-                            )
-                        }
+                            {
+                                status === ENUM.E_SUCCESS ? (
+                                    <Image source={require("../../global/assets/image/done.png")} style={{ width: 40, height: 40 }} />
+                                ) : (
+                                    <Image source={require("../../global/assets/image/error_server.png")} style={{ width: 40, height: 40 }} />
+                                )
+                            }
                         </View>
                         <View
                             style={[styles.btnClose, { borderColor: borderColor !== null && borderColor }]}
@@ -125,12 +131,12 @@ const Alert: React.FC = () => {
                         <View style={{ justifyContent: 'center', flex: 1, }}>
                             {
                                 title && title?.length > 0 && (
-                                    <Text style={[StylesTheme.textLabel, {fontSize: 16, color: borderColor}]}>{title}</Text>
+                                    <Text style={[StylesTheme.textLabel, { fontSize: 16, color: borderColor }]}>{title}</Text>
                                 )
                             }
                             {
                                 text && text?.length > 0 && (
-                                    <Text numberOfLines={3} style={[[StylesTheme.text14, {color: Colors.black}]]}>{text}</Text>
+                                    <Text numberOfLines={3} style={[[StylesTheme.text14, { color: Colors.black }]]}>{text}</Text>
                                 )
                             }
                         </View>

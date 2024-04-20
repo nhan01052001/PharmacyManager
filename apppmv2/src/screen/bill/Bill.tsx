@@ -27,6 +27,9 @@ import { LoadingService } from '../../components/cLoading/Loading.component';
 import { env } from '../../utils/env.utils';
 import { ENUM } from '../../global/enum';
 
+import { useAppSelector } from '../../redux/reduxHook.redux';
+import { CartStore } from '../../redux/cart-slice.redux';
+
 const Tab = createMaterialTopTabNavigator();
 
 interface IState {
@@ -56,47 +59,7 @@ const Bill: React.FC = () => {
     // const { item }: any = route.params;
     const navigation = useNavigation<StackNavigationProp<MainStackParams>>();
     const [{ index, isActiveWhich, waiting, confirm, delivering, cancel }, setState] = useState<IState>({ ...initialState });
-
-    const handleGetData = async () => {
-        try {
-            const profile: any = await Function.getAppData(ENUM.KEY_IN4USER);
-
-            if (profile?.id) {
-                LoadingService.show();
-                Promise.all(
-                    [
-                        HttpService.Get(`${env.URL}/cart/getCartOrderByProfileID/${profile?.id}`),
-                        HttpService.Get(`${env.URL}/bill/getBillConfirmed/${profile?.id}`),
-                        HttpService.Get(`${env.URL}/bill/getBillDelivering/${profile?.id}`),
-                        HttpService.Get(`${env.URL}/bill/getBillCanceled/${profile?.id}`)
-                    ]
-                ).then((resAll: any) => {console.log(resAll, 'resAll');
-                
-                
-                        if(Array.isArray(resAll) && resAll.length === 4) {
-                            const [res1, res2, res3, res4] = resAll;
-                            setState((prevState: IState) => ({
-                                ...prevState,
-                                waiting: Array.isArray(res1?.data) ? res1?.data.length : 0,
-                                confirm: Array.isArray(res2?.data) ? res2?.data.length : 0,
-                                delivering: Array.isArray(res3?.data) ? res3?.data.length : 0,
-                                cancel: Array.isArray(res4?.data) ? res4?.data.length : 0,
-                            }));
-                        }
-                        LoadingService.hide();
-                    }).catch((error) => {
-                        LoadingService.hide();
-                        // show screen error
-                    })
-            }
-        } catch (error) {
-            // handle screen error
-        }
-    }
-
-    useEffect(() => {
-        handleGetData();
-    }, []);
+    const data = useAppSelector(CartStore);
 
     return (
         <View style={{ flex: 1 }}>
@@ -129,28 +92,28 @@ const Bill: React.FC = () => {
                         component={WaitingConfirm}
                         options={{
                             tabBarLabel: 'Chờ xác nhận',
-                            tabBarBadge:()=> { return (  <Text style={{color: 'red'}}>{waiting}</Text> ) }
+                            tabBarBadge: () => { return (<Text style={{ color: 'red' }}>{data?.dataCount.coutnBillWaitingConfirm ? data?.dataCount.coutnBillWaitingConfirm : 0}</Text>) }
                         }} />
                     <Tab.Screen
                         name="Confirm"
                         component={Confirm}
                         options={{
                             tabBarLabel: 'Xác nhận',
-                            tabBarBadge:()=> { return (  <Text style={{color: 'red'}}>{confirm}</Text> ) }
+                            tabBarBadge: () => { return (<Text style={{ color: 'red' }}>{data?.dataCount.countBillConfirmed ? data?.dataCount.countBillConfirmed : 0}</Text>) }
                         }} />
                     <Tab.Screen
                         name="Delevering"
                         component={Delevering}
                         options={{
                             tabBarLabel: 'Đang giao',
-                            tabBarBadge:()=> { return (  <Text style={{color: 'red'}}>{delivering}</Text> ) }
+                            tabBarBadge: () => { return (<Text style={{ color: 'red' }}>{data?.dataCount.countBillDelivering ? data?.dataCount.countBillDelivering : 0}</Text>) }
                         }} />
                     <Tab.Screen
                         name="Cancel"
                         component={Cancel}
                         options={{
                             tabBarLabel: 'Đã huỷ',
-                            tabBarBadge:()=> { return (  <Text style={{color: 'red'}}>{cancel}</Text> ) }
+                            tabBarBadge: () => { return (<Text style={{ color: 'red' }}>{data?.dataCount.countBillCanceled ? data?.dataCount.countBillCanceled : 0}</Text>) }
                         }} />
                 </Tab.Navigator>
             </View>
