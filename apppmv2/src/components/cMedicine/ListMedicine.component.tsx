@@ -115,7 +115,7 @@ const ListMedicine: React.FC<IProps> = (props: IProps) => {
                     horizontal={isHorizontal}
                     showsHorizontalScrollIndicator={false}
                     style={{ marginRight: 16 }}
-                    renderItem={({ item }) => <MedicineComponent item={item} colorBtn={colorBtn} />}
+                    renderItem={({ item, index }) => <MedicineComponent key={index} item={item} colorBtn={colorBtn} />}
                     keyExtractor={(item: any) => item?.id}
                 />
             )}

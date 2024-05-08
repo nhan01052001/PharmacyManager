@@ -42,6 +42,8 @@ import { Colors } from '../../global/theme/Colors.Theme';
 import { ENUM } from '../../global/enum';
 import Function from '../../global/assets/service/Function.Service';
 import { AllStackParams } from '../../navigation/Stack.Navigator';
+import { useAppDispatch, useAppSelector } from '../../redux/reduxHook.redux';
+import { CartStore, addItemIntoCart, setDataCount } from '../../redux/cart-slice.redux';
 
 const DATA_SWIPER = [
     {
@@ -163,6 +165,18 @@ const DetailMedicine: React.FC = () => {
     const [{ dataDefault, index, isActiveWhich, isShowHeader, isShowModalDeliveryForm,
         deliveryForm, numberProductInCart, unitProduct, product, quantityPurchase, isGetMedicineInCart,
     }, setState] = useState<IState>({ ...initialState });
+    const data: {
+        listItemCart: any[],
+        dataCount: {
+            countCart?: number,
+            coutnBillWaitingConfirm?: number,
+            countBillConfirmed?: number,
+            countBillDelivering?: number,
+            countBillCanceled?: number,
+            totalCountInBill?: number,
+        }
+    } = useAppSelector(CartStore);
+    const dispatch = useAppDispatch();
 
     const handleScroll = (value: any) => {
         if (value >= height / 2 - 50) {
@@ -256,24 +270,31 @@ const DetailMedicine: React.FC = () => {
                     }).then((res: any) => {
                         LoadingService.hide();
                         if (res?.status === 201) {
-                            AlertService.show(ENUM.E_SUCCESS, 'THêm thành công!', 3000, null);
+                            AlertService.show(ENUM.E_SUCCESS, 'Thêm thành công!', 3000, null);
+
+                            let countInCart = data?.dataCount?.countCart ? data?.dataCount?.countCart : 0;
+                            // save to redux state
+                            dispatch(setDataCount({ ...data.dataCount, countCart: [...data.listItemCart, dataBody.params].length + countInCart }));
+                            dispatch(addItemIntoCart(dataBody.params));
                             setState((prevState: IState) => ({
                                 ...prevState,
                                 numberProductInCart: prevState.numberProductInCart !== undefined ? [...prevState.numberProductInCart, ...dataBody.params] : [],
                             }));
-                        } else if(res?.status === 200) {
-                            AlertService.show(ENUM.E_SUCCESS, 'THêm thành công!', 3000, null);
+                            return;
+                        } else if (res?.status === 200) {
                             setState((prevState: IState) => ({
                                 ...prevState,
                                 isGetMedicineInCart: false
                             }));
-                        } else {
-                            AlertService.show(ENUM.E_ERROR, res?.message ? res?.message : 'Không thành công!', 3000, null);
-                            setState((prevState: IState) => ({
-                                ...prevState,
-                                isGetMedicineInCart: false
-                            }));
+                            AlertService.show(ENUM.E_SUCCESS, 'Thêm thành công!', 3000, null);
+                            return;
                         }
+
+                        AlertService.show(ENUM.E_ERROR, res?.message ? res?.message : 'Không thành công!', 3000, null);
+                        setState((prevState: IState) => ({
+                            ...prevState,
+                            isGetMedicineInCart: false
+                        }));
                     }).catch((error) => {
                         LoadingService.hide();
                         console.log(error, 'error');

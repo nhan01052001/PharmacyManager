@@ -26,6 +26,11 @@ target 'apppmv2' do
   # pod 'FirebaseCoreInternal', :modular_headers => true
   pod 'FirebaseCore', :modular_headers => true
   pod 'GoogleUtilities', :modular_headers => true
+  pod 'react-native-camera', path: '../node_modules/react-native-camera', subspecs: ['TextDetector', 'FaceDetectorMLKit', 'BarcodeDetectorMLKit']
+  pod 'Firebase/MLVision', '10.18.0'
+  # If you want to detect face contours (landmark detection and classification
+  # don't require this additional model):
+  pod 'Firebase/MLVisionFaceModel', '10.18.0'
   # Flags change depending on the env values.
   flags = get_default_flags()
 

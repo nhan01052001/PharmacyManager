@@ -14,8 +14,10 @@ import { SafeAreaConsumer } from 'react-native-safe-area-context';
 import { AlertService } from './components/cAlert/Alert.component';
 import { ENUM } from './global/enum';
 import { BackIcon, ScanIcon } from './global/icon/Icon';
+import CricleLoaderComponent from './utils/CricleLoader.component';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
+const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 // Define the total number of photos you want to take
 const TOTAL_PHOTOS = 5;
@@ -59,7 +61,8 @@ class FaceScanSetting extends Component {
             isStarted: false,
             isShowingSuccess: false,
             photos: [...dataDefault],
-            txtError: ''
+            txtError: '',
+            valueAnimation: 0,
         };
         this.camera = null;
         this.isCapturing = false;
@@ -128,14 +131,14 @@ class FaceScanSetting extends Component {
                 debugger
                 // Phát hiện khuôn mặt trên ảnh đã chụp
                 const faceDetectionOptions = {
-                    mode: FaceDetector.Constants.Mode.fast,
-                    detectLandmarks: FaceDetector.Constants.Landmarks.all,
+                    mode: FaceDetector.Constants.Mode?.fast,
+                    detectLandmarks: FaceDetector.Constants.Landmarks?.all,
                     runClassifications: FaceDetector.Constants.Classifications.none,
                 };
                 const faces = await FaceDetector.detectFacesAsync(data.uri, faceDetectionOptions);
                 let indexItem = photos.findIndex(item => item.uri == null),
                     itemfind = photos[indexItem];
-                if (this.validateFaceAngles(faces, itemfind.index)) {
+                if (this.validateFaceAngles(faces?.faces, itemfind.index)) {
                     photos[indexItem] = {
                         ...itemfind,
                         uri: data.uri,
@@ -144,11 +147,6 @@ class FaceScanSetting extends Component {
 
                     const progress = (itemfind.index + 1 / TOTAL_PHOTOS) * 100 / 100;
                     this.isCapturing = false;
-                    console.log({
-                        photos: photos,
-                        progress: progress,
-                        txtError: ''
-                    }, '111');
                     this.setState({
                         photos: photos,
                         progress: progress,
@@ -169,15 +167,14 @@ class FaceScanSetting extends Component {
     };
 
     startContinuousCapture = (camera) => {
-        //this.takePicture(camera);
+        this.takePicture(camera);
         const { photos } = this.state;
         this.intervalId = setInterval(() => {
             console.log('intervalId');
             // If we've taken the total number of photos, clear the interval
             if (photos.filter(item => item.uri != null).length >= TOTAL_PHOTOS) {
                 clearInterval(this.intervalId);
-                console.log('saveAvatar');
-                // this.saveAvatar();
+                this.saveAvatar();
 
                 return;
             }
@@ -190,79 +187,82 @@ class FaceScanSetting extends Component {
 
     started = (camera) => {
         this.setState({
-            isStarted: true
-        }, () => this.startContinuousCapture(camera))
+            isStarted: true,
+            // valueAnimation: this.state.valueAnimation < 100 ? this.state.valueAnimation + 20 : 0
+        },
+            () => this.startContinuousCapture(camera)
+        )
     }
 
     componentWillUnmount() {
         this.intervalId && clearInterval(this.intervalId);
     }
 
-    // saveAvatar = () => {
-    //     const { photos } = this.state;
+    saveAvatar = () => {
+        const { photos } = this.state;
 
-    //     if (photos && photos.length > 0) {
-    //         VnrLoadingSevices.show();
-    //         const formData = new FormData();
+        if (photos && photos.length > 0) {
+            LoadingService.show();
+            const formData = new FormData();
 
-    //         photos.forEach((photo, index) => {
-    //             formData.append('photos', photo.file);
-    //         });
+            photos.forEach((photo, index) => {
+                formData.append('photos', photo.file);
+            });
 
-    //         const info = dataVnrStorage.currentUser.info,
-    //             name = `${info.FullName}|${info.ImagePath}|${info.Email}|${info.ProfileID}|09 898 989 89|Phạm Văn Hiển`;
+            const info = dataVnrStorage.currentUser.info,
+                name = `${info.FullName}|${info.ImagePath}|${info.Email}|${info.ProfileID}|09 898 989 89|Phạm Văn Hiển`;
 
-    //         formData.append('name', name);
-    //         formData.append('store', '1');
-    //         formData.append('collections', '');
+            formData.append('name', name);
+            formData.append('store', '1');
+            formData.append('collections', '');
 
-    //         // const configs = {
-    //         //     headers: {
-    //         //         Accept: 'application/json',
-    //         //         'Content-Type': 'multipart/form-data',
-    //         //         'token': '6a556da33450471988b4d113efd75c4b',
-    //         //     },
-    //         // };
+            // const configs = {
+            //     headers: {
+            //         Accept: 'application/json',
+            //         'Content-Type': 'multipart/form-data',
+            //         'token': '6a556da33450471988b4d113efd75c4b',
+            //     },
+            // };
 
-    //         axios.post('https://api.luxand.cloud/v2/person', formData, {
-    //             headers: {
-    //                 'token': '6a556da33450471988b4d113efd75c4b',
-    //                 Accept: 'application/json',
-    //                 'Content-Type': 'multipart/form-data',
-    //             },
-    //             maxContentLength: Infinity,
-    //         })
-    //             .then(res => {
-    //                 VnrLoadingSevices.hide();
-    //                 if (res?.status) {
-    //                     if (res?.status == 'success') {
-    //                         this.setState({ isShowingSuccess: true });
-    // AlertService.show(ENUM.E_SUCCESS, 'Thiết lập khuôn mặt thành công!', 5000);
-    //                     }
-    //                     else if (res?.status == 'failure') {
-    //                         this.resetScan();
-    // AlertService.show(ENUM.E_ERROR, 'Không thể tìm thấy khuôn mặt trong ảnh đính kèm', 5000);
-    //                     }
-    //                 }
-    //                 else {
-    //                     this.resetScan();
-    // AlertService.show(ENUM.E_ERROR, 'Không chụp được ảnh, vui lòng thử lại!', 5000);
-    //                 }
-    //             })
-    //     }
-    //     else {
-    //         AlertService.show(ENUM.E_ERROR, 'Không chụp được ảnh, vui lòng thử lại!', 5000);
-    //     }
-    // }
+            axios.post('https://api.luxand.cloud/v2/person', formData, {
+                headers: {
+                    'token': '6a556da33450471988b4d113efd75c4b',
+                    Accept: 'application/json',
+                    'Content-Type': 'multipart/form-data',
+                },
+                maxContentLength: Infinity,
+            })
+                .then(res => {
+                    LoadingService.hide();
+                    if (res?.status) {
+                        if (res?.status == 'success') {
+                            this.setState({ isShowingSuccess: true });
+                            AlertService.show(ENUM.E_SUCCESS, 'Thiết lập khuôn mặt thành công!', 5000);
+                        }
+                        else if (res?.status == 'failure') {
+                            this.resetScan();
+                            AlertService.show(ENUM.E_ERROR, 'Không thể tìm thấy khuôn mặt trong ảnh đính kèm', 5000);
+                        }
+                    }
+                    else {
+                        this.resetScan();
+                        AlertService.show(ENUM.E_ERROR, 'Không chụp được ảnh, vui lòng thử lại!', 5000);
+                    }
+                })
+        }
+        else {
+            AlertService.show(ENUM.E_ERROR, 'Không chụp được ảnh, vui lòng thử lại!', 5000);
+        }
+    }
 
     validateFaceAngles = (faces, indexface) => {
         if (faces && Array.isArray(faces) && faces.length > 0) {
             faces.forEach((face) => {
                 // Kiểm tra các landmarks để xác định góc nhìn
-                const landmarks = face.landmarks;
-                const nose = landmarks['noseBase'];
-                const leftEye = landmarks['leftEye'];
-                const rightEye = landmarks['rightEye'];
+                const landmarks = face?.landmarks;
+                const nose = landmarks['noseBase'] ? landmarks['noseBase'] : 0;
+                const leftEye = landmarks['leftEye'] ? landmarks['leftEye'] : 0;
+                const rightEye = landmarks['rightEye'] ? landmarks['rightEye'] : 0;
 
                 // Tính toán góc giữa mắt và mũi
                 const angle = Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) * (180 / Math.PI);
@@ -307,7 +307,7 @@ class FaceScanSetting extends Component {
     }
 
     render() {
-        const { isStarted, isShowingSuccess, progress, photos, txtError } = this.state;
+        const { isStarted, isShowingSuccess, progress, photos, txtError, valueAnimation } = this.state;
 
         return (
             <View style={styles.container}>
@@ -316,10 +316,10 @@ class FaceScanSetting extends Component {
                     captureAudio={false}
                     style={styles.preview}
                     type={RNCamera.Constants.Type.front}
-                    faceDetectionClassifications={RNCamera.Constants.FaceDetection.Classifications.all}
-                    faceDetectionLandmarks={RNCamera.Constants.FaceDetection.Landmarks.all}
-                    faceDetectionMode={RNCamera.Constants.FaceDetection.Mode.fast}
-                    flashMode={typeCamera}
+                    faceDetectionClassifications={RNCamera.Constants.FaceDetection.Classifications?.all}
+                    faceDetectionLandmarks={RNCamera.Constants.FaceDetection.Landmarks?.all}
+                    faceDetectionMode={RNCamera.Constants.FaceDetection.Mode?.fast}
+                    flashMode={'auto'} //typeCamera
                     androidCameraPermissionOptions={{
                         title: 'Permission to use camera',
                         message:
@@ -388,7 +388,19 @@ class FaceScanSetting extends Component {
                                                             </View>
 
 
-                                                            <View style={styles.rectangle}>
+                                                            <CricleLoaderComponent valueAnimation={valueAnimation} />
+                                                            {/* <View style={[styles.rectangle]}>
+                                                                <View style={{
+                                                                    width: 270,
+                                                                    height: 270,
+                                                                    // backgroundColor: 'blue',
+                                                                    borderRadius: 300,
+                                                                    borderWidth: 1,
+                                                                    borderColor: 'red',
+                                                                    // transform: [
+                                                                    //     { scaleY: 2 }
+                                                                    // ]
+                                                                }} />
                                                                 <Image source={require('./test/scanning.png')} style={{
                                                                     width: SCREEN_WIDTH * 0.5,
                                                                     height: SCREEN_WIDTH * 0.5
@@ -404,7 +416,7 @@ class FaceScanSetting extends Component {
                                                                         SCREEN_WIDTH * - 0.45
                                                                     )}
                                                                 />
-                                                            </View>
+                                                            </View> */}
 
                                                             {
                                                                 !isStarted ? (
@@ -434,9 +446,9 @@ class FaceScanSetting extends Component {
 
                                                                         <ScrollView horizontal={true} style={styles.containerImage}>
                                                                             {
-                                                                                photos.map(item => {
+                                                                                photos.map((item, index) => {
                                                                                     return item.uri ? (
-                                                                                        <View style={styles.styViewImage}>
+                                                                                        <View style={styles.styViewImage} key={index}>
                                                                                             <Image source={{ uri: item.uri }} style={styles.ImgSize} />
                                                                                             <Text style={[styles.text, styles.txtImg]}>
                                                                                                 {item.lable}
@@ -444,7 +456,7 @@ class FaceScanSetting extends Component {
                                                                                         </View>
 
                                                                                     ) : (
-                                                                                        <View style={styles.styViewImage}>
+                                                                                        <View style={styles.styViewImage} key={index}>
                                                                                             <View style={styles.ImgSize} />
                                                                                             <Text style={[styles.text, styles.txtImg]}>
                                                                                                 {item.lable}

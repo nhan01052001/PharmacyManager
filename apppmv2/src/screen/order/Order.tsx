@@ -345,7 +345,7 @@ const Order: React.FC = () => {
                     params && params?.length > 0 ? (
                         <FlatList
                             data={params}
-                            renderItem={({ item, index }) => <ItemOrder dataItem={item} />}
+                            renderItem={({ item, index }) => <ItemOrder key={index} dataItem={item} />}
                             keyExtractor={item => item.id}
                         />
                     ) : null

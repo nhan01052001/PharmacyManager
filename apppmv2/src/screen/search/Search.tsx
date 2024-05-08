@@ -113,9 +113,9 @@ const SearchScreen: React.FC = () => {
                     <Text style={[StylesTheme.textLabel]}>Tìm kiếm phổ biến</Text>
                     <FlatList
                         data={[1, 2, 3, 4, 5]}
-                        renderItem={({ item }) => {
+                        renderItem={({ item, index }) => {
                             return (
-                                <View style={{ flex: 1, }}>
+                                <View key={index} style={{ flex: 1, }}>
                                     <View style={{ padding: 12, }}>
                                         <Text style={[StylesTheme.text16]}>- Thuốc</Text>
                                     </View>

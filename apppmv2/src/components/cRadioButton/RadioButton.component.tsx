@@ -71,6 +71,7 @@ const RadioButton: React.FC<IProps> = (props: IProps) => {
                         data={dataLocal}
                         renderItem={({ item }) => (
                             <ItemRadioButton
+                                key={item?.id}
                                 item={item}
                                 onComplete={(item) => {
                                     handleSetChecked(item);

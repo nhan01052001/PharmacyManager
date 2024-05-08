@@ -18,7 +18,9 @@ buildscript {
         classpath("com.android.tools.build:gradle:7.3.1")
         classpath("com.facebook.react:react-native-gradle-plugin")
 
-        classpath("com.google.gms:google-services:4.2.0")
+        classpath("com.google.gms:google-services:4.3.8")
+
+        classpath('com.google.android.gms:strict-version-matcher-plugin:1.2.1')
     }
 }
 

@@ -23,6 +23,8 @@ import { env } from '../../utils/env.utils';
 import { ENUM } from '../../global/enum';
 import { LoadingService } from '../../components/cLoading/Loading.component';
 import { AlertService } from '../../components/cAlert/Alert.component';
+import { useAppDispatch, useAppSelector } from '../../redux/reduxHook.redux';
+import { CartStore, addItemIntoCart, setDataCount, deleteItemIntoCart } from '../../redux/cart-slice.redux';
 
 interface IState {
     isCheckAll?: boolean;
@@ -41,6 +43,18 @@ const initialState: IState = {
 const Cart: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<AllStackParams>>();
     const [{ isCheckAll, listProductInCart, listItemChecked, totalPrice }, setState] = useState<IState>({ ...initialState });
+    const data: {
+        listItemCart: any[],
+        dataCount: {
+            countCart?: number,
+            coutnBillWaitingConfirm?: number,
+            countBillConfirmed?: number,
+            countBillDelivering?: number,
+            countBillCanceled?: number,
+            totalCountInBill?: number,
+        }
+    } = useAppSelector(CartStore);
+    const dispatch = useAppDispatch();
 
     const handleGetData = async () => {
         try {
@@ -187,21 +201,32 @@ const Cart: React.FC = () => {
     }
 
     const handleDelete = () => {
-        try {
-            LoadingService.show();
-            HttpService.Post(`${env.URL}/cart/deleteItemsInCart`, {
-                ids: listItemChecked
-            }).then((res: any) => {
+        if (listItemChecked) {
+            try {
+                LoadingService.show();
+                HttpService.Post(`${env.URL}/cart/deleteItemsInCart`, {
+                    ids: listItemChecked
+                }).then((res: any) => {
+                    LoadingService.hide();
+                    if (res && res?.status === 200) {
+                        const dataIDs: any[] = listItemChecked?.map((item) => {
+                            return { id: item };
+                        });
+
+                        let countInCart = data?.dataCount?.countCart ? data?.dataCount?.countCart : 0;
+                        // save to redux state
+                        dispatch(setDataCount({ ...data.dataCount, countCart: countInCart - listItemChecked.length }));
+                        dispatch(deleteItemIntoCart(dataIDs));
+
+                        AlertService.show(ENUM.E_SUCCESS, 'Xoá thành công!', 5000, null);
+                        handleGetData();
+                    } else {
+                        AlertService.show(ENUM.E_ERROR, 'Có lỗi trong quá trình xử lý!', 5000, null);
+                    }
+                })
+            } catch (error) {
                 LoadingService.hide();
-                if (res && res?.status === 200) {
-                    AlertService.show(ENUM.E_SUCCESS, 'Xoá thành công!', 5000, null);
-                    handleGetData();
-                } else {
-                    AlertService.show(ENUM.E_ERROR, 'Có lỗi trong quá trình xử lý!', 5000, null);
-                }
-            })
-        } catch (error) {
-            LoadingService.hide();
+            }
         }
     }
 
@@ -255,7 +280,7 @@ const Cart: React.FC = () => {
                         listProductInCart && listProductInCart?.length > 0 ? (
                             <FlatList
                                 data={listProductInCart}
-                                renderItem={({ item, index }) => <ItemCart key={index} dataItem={item} onCheckItem={(cartId: string) => {
+                                renderItem={({ item, index }) => <ItemCart key={item.id} dataItem={item} onCheckItem={(cartId: string) => {
                                     handleCheckItem(cartId);
                                 }}
                                     onChangeQuantity={(cartId: string, value: number, medicineId: string) => {

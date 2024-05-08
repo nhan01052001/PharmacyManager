@@ -90,7 +90,7 @@ const Delevering: React.FC = () => {
                 id
             }).then((res: any) => {
                 LoadingService.hide();
-                if(res?.status === 200) {
+                if (res?.status === 200) {
                     handleGetData();
                 }
             }).catch((error) => {
@@ -108,7 +108,7 @@ const Delevering: React.FC = () => {
                     <FlatList
                         data={listProductInCart}
                         renderItem={({ item, index }) => <ItemBillWaiting
-                            key={index}
+                            key={item?.billId}
                             dataItem={item}
                             isAllowedCancel={false}
                             isDelivering={true}

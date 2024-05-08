@@ -90,7 +90,7 @@ const Cancel: React.FC = () => {
                     <FlatList
                         data={listProductInCart}
                         renderItem={({ item, index }) => <ItemBillWaiting
-                            key={index}
+                            key={item?.billId}
                             dataItem={item}
                             isAllowedCancel={false}
                             isCanceled={true}
