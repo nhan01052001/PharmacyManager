@@ -299,7 +299,6 @@ export class CartService {
                         }
                     }
                 }
-console.log(data, 'data');
 
                 await this.cartRepository.createQueryBuilder()
                     .update('Cart')

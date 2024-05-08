@@ -58,7 +58,7 @@ export class AuthService {
         }
     }
 
-    async login(userLogin: UserLoginDTO, headers: any): Promise<unknown> {
+    async login(userLogin: UserLoginDTO, headers: any): Promise<unknown> {        
         const { username, password } = userLogin;
         const isApp = headers?.isapp === 'true' || headers?.isapp === true ? true : false;
 

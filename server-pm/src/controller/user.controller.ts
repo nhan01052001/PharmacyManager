@@ -33,4 +33,11 @@ export class UserController {
     }): Promise<User> {
         return this.userService.addDeliveryAddress(body);
     }
+
+    @Get('countNumberCartAndBill/:id')
+    countNumberCartAndBill(@Param() param: {
+        id: string,
+    }): Promise<unknown> {        
+        return this.userService.countNumberCartAndBill(param.id);
+    }
 }

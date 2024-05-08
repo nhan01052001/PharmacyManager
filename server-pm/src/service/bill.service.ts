@@ -31,8 +31,6 @@ export class BillService {
                 if (userId) {
                     carts = await this.cartService.getCartOrderByProfileID(userId);
                 }
-                console.log(carts, 'carts');
-
 
                 // await this.billRepository.createQueryBuilder()
                 //     .update('Cart')
