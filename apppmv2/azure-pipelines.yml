@@ -38,7 +38,7 @@ steps:
   - task: ios-bundle-version@1
     displayName: 'Bump iOS version'
     inputs:
-      sourcePath: 'ios/MyProject/Info.plist'
+      sourcePath: 'ios/apppmv2/Info.plist'
       versionCodeOption: 'buildid'
       versionCode: '$(Build.BuildId)'
       versionName: '$(NEW_VERSION)'
@@ -59,89 +59,89 @@ steps:
     displayName: 'Sign APK'
     inputs:
       apkFiles: 'android/app/build/outputs/apk/release/*.apk'
-      apksignerKeystoreFile: 'mobile-prod.keystore'
+      apksignerKeystoreFile: 'my-upload-key.keystore'
       apksignerKeystorePassword: '$(AndroidKeyStorePassword)'
       apksignerKeystoreAlias: '$(AndroidKeyAlias)'
       apksignerKeyPassword: '$(AndroidKeyAliasPassword)'
       zipalign: true
+  - task: Maven@3
+    inputs:
+      mavenPomFile: 'pom.xml'
+      publishJUnitResults: false
+      javaHomeOption: 'JDKVersion'
+      jdkVersionOption: '11.0.22'
+      mavenVersionOption: 'Default'
+      mavenOptions: '-Xmx3072m'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish APK to artifacts'
     inputs:
       PathtoPublish: 'android/app/build/outputs/apk/release'
       ArtifactName: 'android'
       publishLocation: 'Container'
-  - task: AppCenterDistribute@3
-    displayName: 'Upload APK to AppCenter'
+  - task: InstallAppleCertificate@2
+    displayName: Install Apple Certificate
     inputs:
-      serverEndpoint: 'App Center'
-      appSlug: 'hnadeem/MyProject-Android'
-      appFile: 'android/app/build/outputs/apk/release/app-release-unsigned.apk'
-      releaseNotesOption: 'file'
-      isMandatory: true
-      destinationType: 'groups'
-      distributionGroupId: 'f940ccde-a812-4ade-98d8-76c3ab1d0c2e'
-      isSilent: true
-  # - script: |
-  #     tag="mobile_$(NEW_VERSION)"
-  #     echo "New tag $tag"
-  #     git add *
-  #     git commit -m "Update version from $(OLD_VERSION) to $(NEW_VERSION)"
-  #     git tag $tag
-  #     git pull --rebase origin $(Build.SourceBranchName)
-  #     git push origin $(Build.SourceBranchName)
-  #     git push --tags
-  #   displayName: Bump commit
-  # - task: InstallAppleCertificate@2
-  #   displayName: Install Apple Certificate
-  #   inputs:
-  #     certSecureFile: 'MobileProd.p12'
-  #     certPwd: '$(AppleCertificatePassword)'
-  #     keychain: 'temp'
-  #     deleteCert: true
-  # - task: InstallAppleProvisioningProfile@1
-  #   displayName: 'Install Apple Provisioning Profile'
-  #   inputs:
-  #     provisioningProfileLocation: 'secureFiles'
-  #     provProfileSecureFile: 'MyProject.mobileprovision'
-  #     removeProfile: true
-  # - task: CocoaPods@0
-  #   displayName: 'Install CocoaPods'
-  #   inputs:
-  #     workingDirectory: 'ios'
-  # - task: Xcode@5
-  #   displayName: 'Build IPA'
-  #   inputs:
-  #     actions: 'build'
-  #     configuration: 'Release'
-  #     sdk: 'iphoneos'
-  #     xcWorkspacePath: 'ios/MyProject.xcworkspace'
-  #     scheme: 'MyProject'
-  #     packageApp: true
-  #     exportPath: 'output'
-  #     signingOption: 'manual'
-  #     signingIdentity: '$(APPLE_CERTIFICATE_SIGNING_IDENTITY)'
-  #     provisioningProfileUuid: '$(APPLE_PROV_PROFILE_UUID)'
-  # - task: CopyFiles@2
-  #   displayName: 'Copy IPA'
-  #   inputs:
-  #     contents: '**/*.ipa'
-  #     targetFolder: '$(build.artifactStagingDirectory)'
-  #     overWrite: true
-  #     flattenFolders: true
-  # - task: PublishBuildArtifacts@1
-  #   displayName: 'Publish IPA to artifacts'
-  #   inputs:
-  #     PathtoPublish: '$(build.artifactStagingDirectory)'
-  #     ArtifactName: 'ios'
-  #     publishLocation: 'Container'
-  # - task: AppCenterDistribute@3
-  #   displayName: 'Upload IPA to AppCenter'
-  #   inputs:
-  #     serverEndpoint: 'App Center'
-  #     appSlug: 'hnadeem/MyProject-iOS'
-  #     appFile: 'output/MyProject.ipa'
-  #     releaseNotesOption: 'file'
-  #     isMandatory: true
-  #     destinationType: 'groups'
-  #     distributionGroupId: '058a4704-ea24-4877-a2f0-bdfaff9335dc'
-  #     isSilent: true
+      certSecureFile: 'Certificates.p12'
+      certPwd: '$(AppleCertificatePassword)'
+      keychain: 'temp'
+      deleteCert: true
+  - task: InstallAppleProvisioningProfile@1
+    displayName: 'Install Apple Provisioning Profile'
+    inputs:
+      provisioningProfileLocation: 'secureFiles'
+      provProfileSecureFile: 'Test_Azure_Pipelines.mobileprovision'
+      removeProfile: true
+  - task: CocoaPods@0
+    displayName: 'Install CocoaPods'
+    inputs:
+      workingDirectory: 'ios'
+      forceRepoUpdate: false
+  - task: Xcode@5
+    displayName: 'Build IPA'
+    inputs:
+      actions: 'clean build'
+      configuration: 'Release'
+      sdk: 'iphoneos'
+      xcWorkspacePath: 'ios/apppmv2.xcworkspace'
+      scheme: 'apppmv2'
+      xcodeVersion: '13'
+      packageApp: true
+      signingOption: manual
+      exportPath: 'output'
+      signingIdentity: '$(APPLE_CERTIFICATE_SIGNING_IDENTITY)'
+      provisioningProfileUuid: '$(APPLE_PROV_PROFILE_UUID)'
+      args: '-verbose'
+  - task: CopyFiles@2
+    displayName: 'Copy IPA'
+    inputs:
+      contents: '**/*.ipa'
+      targetFolder: '$(build.artifactStagingDirectory)'
+      overWrite: true
+      flattenFolders: true
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish IPA to artifacts'
+    inputs:
+      PathtoPublish: '$(build.artifactStagingDirectory)'
+      ArtifactName: 'ios'
+      publishLocation: 'Container'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download artifacts'
+    inputs:
+      buildType: current
+      downloadType: specific
+      artifactName: ios-test
+      downloadPath: '$(build.artifactStagingDirectory)'
+  - task: AppStoreRelease@1
+    displayName: 'Upload IPA to TestFlight'
+    inputs:
+      authType: ApiKey
+      apiKeyId: 'Y39DYN2XGH'
+      apiKeyIssuerId: '661dcd26-6e25-4639-a73e-97276b5c240e'
+      apitoken: 'e1xydGYxXGFuc2lcYW5zaWNwZzEyNTJcY29jb2FydGYyNzYxClxjb2NvYXRleHRzY2FsaW5nMFxjb2NvYXBsYXRmb3JtMHtcZm9udHRibH0Ke1xjb2xvcnRibDtccmVkMjU1XGdyZWVuMjU1XGJsdWUyNTU7fQp7XCpcZXhwYW5kZWRjb2xvcnRibDs7fQpccGFwZXJ3MTE5MDBccGFwZXJoMTY4NDBcbWFyZ2wxNDQwXG1hcmdyMTQ0MFx2aWV3dzExNTIwXHZpZXdoODQwMFx2aWV3a2luZDAKfQ=='
+      releaseTrack: TestFlight
+      appIdentifier: 'com.app.apppmv2'
+      appType: iOS
+      ipaPath: '$(build.artifactStagingDirectory)/ios/*.ipa'
+      shouldSkipWaitingForProcessing: true
+      shouldSkipSubmission: true
+      appSpecificId: '6504415035'
