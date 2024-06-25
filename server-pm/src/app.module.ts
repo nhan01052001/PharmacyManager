@@ -8,7 +8,7 @@ import { DatabaseModule } from './module/database.module';
 import { entities } from './entities.provider';
 import { UserModule } from './module/user.module';
 import { StaffModule } from './module/staff.module';
-import { ProvincesModule } from './module/provinces.module'; 
+import { ProvincesModule } from './module/provinces.module';
 import { DistrictsModule } from './module/districts.module';
 import { WardsModule } from './module/wards.module';
 import { MedicineModule } from './module/medicine.module';
@@ -40,8 +40,6 @@ import { BillModule } from './module/bill.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(AppMiddleware)
-      .forRoutes('*');
+    consumer.apply(AppMiddleware).forRoutes('*');
   }
 }

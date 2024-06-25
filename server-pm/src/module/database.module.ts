@@ -8,15 +8,15 @@ dotenv.config();
 
 const DatabaseProvider: Provider[] = [
   {
-    provide: "MYSQL_CONNECTION",
+    provide: 'MYSQL_CONNECTION',
     useFactory: () =>
       createConnection({
         connectTimeout: 60 * 60 * 1000,
         acquireTimeout: 60 * 60 * 1000,
-        name: "MYSQL_CONNECTION",
+        name: 'MYSQL_CONNECTION',
         ...ormConfig,
-      } as MysqlConnectionOptions)
-  }
+      } as MysqlConnectionOptions),
+  },
 ];
 
 @Global()
@@ -32,8 +32,8 @@ const DatabaseProvider: Provider[] = [
       database: process.env.DATABASE,
       entities: [__dirname + '/../**/*.entity.{js,ts}'], //['./**/entities/*.entity'],
       // autoLoadEntities: true,
-      synchronize: true
-    })
+      synchronize: true,
+    }),
   ],
 })
-export class DatabaseModule { }
+export class DatabaseModule {}
